@@ -41,14 +41,17 @@ export default function AdminLeden() {
 
   async function weiger(profiel) {
     if (!confirm('Weet je zeker dat je dit account wil weigeren en verwijderen?')) return
-
-    // Verwijder het auth account (vereist service role — via API)
-    const res = await fetch(`http://localhost:3000/admin/gebruikers/${profiel.id}`, {
-      method: 'DELETE',
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ userId: profiel.id }),
     })
-
     if (res.ok) fetchData()
-    else alert('Verwijderen mislukt. Controleer of de API draait.')
+    else alert('Verwijderen mislukt.')
   }
 
   async function koppelSpeler(profielId, spelerId) {
