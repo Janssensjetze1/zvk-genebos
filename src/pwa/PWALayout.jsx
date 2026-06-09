@@ -134,7 +134,7 @@ export default function PWALayout({ children }) {
       </header>
 
       {/* Page content */}
-      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: '92px' }}>
+      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: '100px' }}>
         {children}
       </main>
 
@@ -145,7 +145,6 @@ export default function PWALayout({ children }) {
         borderTop: '1px solid rgba(255,255,255,0.07)',
         display: 'flex',
         paddingBottom: 'env(safe-area-inset-bottom)',
-        position: 'relative',
       }}>
         <span style={{
           position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom) + 2px)', right: '8px',
@@ -163,7 +162,7 @@ export default function PWALayout({ children }) {
               style={{
                 flex: 1, display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
-                padding: '14px 2px 12px',
+                padding: '16px 2px 14px',
                 textDecoration: 'none',
                 color: active ? '#93c5fd' : 'rgba(255,255,255,0.35)',
                 gap: '2px',
