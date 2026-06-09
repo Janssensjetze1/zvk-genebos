@@ -85,14 +85,29 @@ export function AnnouncementPopup() {
         overflow: 'hidden',
       }}>
 
-        {/* Emoji sectie */}
-        <div style={{
-          background: 'linear-gradient(135deg, #0f172a, #1e293b)',
-          padding: '28px 24px 20px',
-          textAlign: 'center',
-        }}>
-          <div style={{ fontSize: '52px', lineHeight: 1 }}>{melding.emoji}</div>
-        </div>
+        {/* Foto of emoji sectie */}
+        {melding.image_url ? (
+          <div style={{ position: 'relative', height: '180px', overflow: 'hidden' }}>
+            <img
+              src={melding.image_url}
+              alt=""
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+            {/* Gradient overlay onderaan voor vloeiende overgang naar wit */}
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0, height: '60px',
+              background: 'linear-gradient(to bottom, transparent, white)',
+            }} />
+          </div>
+        ) : (
+          <div style={{
+            background: 'linear-gradient(135deg, #0f172a, #1e293b)',
+            padding: '28px 24px 20px',
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '52px', lineHeight: 1 }}>{melding.emoji}</div>
+          </div>
+        )}
 
         {/* Inhoud */}
         <div style={{ padding: '24px 24px 28px' }}>
