@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-function lokaalVandaag() {
-  const nu = new Date()
-  const y = nu.getFullYear()
-  const m = String(nu.getMonth() + 1).padStart(2, '0')
-  const d = String(nu.getDate()).padStart(2, '0')
+function datumString(date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
   return `${y}-${m}-${d}`
 }
 
@@ -15,16 +14,29 @@ export function useMatchdayCountdown(seizoenId) {
 
   useEffect(() => {
     if (!seizoenId) return
-    const vandaag = lokaalVandaag()
+
+    const nu = new Date()
+    const morgen = new Date(nu)
+    morgen.setDate(morgen.getDate() + 1)
+
     supabase
       .from('matches')
-      .select('id, time, home_team:home_team_id(name, is_zvk), away_team:away_team_id(name, is_zvk)')
+      .select('id, date, time, home_team:home_team_id(name, is_zvk), away_team:away_team_id(name, is_zvk)')
       .eq('season_id', seizoenId)
-      .eq('date', vandaag)
+      .in('date', [datumString(nu), datumString(morgen)])
       .not('time', 'is', null)
+      .order('date', { ascending: true })
       .order('time', { ascending: true })
-      .limit(1)
-      .then(({ data }) => setWedstrijd(data?.[0] ?? null))
+      .then(({ data }) => {
+        // Vind de eerste wedstrijd die binnen 24 uur valt én nog niet begonnen is
+        const grens = new Date(nu.getTime() + 24 * 60 * 60 * 1000)
+        const gevonden = (data ?? []).find(w => {
+          const [uur, min] = w.time.slice(0, 5).split(':').map(Number)
+          const aftrap = new Date(`${w.date}T${String(uur).padStart(2,'0')}:${String(min).padStart(2,'0')}:00`)
+          return aftrap > nu && aftrap <= grens
+        })
+        setWedstrijd(gevonden ?? null)
+      })
   }, [seizoenId])
 
   useEffect(() => {
@@ -35,10 +47,8 @@ export function useMatchdayCountdown(seizoenId) {
 
     function bereken() {
       const nu = new Date()
-      const tijdStr = wedstrijd.time.slice(0, 5) // "HH:MM"
-      const [uur, min] = tijdStr.split(':').map(Number)
-      const aftrap = new Date()
-      aftrap.setHours(uur, min, 0, 0)
+      const [uur, min] = wedstrijd.time.slice(0, 5).split(':').map(Number)
+      const aftrap = new Date(`${wedstrijd.date}T${String(uur).padStart(2,'0')}:${String(min).padStart(2,'0')}:00`)
       const diff = aftrap - nu
       if (diff <= 0) { setRestTijd(false); return }
       const totMinuten = Math.floor(diff / 60000)
