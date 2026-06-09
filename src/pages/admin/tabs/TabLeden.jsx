@@ -27,11 +27,22 @@ export default function TabLeden() {
 
   async function fetchData() {
     setLoading(true)
-    const [{ data: profielData }, { data: spelerData }] = await Promise.all([
+    const [{ data: profielData }, { data: spelerData }, { data: signInData }] = await Promise.all([
       supabase.from('profiles').select('*, players(id, name)').order('approved', { ascending: true }).order('display_name'),
       supabase.from('players').select('id, name').order('name'),
+      supabase.rpc('get_users_last_sign_in'),
     ])
-    setProfielen(profielData ?? [])
+
+    // Merge last_sign_in_at in elk profiel
+    const signInMap = {}
+    for (const row of (signInData ?? [])) signInMap[row.id] = row.last_sign_in_at
+
+    const profielen = (profielData ?? []).map(p => ({
+      ...p,
+      last_sign_in_at: signInMap[p.id] ?? null,
+    }))
+
+    setProfielen(profielen)
     setSpelers(spelerData ?? [])
     setLoading(false)
   }
@@ -223,7 +234,7 @@ function WachtendKaart({ profiel, spelers, onGoedkeuren, onWeigeren, onKoppelSpe
 // Rij voor actieve leden
 function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
   const [open, setOpen] = useState(false)
-  const lastSeen = tijdGeleden(profiel.last_seen)
+  const lastSeen = tijdGeleden(profiel.last_sign_in_at)
 
   return (
     <div style={{ borderBottom: isLast ? 'none' : '1px solid #f1f5f9' }}>
@@ -261,7 +272,7 @@ function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
         <div style={{ flexShrink: 0, textAlign: 'right', minWidth: '110px' }}>
           {lastSeen ? (
             <div style={{ fontSize: '12px', color: '#64748b' }}>
-              <span style={{ display: 'block', fontSize: '10px', color: '#cbd5e1', fontWeight: '500', marginBottom: '1px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Laatste login</span>
+              <span style={{ display: 'block', fontSize: '10px', color: '#cbd5e1', fontWeight: '500', marginBottom: '1px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Ingelogd</span>
               {lastSeen}
             </div>
           ) : (
