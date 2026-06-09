@@ -176,10 +176,13 @@ function AankomendeKaart({ wedstrijd: w }) {
 // ── Gespeelde wedstrijd kaart ────────────────────────────────────────────────
 
 function GespeeldeKaart({ wedstrijd: w }) {
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const [open, setOpen] = useState(false)
+  const [detailTab, setDetailTab] = useState('details') // 'details' | 'verslag'
   const [reacties, setReacties] = useState([])
   const [mijneReactie, setMijneReactie] = useState(null)
+  const [verslag, setVerslag] = useState(w.report ?? null)
+  const [genereert, setGenereert] = useState(false)
   const isThuis = w.home_team?.is_zvk
   const zvkScore = isThuis ? w.home_score : w.away_score
   const tegScore = isThuis ? w.away_score : w.home_score
@@ -220,7 +223,24 @@ function GespeeldeKaart({ wedstrijd: w }) {
   const resultaatBg = { W: '#f0fdf4', V: '#fef2f2', G: '#fffbeb' }[resultaat]
   const resultaatLabel = { W: 'Winst', V: 'Verlies', G: 'Gelijkspel' }[resultaat]
 
-  const heeftBlad = w.match_players?.length > 0 || w.goals?.length > 0
+  async function genereerVerslag() {
+    setGenereert(true)
+    setDetailTab('verslag')
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-match-report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ match_id: w.id }),
+      })
+      const json = await res.json()
+      if (json.report) setVerslag(json.report)
+    } finally {
+      setGenereert(false)
+    }
+  }
+
+  const heeftBlad = w.match_players?.length > 0 || w.goals?.length > 0 || verslag
   const zvkGoals = w.goals?.filter(g => {
     // Goal is van ZVK als de scorer speelde voor ZVK (we controleren via match_players)
     return true // toon alle goals in deze wedstrijd
@@ -326,49 +346,88 @@ function GespeeldeKaart({ wedstrijd: w }) {
         })}
       </div>
 
-      {/* Uitklap: doelpunten + spelers */}
+      {/* Uitklap sectie */}
       {open && heeftBlad && (
-        <div style={{ borderTop: '1px solid #f1f5f9', padding: '14px 18px', background: '#fafafa', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ borderTop: '1px solid #f1f5f9', background: '#fafafa' }}>
 
-          {zvkGoals.length > 0 && (
-            <div>
-              <p style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Doelpunten</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                {zvkGoals.map(g => (
-                  <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '14px' }}>⚽</span>
-                    <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>{g.scorer?.name}</span>
-                    {g.assist?.name && (
-                      <span style={{ fontSize: '12px', color: '#94a3b8' }}>assist: {g.assist.name}</span>
-                    )}
-                    {g.minute && (
-                      <span style={{ fontSize: '12px', color: '#cbd5e1', marginLeft: 'auto' }}>{g.minute}'</span>
-                    )}
+          {/* Tab bar */}
+          <div style={{ display: 'flex', borderBottom: '1px solid #f1f5f9', padding: '0 18px' }}>
+            {[['details', '📋 Details'], ['verslag', '📰 Verslag']].map(([id, label]) => (
+              <button key={id} onClick={() => setDetailTab(id)} style={{
+                padding: '10px 14px', fontSize: '12px', fontWeight: detailTab === id ? '700' : '500',
+                color: detailTab === id ? '#1d4ed8' : '#94a3b8',
+                background: 'none', border: 'none', cursor: 'pointer',
+                borderBottom: detailTab === id ? '2px solid #3b82f6' : '2px solid transparent',
+                marginBottom: '-1px', transition: 'all 0.15s',
+              }}>{label}</button>
+            ))}
+          </div>
+
+          {/* Details tab */}
+          {detailTab === 'details' && (
+            <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {zvkGoals.length > 0 && (
+                <div>
+                  <p style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Doelpunten</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    {zvkGoals.map(g => (
+                      <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '14px' }}>⚽</span>
+                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>{g.scorer?.name}</span>
+                        {g.assist?.name && <span style={{ fontSize: '12px', color: '#94a3b8' }}>assist: {g.assist.name}</span>}
+                        {g.minute && <span style={{ fontSize: '12px', color: '#cbd5e1', marginLeft: 'auto' }}>{g.minute}'</span>}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
+              {w.match_players?.length > 0 && (
+                <div>
+                  <p style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
+                    Aanwezig ({w.match_players.length})
+                  </p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                    {w.match_players.slice().sort((a, b) => (a.player?.name ?? '').localeCompare(b.player?.name ?? '')).map(mp => (
+                      <span key={mp.player_id} style={{ fontSize: '12px', color: '#475569', background: 'white', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '3px 10px' }}>
+                        {mp.player?.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {w.match_players?.length > 0 && (
-            <div>
-              <p style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
-                Aanwezig ({w.match_players.length})
-              </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                {w.match_players
-                  .slice()
-                  .sort((a, b) => (a.player?.name ?? '').localeCompare(b.player?.name ?? ''))
-                  .map(mp => (
-                    <span key={mp.player_id} style={{
-                      fontSize: '12px', color: '#475569', background: 'white',
-                      border: '1px solid #e2e8f0', borderRadius: '20px', padding: '3px 10px',
-                    }}>
-                      {mp.player?.name}
-                    </span>
-                  ))
-                }
-              </div>
+          {/* Verslag tab */}
+          {detailTab === 'verslag' && (
+            <div style={{ padding: '16px 18px' }}>
+              {genereert ? (
+                <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>
+                  <div className="pulse-soft" style={{ fontSize: '28px', marginBottom: '8px' }}>📝</div>
+                  <p style={{ fontSize: '13px' }}>Verslag wordt gegenereerd...</p>
+                </div>
+              ) : verslag ? (
+                <div>
+                  <p style={{ fontSize: '14px', color: '#334155', lineHeight: 1.75, whiteSpace: 'pre-wrap', fontStyle: 'italic' }}>{verslag}</p>
+                  {isAdmin && (
+                    <button onClick={genereerVerslag} style={{ marginTop: '12px', fontSize: '12px', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
+                      Opnieuw genereren
+                    </button>
+                  )}
+                </div>
+              ) : isAdmin ? (
+                <div style={{ textAlign: 'center', padding: '20px' }}>
+                  <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '14px' }}>Nog geen verslag voor deze wedstrijd.</p>
+                  <button
+                    onClick={genereerVerslag}
+                    style={{ background: '#0f172a', color: 'white', border: 'none', borderRadius: '10px', padding: '10px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '7px' }}
+                  >
+                    ✨ Genereer verslag
+                  </button>
+                </div>
+              ) : (
+                <p style={{ fontSize: '13px', color: '#94a3b8', textAlign: 'center', padding: '20px' }}>Nog geen verslag beschikbaar.</p>
+              )}
             </div>
           )}
         </div>
