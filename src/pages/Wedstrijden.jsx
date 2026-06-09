@@ -26,7 +26,7 @@ export default function Wedstrijden() {
         home_team:home_team_id(id, name, is_zvk),
         away_team:away_team_id(id, name, is_zvk),
         goals(id, scorer_id, assist_id, minute, scorer:scorer_id(name), assist:assist_id(name)),
-        match_players(player_id)
+        match_players(player_id, player:player_id(name))
       `)
       .eq('season_id', seizoen.id)
       .order('date', { ascending: false })
@@ -149,6 +149,9 @@ function AankomendeKaart({ wedstrijd: w }) {
           <span style={{ fontSize: '12px', color: '#94a3b8' }}>
             {isThuis ? '🏠 Thuis' : '✈️ Uit'}
           </span>
+          {w.time && (
+            <span style={{ fontSize: '12px', color: '#94a3b8' }}>· 🕐 {w.time.slice(0, 5)}</span>
+          )}
           {w.location && (
             <span style={{ fontSize: '12px', color: '#94a3b8' }}>· 📍 {w.location}</span>
           )}
@@ -240,6 +243,9 @@ function GespeeldeKaart({ wedstrijd: w }) {
             <span style={{ fontSize: '12px', color: '#94a3b8' }}>
               {isThuis ? '🏠 Thuis' : '✈️ Uit'}
             </span>
+            {w.time && (
+              <span style={{ fontSize: '12px', color: '#94a3b8' }}>· 🕐 {w.time.slice(0, 5)}</span>
+            )}
           </div>
         </div>
 
@@ -284,9 +290,20 @@ function GespeeldeKaart({ wedstrijd: w }) {
               <p style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
                 Aanwezig ({w.match_players.length})
               </p>
-              <p style={{ fontSize: '12px', color: '#64748b' }}>
-                {w.match_players.length} speler{w.match_players.length !== 1 ? 's' : ''} aanwezig
-              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                {w.match_players
+                  .slice()
+                  .sort((a, b) => (a.player?.name ?? '').localeCompare(b.player?.name ?? ''))
+                  .map(mp => (
+                    <span key={mp.player_id} style={{
+                      fontSize: '12px', color: '#475569', background: 'white',
+                      border: '1px solid #e2e8f0', borderRadius: '20px', padding: '3px 10px',
+                    }}>
+                      {mp.player?.name}
+                    </span>
+                  ))
+                }
+              </div>
             </div>
           )}
         </div>

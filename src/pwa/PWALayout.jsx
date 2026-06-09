@@ -102,7 +102,7 @@ export default function PWALayout({ children }) {
               style={{
                 flex: 1, display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
-                padding: '18px 4px 14px',
+                padding: '22px 4px 14px',
                 textDecoration: 'none',
                 color: active ? '#93c5fd' : 'rgba(255,255,255,0.35)',
                 gap: '3px',

@@ -298,6 +298,7 @@ function VolgendeKaart({ wedstrijd: w }) {
             {TYPE_LABELS[w.type]}
           </span>
           <span style={{ fontSize: '12px', color: '#94a3b8' }}>{isThuis ? '🏠 Thuis' : '✈️ Uit'}</span>
+          {w.time && <span style={{ fontSize: '12px', color: '#94a3b8' }}>· 🕐 {w.time.slice(0, 5)}</span>}
         </div>
         <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px', textTransform: 'capitalize' }}>
           {dagNaam} {datumStr}

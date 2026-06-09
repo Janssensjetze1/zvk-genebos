@@ -156,6 +156,7 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, onSelecteer }) {
             background: '#eff6ff', color: '#1d4ed8',
           }}>{TYPE_LABELS[w.type]}</span>
           <span style={{ fontSize: '12px', color: '#94a3b8' }}>{isThuis ? 'Thuis' : 'Uit'}</span>
+          {w.time && <span style={{ fontSize: '12px', color: '#94a3b8' }}>· 🕐 {w.time.slice(0, 5)}</span>}
         </div>
       </div>
 

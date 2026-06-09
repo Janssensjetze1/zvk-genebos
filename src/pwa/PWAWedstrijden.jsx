@@ -21,7 +21,13 @@ export default function PWAWedstrijden() {
     setLoading(true)
     const { data } = await supabase
       .from('matches')
-      .select('*, home_team:home_team_id(id,name,is_zvk), away_team:away_team_id(id,name,is_zvk), goals(id,scorer_id,scorer:scorer_id(name))')
+      .select(`
+        *,
+        home_team:home_team_id(id,name,is_zvk),
+        away_team:away_team_id(id,name,is_zvk),
+        goals(id,scorer_id,scorer:scorer_id(name)),
+        match_players(player_id, player:player_id(name))
+      `)
       .eq('season_id', seizoen.id)
       .order('date', { ascending: true })
     setWedstrijden(data ?? [])
@@ -69,6 +75,8 @@ export default function PWAWedstrijden() {
 }
 
 function WedstrijdKaart({ wedstrijd: w }) {
+  const [open, setOpen] = useState(false)
+
   const isThuis = w.home_team?.is_zvk
   const tegenstander = isThuis ? w.away_team : w.home_team
   const zvkScore = isThuis ? w.home_score : w.away_score
@@ -77,6 +85,7 @@ function WedstrijdKaart({ wedstrijd: w }) {
   const gewonnen = isPast && zvkScore > tegScore
   const verloren = isPast && zvkScore < tegScore
   const datum = new Date(w.date)
+  const heeftDetail = isPast && (w.goals?.length > 0 || w.match_players?.length > 0)
 
   const dagNaam = datum.toLocaleDateString('nl-BE', { weekday: 'short' })
   const dagNr = datum.getDate()
@@ -84,12 +93,17 @@ function WedstrijdKaart({ wedstrijd: w }) {
 
   return (
     <div style={{
-      background: 'white', borderRadius: '16px', padding: '16px',
+      background: 'white', borderRadius: '16px',
       border: `1.5px solid ${gewonnen ? '#bbf7d0' : verloren ? '#fecaca' : '#e2e8f0'}`,
       boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+      overflow: 'hidden',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-        {/* Datum */}
+      {/* Hoofdrij */}
+      <div
+        style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '14px', cursor: heeftDetail ? 'pointer' : 'default' }}
+        onClick={() => heeftDetail && setOpen(o => !o)}
+      >
+        {/* Datum blok */}
         <div style={{
           width: '48px', textAlign: 'center', flexShrink: 0,
           background: '#f8fafc', borderRadius: '10px', padding: '8px 4px',
@@ -105,13 +119,13 @@ function WedstrijdKaart({ wedstrijd: w }) {
           <div style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a', marginBottom: '5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             vs {tegenstander?.name}
           </div>
-          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
             <span style={{
               fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '20px',
               ...TYPE_COLORS[w.type],
             }}>{TYPE_LABELS[w.type]}</span>
             <span style={{ fontSize: '12px', color: '#94a3b8' }}>{isThuis ? 'Thuis' : 'Uit'}</span>
-            {w.time && <span style={{ fontSize: '12px', color: '#94a3b8' }}>· {w.time.slice(0,5)}</span>}
+            {w.time && <span style={{ fontSize: '12px', color: '#94a3b8' }}>· {w.time.slice(0, 5)}</span>}
           </div>
         </div>
 
@@ -122,30 +136,65 @@ function WedstrijdKaart({ wedstrijd: w }) {
               <div style={{ fontSize: '22px', fontWeight: '900', color: '#0f172a', letterSpacing: '-1px' }}>
                 {zvkScore}–{tegScore}
               </div>
-              <div style={{
-                fontSize: '11px', fontWeight: '700',
-                color: gewonnen ? '#16a34a' : verloren ? '#ef4444' : '#64748b',
-              }}>
+              <div style={{ fontSize: '11px', fontWeight: '700', color: gewonnen ? '#16a34a' : verloren ? '#ef4444' : '#64748b' }}>
                 {gewonnen ? '✓ Gewonnen' : verloren ? '✗ Verloren' : '= Gelijkspel'}
               </div>
             </>
           ) : (
-            <span style={{
-              fontSize: '12px', color: '#64748b', background: '#f1f5f9',
-              borderRadius: '8px', padding: '5px 10px', fontWeight: '500',
-            }}>Gepland</span>
+            <span style={{ fontSize: '12px', color: '#64748b', background: '#f1f5f9', borderRadius: '8px', padding: '5px 10px', fontWeight: '500' }}>
+              Gepland
+            </span>
           )}
         </div>
+
+        {/* Uitklappijl */}
+        {heeftDetail && (
+          <svg width="14" height="14" fill="none" stroke="#cbd5e1" strokeWidth="2" viewBox="0 0 24 24"
+            style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        )}
       </div>
 
-      {/* Doelpunten */}
-      {isPast && w.goals?.length > 0 && (
-        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #f1f5f9', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-          {w.goals.map(g => (
-            <span key={g.id} style={{ fontSize: '12px', color: '#475569', background: '#f8fafc', borderRadius: '20px', padding: '3px 10px', border: '1px solid #e2e8f0' }}>
-              ⚽ {g.scorer?.name}
-            </span>
-          ))}
+      {/* Uitklapdetail */}
+      {open && heeftDetail && (
+        <div style={{ borderTop: '1px solid #f1f5f9', padding: '14px 16px', background: '#fafafa', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
+          {/* Doelpunten */}
+          {w.goals?.length > 0 && (
+            <div>
+              <div style={{ fontSize: '11px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                ⚽ Doelpunten
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {w.goals.map(g => (
+                  <span key={g.id} style={{ fontSize: '12px', color: '#475569', background: 'white', borderRadius: '20px', padding: '4px 10px', border: '1px solid #e2e8f0' }}>
+                    {g.scorer?.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Aanwezigen */}
+          {w.match_players?.length > 0 && (
+            <div>
+              <div style={{ fontSize: '11px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                👥 Aanwezig ({w.match_players.length})
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {w.match_players
+                  .slice()
+                  .sort((a, b) => (a.player?.name ?? '').localeCompare(b.player?.name ?? ''))
+                  .map(mp => (
+                    <span key={mp.player_id} style={{ fontSize: '12px', color: '#475569', background: 'white', borderRadius: '20px', padding: '4px 10px', border: '1px solid #e2e8f0' }}>
+                      {mp.player?.name}
+                    </span>
+                  ))
+                }
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
