@@ -345,7 +345,7 @@ export default function PWAAccount() {
       {/* Sticky save bar */}
       {isDirty && (
         <div style={{
-          position: 'fixed', bottom: '80px', left: '16px', right: '16px', zIndex: 100,
+          position: 'fixed', bottom: '64px', left: '16px', right: '16px', zIndex: 100,
           background: '#0f172a', borderRadius: '16px',
           padding: '14px 20px',
           display: 'flex', alignItems: 'center', gap: '14px',
