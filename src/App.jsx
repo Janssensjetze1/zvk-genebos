@@ -74,7 +74,7 @@ function AppRoutes() {
         } />
         <Route path="/app/invullen" element={
           <AdminRoute>
-            <Invullen />
+            <PWALayout><Invullen /></PWALayout>
           </AdminRoute>
         } />
 

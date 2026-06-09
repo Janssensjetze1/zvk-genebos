@@ -17,11 +17,15 @@ export function AuthProvider({ children }) {
     })
 
     // Luister naar auth wijzigingen
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
       if (session?.user) {
         setLoading(true) // Wacht op profiel voor ProtectedRoute evalueert
         fetchProfile(session.user.id)
+        // Sla laatste login op bij elke nieuwe sessie
+        if (event === 'SIGNED_IN') {
+          supabase.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', session.user.id)
+        }
       } else {
         setProfile(null)
         setLoading(false)

@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
+import { useIsPWA } from '../hooks/useIsPWA'
 
 const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
 
 export default function Invullen() {
   const { actief: seizoen } = useSeason()
+  const isPWA = useIsPWA()
   const [wedstrijden, setWedstrijden] = useState([])
   const [spelers, setSpelers] = useState([])
   const [teams, setTeams] = useState([])
@@ -60,18 +62,20 @@ export default function Invullen() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: '32px' }}>
-      {/* Header */}
-      <div style={{
-        background: 'white', borderBottom: '1px solid #e2e8f0',
-        padding: '20px 20px 16px', position: 'sticky', top: 0, zIndex: 10,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
-          <img src="/logo.png" alt="ZVK" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
-          <h1 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', margin: 0 }}>Wedstrijden invullen</h1>
+    <div style={{ background: '#f8fafc', paddingBottom: '32px', minHeight: isPWA ? 'auto' : '100vh' }}>
+      {/* Header — enkel buiten PWA tonen, PWALayout heeft al een header */}
+      {!isPWA && (
+        <div style={{
+          background: 'white', borderBottom: '1px solid #e2e8f0',
+          padding: '20px 20px 16px', position: 'sticky', top: 0, zIndex: 10,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+            <img src="/logo.png" alt="ZVK" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+            <h1 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', margin: 0 }}>Wedstrijden invullen</h1>
+          </div>
+          <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>{seizoen.name}</p>
         </div>
-        <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>{seizoen.name}</p>
-      </div>
+      )}
 
       {opgeslagen && (
         <div style={{
