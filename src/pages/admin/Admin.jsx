@@ -19,9 +19,45 @@ export default function Admin() {
   return (
     <div>
       {/* Header */}
-      <div style={{ marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: '600', color: '#0f172a', marginBottom: '4px' }}>Beheer</h1>
-        <p style={{ fontSize: '14px', color: '#94a3b8' }}>Administratie van de ZVK applicatie</p>
+      <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h1 style={{ fontSize: '22px', fontWeight: '600', color: '#0f172a', marginBottom: '4px' }}>Beheer</h1>
+          <p style={{ fontSize: '14px', color: '#94a3b8' }}>Administratie van de ZVK applicatie</p>
+        </div>
+
+        {/* PWA installatie kaart */}
+        <a
+          href="/invullen"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex', alignItems: 'center', gap: '14px',
+            background: '#0f172a', borderRadius: '14px',
+            padding: '14px 18px', textDecoration: 'none',
+            border: 'none', cursor: 'pointer',
+            boxShadow: '0 4px 16px rgba(15,23,42,0.15)',
+          }}
+        >
+          <div style={{
+            width: '44px', height: '44px', borderRadius: '12px',
+            background: 'white', flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          }}>
+            <img src="/logo.png" alt="ZVK" style={{ width: '34px', height: '34px', objectFit: 'contain' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: '14px', fontWeight: '700', color: 'white', marginBottom: '2px' }}>
+              Wedstrijden invullen
+            </div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>
+              Open → deel → voeg toe aan beginscherm
+            </div>
+          </div>
+          <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
       </div>
 
       {/* Tabs */}

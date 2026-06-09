@@ -15,6 +15,7 @@ import Onboarding from './pages/Onboarding'
 import Klassement from './pages/Klassement'
 import Wedstrijden from './pages/Wedstrijden'
 import GoudenJaar from './pages/GoudenJaar'
+import Invullen from './pages/Invullen'
 
 export default function App() {
   return (
@@ -60,6 +61,13 @@ export default function App() {
             <ProtectedRoute>
               <Layout><Account /></Layout>
             </ProtectedRoute>
+          } />
+
+          {/* PWA invulpagina — geen sidebar */}
+          <Route path="/invullen" element={
+            <AdminRoute>
+              <Invullen />
+            </AdminRoute>
           } />
 
           {/* Gouden Jaar route */}
