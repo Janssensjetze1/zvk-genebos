@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
 import { useSeason } from '../../../context/SeasonContext'
+import { useAuth } from '../../../context/AuthContext'
 
 const TYPES = ['competitie', 'beker', 'vriendschappelijk']
 const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
@@ -12,6 +13,7 @@ const TYPE_COLORS = {
 
 export default function TabWedstrijden() {
   const { actief: seizoen } = useSeason()
+  const { user } = useAuth()
   const [wedstrijden, setWedstrijden] = useState([])
   const [teams, setTeams] = useState([])
   const [spelers, setSpelers] = useState([])
@@ -33,7 +35,8 @@ export default function TabWedstrijden() {
             home_team:home_team_id(id, name, is_zvk),
             away_team:away_team_id(id, name, is_zvk),
             match_players(player_id),
-            goals(id, scorer_id, assist_id, minute, scorer:scorer_id(name), assist:assist_id(name))
+            goals(id, scorer_id, assist_id, minute, scorer:scorer_id(name), assist:assist_id(name)),
+            report
           `).eq('season_id', seizoen.id).order('date', { ascending: false })
         : { data: [] },
       supabase.from('teams').select('*').order('name'),
@@ -142,6 +145,7 @@ export default function TabWedstrijden() {
                 wedstrijd={w}
                 zvkTeam={zvkTeam}
                 spelers={spelers}
+                user={user}
                 actief={bewerkWedstrijd?.id === w.id || wedstrijdblad?.id === w.id}
                 onBewerken={() => { setBewerkWedstrijd(w); setWedstrijdblad(null); setToonFormulier(false); setToonAndere(false); setBewerkAndere(null) }}
                 onWedstrijdblad={() => { setWedstrijdblad(w); setBewerkWedstrijd(null); setToonFormulier(false); setToonAndere(false); setBewerkAndere(null) }}
@@ -580,8 +584,10 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
 
 // ─── Wedstrijd kaart ─────────────────────────────────────────────────────────
 
-function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, actief, onBewerken, onWedstrijdblad, onVerwijderen }) {
+function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerken, onWedstrijdblad, onVerwijderen }) {
   const [open, setOpen] = useState(false)
+  const [genereert, setGenereert] = useState(false)
+  const [verslag, setVerslag] = useState(w.report ?? null)
   const isThuis = w.home_team?.is_zvk
   const zvkScore = isThuis ? w.home_score : w.away_score
   const tegScore = isThuis ? w.away_score : w.home_score
@@ -592,6 +598,23 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, actief, onBewerken, on
   const verloren = zvkScore < tegScore
   const resultaatKleur = gewonnen ? '#16a34a' : verloren ? '#ef4444' : '#64748b'
   const resultaatLabel = gewonnen ? 'W' : verloren ? 'V' : 'G'
+
+  async function genereerVerslag() {
+    setGenereert(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-match-report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ match_id: w.id }),
+      })
+      const json = await res.json()
+      if (json.report) setVerslag(json.report)
+    } catch (e) {
+      console.error(e)
+    }
+    setGenereert(false)
+  }
 
   return (
     <div style={{
@@ -674,6 +697,26 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, actief, onBewerken, on
             </svg>
             {heeftData ? 'Blad bewerken' : 'Invullen'}
           </button>
+          {/* Verslag knop — enkel voor gespeelde wedstrijden */}
+          {isPast && (
+            <button
+              onClick={genereerVerslag}
+              disabled={genereert}
+              title={verslag ? 'Verslag opnieuw genereren' : 'Verslag genereren'}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '5px',
+                background: verslag ? '#f0fdf4' : '#faf5ff',
+                color: verslag ? '#16a34a' : '#7c3aed',
+                border: `1px solid ${verslag ? '#bbf7d0' : '#e9d5ff'}`,
+                borderRadius: '7px', padding: '5px 11px',
+                fontSize: '12px', fontWeight: '600', cursor: genereert ? 'not-allowed' : 'pointer',
+                opacity: genereert ? 0.7 : 1,
+              }}
+            >
+              {genereert ? '⏳' : verslag ? '📰' : '✨'}
+              {genereert ? 'Genereert...' : verslag ? 'Hergeneer' : 'Verslag'}
+            </button>
+          )}
           <button
             onClick={onBewerken}
             title="Wedstrijd bewerken"
@@ -700,33 +743,47 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, actief, onBewerken, on
 
       {/* Detail uitklappen */}
       {open && (
-        <div style={{ borderTop: '1px solid #f1f5f9', padding: '14px 16px', background: '#fafafa', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '180px' }}>
-            <p style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Doelpunten ZVK</p>
-            {w.goals?.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                {w.goals.map(g => (
-                  <div key={g.id} style={{ fontSize: '13px', color: '#334155', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>⚽</span>
-                    <span style={{ fontWeight: '500' }}>{g.scorer?.name}</span>
-                    {g.assist && <span style={{ color: '#94a3b8' }}>({g.assist.name})</span>}
-                    {g.minute && <span style={{ color: '#94a3b8', fontSize: '12px' }}>{g.minute}'</span>}
-                  </div>
-                ))}
-              </div>
-            ) : <p style={{ fontSize: '13px', color: '#94a3b8' }}>Nog niet ingevuld.</p>}
+        <div style={{ borderTop: '1px solid #f1f5f9', background: '#fafafa' }}>
+          <div style={{ padding: '14px 16px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '180px' }}>
+              <p style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Doelpunten ZVK</p>
+              {w.goals?.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  {w.goals.map(g => (
+                    <div key={g.id} style={{ fontSize: '13px', color: '#334155', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>⚽</span>
+                      <span style={{ fontWeight: '500' }}>{g.scorer?.name}</span>
+                      {g.assist && <span style={{ color: '#94a3b8' }}>({g.assist.name})</span>}
+                      {g.minute && <span style={{ color: '#94a3b8', fontSize: '12px' }}>{g.minute}'</span>}
+                    </div>
+                  ))}
+                </div>
+              ) : <p style={{ fontSize: '13px', color: '#94a3b8' }}>Nog niet ingevuld.</p>}
+            </div>
+            <div style={{ flex: 1, minWidth: '180px' }}>
+              <p style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Aanwezige spelers</p>
+              {w.match_players?.length > 0 ? (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                  {w.match_players.map(mp => {
+                    const s = spelers.find(x => x.id === mp.player_id)
+                    return s ? <span key={mp.player_id} style={{ fontSize: '12px', padding: '3px 9px', borderRadius: '20px', background: '#f1f5f9', color: '#475569' }}>{s.name}</span> : null
+                  })}
+                </div>
+              ) : <p style={{ fontSize: '13px', color: '#94a3b8' }}>Nog niet ingevuld.</p>}
+            </div>
           </div>
-          <div style={{ flex: 1, minWidth: '180px' }}>
-            <p style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Aanwezige spelers</p>
-            {w.match_players?.length > 0 ? (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                {w.match_players.map(mp => {
-                  const s = spelers.find(x => x.id === mp.player_id)
-                  return s ? <span key={mp.player_id} style={{ fontSize: '12px', padding: '3px 9px', borderRadius: '20px', background: '#f1f5f9', color: '#475569' }}>{s.name}</span> : null
-                })}
-              </div>
-            ) : <p style={{ fontSize: '13px', color: '#94a3b8' }}>Nog niet ingevuld.</p>}
-          </div>
+          {/* Verslag sectie */}
+          {verslag && (
+            <div style={{ borderTop: '1px solid #f1f5f9', padding: '14px 16px' }}>
+              <p style={{ fontSize: '11px', fontWeight: '600', color: '#7c3aed', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>📰 Wedstrijdverslag</p>
+              <p style={{ fontSize: '13px', color: '#334155', lineHeight: 1.7, fontStyle: 'italic', whiteSpace: 'pre-wrap', margin: 0 }}>{verslag}</p>
+            </div>
+          )}
+          {genereert && !verslag && (
+            <div style={{ borderTop: '1px solid #f1f5f9', padding: '14px 16px' }}>
+              <p style={{ fontSize: '13px', color: '#94a3b8', fontStyle: 'italic' }}>📝 Verslag wordt gegenereerd...</p>
+            </div>
+          )}
         </div>
       )}
     </div>
