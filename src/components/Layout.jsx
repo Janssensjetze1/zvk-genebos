@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useSeason } from '../context/SeasonContext'
+import { useMatchdayCountdown } from '../hooks/useMatchdayCountdown'
 
 const navItems = [
   { label: 'Dashboard', path: '/', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
@@ -231,6 +232,46 @@ function Sidebar({ onClose }) {
   )
 }
 
+function MatchdayBanner() {
+  const { actief: seizoen } = useSeason()
+  const { wedstrijd, restTijd } = useMatchdayCountdown(seizoen?.id)
+
+  if (!wedstrijd || !restTijd) return null
+
+  const thuisNaam = wedstrijd.home_team?.name ?? '?'
+  const uitNaam = wedstrijd.away_team?.name ?? '?'
+  const tijdLabel = wedstrijd.time?.slice(0, 5)
+
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, #1e3a5f, #1d4ed8)',
+      color: 'white',
+      padding: '10px 24px',
+      display: 'flex', alignItems: 'center', gap: '14px',
+      borderBottom: '1px solid rgba(255,255,255,0.1)',
+    }}>
+      <span style={{ fontSize: '16px', flexShrink: 0 }}>⚽</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          Vandaag · {tijdLabel}
+        </div>
+        <div style={{ fontSize: '13px', fontWeight: '700', marginTop: '1px' }}>
+          {thuisNaam} – {uitNaam}
+        </div>
+      </div>
+      <div className="pulse-soft" style={{
+        background: 'rgba(255,255,255,0.12)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        borderRadius: '8px', padding: '5px 12px',
+        fontSize: '13px', fontWeight: '800', color: '#93c5fd',
+        flexShrink: 0, whiteSpace: 'nowrap',
+      }}>
+        nog {restTijd}
+      </div>
+    </div>
+  )
+}
+
 function ArchiefBanner() {
   const { isArchief, actief, huidigSeizoen, switchSeizoen } = useSeason()
   if (!isArchief) return null
@@ -324,6 +365,7 @@ export default function Layout({ children }) {
         </div>
 
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <MatchdayBanner />
           <ArchiefBanner />
           <div style={{ padding: '24px 16px', flex: 1 }}>
             {children}
@@ -339,6 +381,7 @@ export default function Layout({ children }) {
         <Sidebar />
       </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', overflowY: 'auto' }}>
+        <MatchdayBanner />
         <ArchiefBanner />
         <main style={{ flex: 1, padding: '40px 44px' }}>
           {children}

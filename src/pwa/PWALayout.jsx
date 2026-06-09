@@ -1,8 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
-import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
-import { supabase } from '../lib/supabase'
+import { useMatchdayCountdown } from '../hooks/useMatchdayCountdown'
 
 const ICON_SIZE = 20
 
@@ -53,49 +52,6 @@ const tabs = [
     ),
   },
 ]
-
-function useMatchdayCountdown(seizoenId) {
-  const [wedstrijd, setWedstrijd] = useState(null)
-  const [restTijd, setRestTijd] = useState(null) // null = nog niet berekend, false = voorbij
-
-  useEffect(() => {
-    if (!seizoenId) return
-    const vandaag = new Date().toISOString().split('T')[0]
-    supabase
-      .from('matches')
-      .select('id, time, home_team:home_team_id(name, is_zvk), away_team:away_team_id(name, is_zvk)')
-      .eq('season_id', seizoenId)
-      .eq('date', vandaag)
-      .not('time', 'is', null)
-      .order('time', { ascending: true })
-      .limit(1)
-      .single()
-      .then(({ data }) => setWedstrijd(data ?? null))
-  }, [seizoenId])
-
-  useEffect(() => {
-    if (!wedstrijd?.time) return
-
-    function bereken() {
-      const nu = new Date()
-      const [uur, min] = wedstrijd.time.split(':').map(Number)
-      const aftrap = new Date()
-      aftrap.setHours(uur, min, 0, 0)
-      const diff = aftrap - nu
-      if (diff <= 0) { setRestTijd(false); return }
-      const totMinuten = Math.floor(diff / 60000)
-      const uren = Math.floor(totMinuten / 60)
-      const minuten = totMinuten % 60
-      setRestTijd(uren > 0 ? `${uren}u${minuten < 10 ? '0' : ''}${minuten}m` : `${minuten}m`)
-    }
-
-    bereken()
-    const interval = setInterval(bereken, 30000) // update elke 30s
-    return () => clearInterval(interval)
-  }, [wedstrijd])
-
-  return { wedstrijd, restTijd }
-}
 
 function MatchdayBadge({ seizoenId }) {
   const { wedstrijd, restTijd } = useMatchdayCountdown(seizoenId)
@@ -178,7 +134,7 @@ export default function PWALayout({ children }) {
       </header>
 
       {/* Page content */}
-      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: '76px' }}>
+      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: '92px' }}>
         {children}
       </main>
 
@@ -207,7 +163,7 @@ export default function PWALayout({ children }) {
               style={{
                 flex: 1, display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
-                padding: '10px 2px 8px',
+                padding: '14px 2px 12px',
                 textDecoration: 'none',
                 color: active ? '#93c5fd' : 'rgba(255,255,255,0.35)',
                 gap: '2px',
