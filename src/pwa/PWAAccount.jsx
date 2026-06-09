@@ -17,45 +17,48 @@ const FLAIR_OPTIES = [
 
 export default function PWAAccount() {
   const { user, profile, patchProfile, signOut } = useAuth()
-
-  const [speler, setSpeler] = useState(null)
-  const [naam, setNaam] = useState(profile?.display_name ?? '')
-  const [fotoBestand, setFotoBestand] = useState(null)
-  const [fotoPreview, setFotoPreview] = useState(null)
-  const [naamOpslaan, setNaamOpslaan] = useState(false)
-  const [naamBericht, setNaamBericht] = useState('')
   const fotoInputRef = useRef(null)
 
-  const [email, setEmail] = useState(user?.email ?? '')
-  const [emailOpslaan, setEmailOpslaan] = useState(false)
-  const [emailBericht, setEmailBericht] = useState('')
+  // Speler
+  const [speler, setSpeler] = useState(null)
 
+  // Naam & foto
+  const [naam, setNaam] = useState('')
+  const [origNaam, setOrigNaam] = useState('')
+  const [fotoBestand, setFotoBestand] = useState(null)
+  const [fotoPreview, setFotoPreview] = useState(null)
+
+  // Flair
+  const [flair, setFlair] = useState('')
+  const [origFlair, setOrigFlair] = useState('')
+  const [andersText, setAndersText] = useState('')
+
+  // Email
+  const [email, setEmail] = useState(user?.email ?? '')
+  const [origEmail] = useState(user?.email ?? '')
+
+  // Wachtwoord
   const [nieuwWachtwoord, setNieuwWachtwoord] = useState('')
   const [bevestigWachtwoord, setBevestigWachtwoord] = useState('')
-  const [wachtwoordOpslaan, setWachtwoordOpslaan] = useState(false)
-  const [wachtwoordBericht, setWachtwoordBericht] = useState('')
   const [toonNieuw, setToonNieuw] = useState(false)
   const [toonBevestig, setToonBevestig] = useState(false)
 
-  // Flair
-  const [flair, setFlair] = useState(profile?.flair ?? '')
-  const [andersText, setAndersText] = useState('')
-  const [flairOpslaan, setFlairOpslaan] = useState(false)
-  const [flairBericht, setFlairBericht] = useState('')
-  const isAnders = flair && !FLAIR_OPTIES.includes(flair)
+  // Opslaan
+  const [bezig, setBezig] = useState(false)
+  const [bericht, setBericht] = useState(null)
 
   useEffect(() => {
+    const n = profile?.display_name ?? ''
+    const f = profile?.flair ?? ''
+    setNaam(n); setOrigNaam(n)
+    setFlair(f); setOrigFlair(f)
+    if (f && !FLAIR_OPTIES.includes(f)) setAndersText(f)
     if (profile?.player_id) fetchSpeler(profile.player_id)
-    else setNaam(profile?.display_name ?? '')
-    setFlair(profile?.flair ?? '')
-    if (profile?.flair && !FLAIR_OPTIES.includes(profile.flair)) {
-      setAndersText(profile.flair)
-    }
-  }, [profile?.player_id, profile?.flair])
+  }, [profile?.player_id, profile?.flair, profile?.display_name])
 
-  async function fetchSpeler(playerId) {
-    const { data } = await supabase.from('players').select('*').eq('id', playerId).single()
-    if (data) { setSpeler(data); setNaam(data.name) }
+  async function fetchSpeler(id) {
+    const { data } = await supabase.from('players').select('*').eq('id', id).single()
+    if (data) { setSpeler(data); setNaam(data.name); setOrigNaam(data.name) }
   }
 
   function handleFotoKiezen(e) {
@@ -67,109 +70,88 @@ export default function PWAAccount() {
     reader.readAsDataURL(bestand)
   }
 
-  async function handleNaamOpslaan(e) {
-    e.preventDefault()
-    setNaamBericht('')
-    setNaamOpslaan(true)
-
-    let photo_url = speler?.photo_url ?? profile?.avatar_url ?? null
-
-    if (fotoBestand) {
-      const ext = fotoBestand.name.split('.').pop()
-      const bestandsnaam = `${Date.now()}.${ext}`
-      const { error: uploadFout } = await supabase.storage
-        .from('player-photos')
-        .upload(bestandsnaam, fotoBestand, { upsert: true })
-      if (uploadFout) {
-        setNaamBericht({ type: 'fout', tekst: 'Foto uploaden mislukt.' })
-        setNaamOpslaan(false)
-        return
-      }
-      const { data: urlData } = supabase.storage.from('player-photos').getPublicUrl(bestandsnaam)
-      photo_url = urlData.publicUrl
-    }
-
-    if (speler) {
-      await supabase.from('players').update({ name: naam, photo_url }).eq('id', speler.id)
-      setSpeler(prev => ({ ...prev, name: naam, photo_url }))
-    }
-
-    const profileChanges = { display_name: naam, avatar_url: photo_url }
-    await supabase.from('profiles').update(profileChanges).eq('id', user.id)
-    patchProfile(profileChanges)
-
-    setNaamOpslaan(false)
-    setNaamBericht({ type: 'ok', tekst: 'Profiel bijgewerkt.' })
-    setFotoBestand(null)
-    setFotoPreview(null)
-  }
-
-  async function handleEmailOpslaan(e) {
-    e.preventDefault()
-    setEmailBericht('')
-    setEmailOpslaan(true)
-    const { error } = await supabase.auth.updateUser({ email })
-    setEmailOpslaan(false)
-    if (error) setEmailBericht({ type: 'fout', tekst: error.message })
-    else setEmailBericht({ type: 'ok', tekst: 'E-mail bijgewerkt.' })
-  }
-
-  async function handleWachtwoordOpslaan(e) {
-    e.preventDefault()
-    setWachtwoordBericht('')
-    if (nieuwWachtwoord !== bevestigWachtwoord) {
-      setWachtwoordBericht({ type: 'fout', tekst: 'Wachtwoorden komen niet overeen.' }); return
-    }
-    if (nieuwWachtwoord.length < 6) {
-      setWachtwoordBericht({ type: 'fout', tekst: 'Minimum 6 tekens.' }); return
-    }
-    setWachtwoordOpslaan(true)
-    const { error } = await supabase.auth.updateUser({ password: nieuwWachtwoord })
-    setWachtwoordOpslaan(false)
-    if (error) setWachtwoordBericht({ type: 'fout', tekst: error.message })
-    else {
-      setWachtwoordBericht({ type: 'ok', tekst: 'Wachtwoord bijgewerkt.' })
-      setNieuwWachtwoord('')
-      setBevestigWachtwoord('')
-    }
-  }
-
-  async function handleFlairOpslaan() {
-    setFlairBericht('')
-    const waarde = isAnders ? andersText.trim() : flair
-    if (!waarde) { setFlairBericht({ type: 'fout', tekst: 'Kies of typ een flair.' }); return }
-    setFlairOpslaan(true)
-    await supabase.from('profiles').update({ flair: waarde }).eq('id', user.id)
-    patchProfile({ flair: waarde })
-    setFlairOpslaan(false)
-    setFlairBericht({ type: 'ok', tekst: 'Flair opgeslagen!' })
-  }
-
-  async function handleFlairVerwijderen() {
-    setFlairBericht('')
-    await supabase.from('profiles').update({ flair: null }).eq('id', user.id)
-    patchProfile({ flair: null })
-    setFlair('')
-    setAndersText('')
-    setFlairBericht({ type: 'ok', tekst: 'Flair verwijderd.' })
-  }
-
   function kiesFlair(optie) {
-    if (optie === '__anders__') {
-      setFlair('__anders__')
-    } else {
-      setFlair(optie)
-      setAndersText('')
+    if (optie === '__anders__') { setFlair('__anders__') }
+    else { setFlair(optie); setAndersText('') }
+    setBericht(null)
+  }
+
+  // Dirty checks
+  const effectieveFlair = (flair === '__anders__' || (flair && !FLAIR_OPTIES.includes(flair) && flair !== '__anders__'))
+    ? andersText.trim()
+    : flair
+  const isAnders = flair === '__anders__' || (flair && !FLAIR_OPTIES.includes(flair))
+
+  const naamDirty = naam !== origNaam || !!fotoBestand
+  const flairDirty = effectieveFlair !== origFlair
+  const emailDirty = email !== origEmail
+  const wachtwoordDirty = nieuwWachtwoord.length > 0
+  const isDirty = naamDirty || flairDirty || emailDirty || wachtwoordDirty
+
+  async function handleOpslaan() {
+    setBericht(null)
+    setBezig(true)
+
+    try {
+      // --- Naam & foto ---
+      if (naamDirty) {
+        let photo_url = speler?.photo_url ?? profile?.avatar_url ?? null
+        if (fotoBestand) {
+          const ext = fotoBestand.name.split('.').pop()
+          const { error: uploadFout } = await supabase.storage
+            .from('player-photos')
+            .upload(`${Date.now()}.${ext}`, fotoBestand, { upsert: true })
+          if (uploadFout) throw new Error('Foto uploaden mislukt.')
+          const { data: urlData } = supabase.storage.from('player-photos').getPublicUrl(`${Date.now()}.${ext}`)
+          photo_url = urlData.publicUrl
+        }
+        if (speler) await supabase.from('players').update({ name: naam, photo_url }).eq('id', speler.id)
+        await supabase.from('profiles').update({ display_name: naam, avatar_url: photo_url }).eq('id', user.id)
+        patchProfile({ display_name: naam, avatar_url: photo_url })
+        setOrigNaam(naam)
+        setFotoBestand(null)
+        setFotoPreview(null)
+      }
+
+      // --- Flair ---
+      if (flairDirty) {
+        const waarde = effectieveFlair || null
+        await supabase.from('profiles').update({ flair: waarde }).eq('id', user.id)
+        patchProfile({ flair: waarde })
+        setOrigFlair(waarde ?? '')
+        if (!waarde) { setFlair(''); setAndersText('') }
+      }
+
+      // --- Email ---
+      if (emailDirty) {
+        const { error } = await supabase.auth.updateUser({ email })
+        if (error) throw new Error(error.message)
+      }
+
+      // --- Wachtwoord ---
+      if (wachtwoordDirty) {
+        if (nieuwWachtwoord !== bevestigWachtwoord) throw new Error('Wachtwoorden komen niet overeen.')
+        if (nieuwWachtwoord.length < 6) throw new Error('Wachtwoord minimum 6 tekens.')
+        const { error } = await supabase.auth.updateUser({ password: nieuwWachtwoord })
+        if (error) throw new Error(error.message)
+        setNieuwWachtwoord('')
+        setBevestigWachtwoord('')
+      }
+
+      setBericht({ type: 'ok', tekst: 'Alles opgeslagen!' })
+    } catch (e) {
+      setBericht({ type: 'fout', tekst: e.message })
     }
-    setFlairBericht('')
+
+    setBezig(false)
   }
 
   const fotoSrc = fotoPreview ?? speler?.photo_url ?? profile?.avatar_url ?? null
   const weergaveNaam = naam || profile?.display_name || '?'
-  const huidigeFlair = profile?.flair
+  const huidigeFlair = origFlair
 
   return (
-    <div style={{ padding: '20px 16px 40px' }}>
+    <div style={{ padding: '20px 16px 120px' }}>
       <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', marginBottom: '24px' }}>Account</h1>
 
       {/* Profiel header */}
@@ -193,7 +175,7 @@ export default function PWAAccount() {
               </span>
           }
           <div style={{
-            position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)',
+            position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%',
           }}>
             <svg width="18" height="18" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
@@ -222,36 +204,26 @@ export default function PWAAccount() {
             {user?.email}
           </div>
           {fotoPreview && (
-            <div style={{ fontSize: '12px', color: '#3b82f6', marginTop: '4px' }}>
-              Nieuwe foto geselecteerd
-            </div>
+            <div style={{ fontSize: '12px', color: '#3b82f6', marginTop: '4px' }}>Nieuwe foto geselecteerd</div>
           )}
         </div>
       </div>
 
-      {/* Naam bewerken */}
-      <form onSubmit={handleNaamOpslaan}>
-        <Kaart titel="Naam">
-          <input
-            type="text"
-            value={naam}
-            onChange={e => setNaam(e.target.value)}
-            placeholder="Voor- en achternaam"
-            style={inputStijl}
-          />
-          {!speler && (
-            <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '8px' }}>
-              Je bent nog niet gekoppeld aan een spelersfiche. Een admin doet dit.
-            </p>
-          )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px' }}>
-            <button type="submit" disabled={naamOpslaan} style={knopStijl(naamOpslaan)}>
-              {naamOpslaan ? 'Opslaan...' : 'Opslaan'}
-            </button>
-            {naamBericht && <Bericht bericht={naamBericht} />}
-          </div>
-        </Kaart>
-      </form>
+      {/* Naam */}
+      <Kaart titel="Naam">
+        <input
+          type="text"
+          value={naam}
+          onChange={e => { setNaam(e.target.value); setBericht(null) }}
+          placeholder="Voor- en achternaam"
+          style={inputStijl(naamDirty)}
+        />
+        {!speler && (
+          <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '8px' }}>
+            Je bent nog niet gekoppeld aan een spelersfiche. Een admin doet dit.
+          </p>
+        )}
+      </Kaart>
 
       {/* Flair */}
       <Kaart titel="✨ Profielflair">
@@ -278,108 +250,85 @@ export default function PWAAccount() {
               </button>
             )
           })}
-          {/* Anders knop */}
           <button
             onClick={() => kiesFlair('__anders__')}
             style={{
               padding: '6px 12px', borderRadius: '20px', border: '1.5px solid',
-              borderColor: flair === '__anders__' || isAnders ? '#7c3aed' : '#e2e8f0',
-              background: flair === '__anders__' || isAnders ? '#f5f3ff' : 'white',
-              color: flair === '__anders__' || isAnders ? '#7c3aed' : '#475569',
-              fontSize: '13px', fontWeight: (flair === '__anders__' || isAnders) ? '700' : '500',
+              borderColor: isAnders ? '#7c3aed' : '#e2e8f0',
+              background: isAnders ? '#f5f3ff' : 'white',
+              color: isAnders ? '#7c3aed' : '#475569',
+              fontSize: '13px', fontWeight: isAnders ? '700' : '500',
               cursor: 'pointer',
             }}
           >
             ✏️ Anders...
           </button>
         </div>
-
-        {(flair === '__anders__' || isAnders) && (
+        {isAnders && (
           <input
             type="text"
             value={andersText}
-            onChange={e => setAndersText(e.target.value)}
+            onChange={e => { setAndersText(e.target.value); setBericht(null) }}
             placeholder="Typ je eigen flair..."
             maxLength={40}
-            style={{ ...inputStijl, marginBottom: '12px' }}
+            style={inputStijl(flairDirty)}
           />
         )}
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+        {huidigeFlair && (
           <button
-            onClick={handleFlairOpslaan}
-            disabled={flairOpslaan || (!flair)}
-            style={knopStijl(flairOpslaan || !flair)}
+            onClick={async () => {
+              await supabase.from('profiles').update({ flair: null }).eq('id', user.id)
+              patchProfile({ flair: null })
+              setFlair(''); setOrigFlair(''); setAndersText('')
+              setBericht({ type: 'ok', tekst: 'Flair verwijderd.' })
+            }}
+            style={{
+              marginTop: '10px', background: 'none', border: '1px solid #e2e8f0',
+              borderRadius: '10px', padding: '6px 14px', fontSize: '12px',
+              color: '#94a3b8', cursor: 'pointer',
+            }}
           >
-            {flairOpslaan ? 'Opslaan...' : 'Opslaan'}
+            Flair verwijderen
           </button>
-          {huidigeFlair && (
-            <button
-              onClick={handleFlairVerwijderen}
-              style={{
-                background: 'none', border: '1px solid #e2e8f0', borderRadius: '10px',
-                padding: '0 16px', height: '40px', fontSize: '13px', color: '#94a3b8',
-                cursor: 'pointer',
-              }}
-            >
-              Verwijderen
-            </button>
-          )}
-          {flairBericht && <Bericht bericht={flairBericht} />}
-        </div>
+        )}
       </Kaart>
 
       {/* E-mail */}
-      <form onSubmit={handleEmailOpslaan}>
-        <Kaart titel="E-mailadres">
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            style={inputStijl}
-          />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px' }}>
-            <button type="submit" disabled={emailOpslaan} style={knopStijl(emailOpslaan)}>
-              {emailOpslaan ? 'Opslaan...' : 'Opslaan'}
-            </button>
-            {emailBericht && <Bericht bericht={emailBericht} />}
-          </div>
-        </Kaart>
-      </form>
+      <Kaart titel="E-mailadres">
+        <input
+          type="email"
+          value={email}
+          onChange={e => { setEmail(e.target.value); setBericht(null) }}
+          required
+          style={inputStijl(emailDirty)}
+        />
+      </Kaart>
 
       {/* Wachtwoord */}
-      <form onSubmit={handleWachtwoordOpslaan}>
-        <Kaart titel="Wachtwoord wijzigen">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <WachtwoordVeld
-              label="Nieuw wachtwoord"
-              value={nieuwWachtwoord}
-              onChange={e => setNieuwWachtwoord(e.target.value)}
-              toon={toonNieuw}
-              onToggle={() => setToonNieuw(v => !v)}
-              placeholder="Minimum 6 tekens"
-              required
-              minLength={6}
-            />
+      <Kaart titel="Wachtwoord wijzigen">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <WachtwoordVeld
+            label="Nieuw wachtwoord"
+            value={nieuwWachtwoord}
+            onChange={e => { setNieuwWachtwoord(e.target.value); setBericht(null) }}
+            toon={toonNieuw}
+            onToggle={() => setToonNieuw(v => !v)}
+            placeholder="Minimum 6 tekens"
+            dirty={wachtwoordDirty}
+          />
+          {nieuwWachtwoord.length > 0 && (
             <WachtwoordVeld
               label="Bevestig wachtwoord"
               value={bevestigWachtwoord}
-              onChange={e => setBevestigWachtwoord(e.target.value)}
+              onChange={e => { setBevestigWachtwoord(e.target.value); setBericht(null) }}
               toon={toonBevestig}
               onToggle={() => setToonBevestig(v => !v)}
               placeholder="Herhaal wachtwoord"
-              required
+              dirty={bevestigWachtwoord.length > 0}
             />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px' }}>
-            <button type="submit" disabled={wachtwoordOpslaan} style={knopStijl(wachtwoordOpslaan)}>
-              {wachtwoordOpslaan ? 'Opslaan...' : 'Wijzigen'}
-            </button>
-            {wachtwoordBericht && <Bericht bericht={wachtwoordBericht} />}
-          </div>
-        </Kaart>
-      </form>
+          )}
+        </div>
+      </Kaart>
 
       {/* Afmelden */}
       <button
@@ -392,6 +341,40 @@ export default function PWAAccount() {
       >
         Afmelden
       </button>
+
+      {/* Sticky save bar */}
+      {isDirty && (
+        <div style={{
+          position: 'fixed', bottom: '80px', left: '16px', right: '16px', zIndex: 100,
+          background: '#0f172a', borderRadius: '16px',
+          padding: '14px 20px',
+          display: 'flex', alignItems: 'center', gap: '14px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+        }}>
+          <div style={{ flex: 1 }}>
+            {bericht ? (
+              <span style={{ fontSize: '13px', fontWeight: '500', color: bericht.type === 'ok' ? '#86efac' : '#fca5a5' }}>
+                {bericht.type === 'ok' ? '✓ ' : '✕ '}{bericht.tekst}
+              </span>
+            ) : (
+              <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>Je hebt onopgeslagen wijzigingen</span>
+            )}
+          </div>
+          <button
+            onClick={handleOpslaan}
+            disabled={bezig}
+            style={{
+              background: '#3b82f6', color: 'white', border: 'none',
+              borderRadius: '10px', padding: '0 20px', height: '38px',
+              fontSize: '14px', fontWeight: '700',
+              cursor: bezig ? 'not-allowed' : 'pointer',
+              opacity: bezig ? 0.7 : 1, flexShrink: 0,
+            }}
+          >
+            {bezig ? 'Opslaan...' : 'Opslaan'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -407,7 +390,7 @@ function Kaart({ titel, children }) {
   )
 }
 
-function WachtwoordVeld({ label, value, onChange, toon, onToggle, placeholder, required, minLength }) {
+function WachtwoordVeld({ label, value, onChange, toon, onToggle, placeholder, dirty }) {
   return (
     <div>
       <label style={{ display: 'block', fontSize: '12px', color: '#64748b', marginBottom: '6px' }}>{label}</label>
@@ -416,10 +399,8 @@ function WachtwoordVeld({ label, value, onChange, toon, onToggle, placeholder, r
           type={toon ? 'text' : 'password'}
           value={value}
           onChange={onChange}
-          required={required}
-          minLength={minLength}
           placeholder={placeholder}
-          style={{ ...inputStijl, paddingRight: '44px' }}
+          style={{ ...inputStijl(dirty), paddingRight: '44px' }}
         />
         <button
           type="button"
@@ -445,22 +426,11 @@ function WachtwoordVeld({ label, value, onChange, toon, onToggle, placeholder, r
   )
 }
 
-function Bericht({ bericht }) {
-  return (
-    <span style={{ fontSize: '13px', color: bericht.type === 'ok' ? '#16a34a' : '#ef4444' }}>
-      {bericht.type === 'ok' ? '✓' : '✕'} {bericht.tekst}
-    </span>
-  )
-}
-
-const inputStijl = {
-  width: '100%', border: '1px solid #e2e8f0', borderRadius: '10px',
-  padding: '0 14px', fontSize: '14px', color: '#0f172a', outline: 'none',
-  background: '#f8fafc', boxSizing: 'border-box', height: '44px',
-}
-
-const knopStijl = (disabled) => ({
-  background: '#0f172a', color: 'white', border: 'none', borderRadius: '10px',
-  padding: '0 20px', height: '40px', fontSize: '14px', fontWeight: '600',
-  cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1,
+const inputStijl = (dirty) => ({
+  width: '100%', border: `1.5px solid ${dirty ? '#3b82f6' : '#e2e8f0'}`,
+  borderRadius: '10px', padding: '0 14px', fontSize: '14px',
+  color: '#0f172a', outline: 'none',
+  background: dirty ? '#f0f7ff' : '#f8fafc',
+  boxSizing: 'border-box', height: '44px',
+  transition: 'border-color 0.15s, background 0.15s',
 })

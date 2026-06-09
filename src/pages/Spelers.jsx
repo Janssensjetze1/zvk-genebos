@@ -13,8 +13,15 @@ export default function Spelers() {
   useEffect(() => { if (spelers.length > 0 && seizoen) fetchStats() }, [spelers, seizoen])
 
   async function fetchSpelers() {
-    const { data } = await supabase.from('players').select('*').order('name')
-    setSpelers(data ?? [])
+    const [{ data: sData }, { data: pData }] = await Promise.all([
+      supabase.from('players').select('*').order('name'),
+      supabase.from('profiles').select('player_id, flair').not('player_id', 'is', null),
+    ])
+    const flairMap = {}
+    for (const p of (pData ?? [])) {
+      if (p.player_id && p.flair) flairMap[p.player_id] = p.flair
+    }
+    setSpelers((sData ?? []).map(s => ({ ...s, flair: flairMap[s.id] ?? null })))
     setLoading(false)
   }
 
@@ -181,10 +188,21 @@ function SpelerKaart({ speler, stats, isTopscorer }) {
       <div style={{ padding: '14px' }}>
         <p style={{
           fontSize: '14px', fontWeight: '700', color: '#0f172a',
-          marginBottom: '10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          marginBottom: speler.flair ? '4px' : '10px',
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
           {speler.name}
         </p>
+        {speler.flair && (
+          <div style={{
+            display: 'inline-block', marginBottom: '8px',
+            fontSize: '11px', fontWeight: '600', color: '#7c3aed',
+            background: '#f5f3ff', padding: '2px 8px', borderRadius: '20px',
+            border: '1px solid #ddd6fe',
+          }}>
+            {speler.flair}
+          </div>
+        )}
 
         {/* Stats */}
         <div style={{ display: 'flex', gap: '0', borderRadius: '8px', overflow: 'hidden', border: '1px solid #f1f5f9' }}>

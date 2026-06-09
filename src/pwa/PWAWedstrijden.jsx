@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import { useAuth } from '../context/AuthContext'
 
-const REACTIE_EMOJIS = ['🔥', '😬', '🤦', '👏', '💀', '🥳']
+const REACTIE_EMOJIS = ['💪', '❤️', '🎯', '😭']
 
 const TYPE_COLORS = {
   competitie: { bg: '#eff6ff', color: '#1d4ed8' },

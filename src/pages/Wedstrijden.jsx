@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
+import { useAuth } from '../context/AuthContext'
+
+const REACTIE_EMOJIS = ['💪', '❤️', '🎯', '😭']
 
 const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
 const TYPE_COLORS = {
@@ -173,13 +176,44 @@ function AankomendeKaart({ wedstrijd: w }) {
 // ── Gespeelde wedstrijd kaart ────────────────────────────────────────────────
 
 function GespeeldeKaart({ wedstrijd: w }) {
+  const { user } = useAuth()
   const [open, setOpen] = useState(false)
+  const [reacties, setReacties] = useState([])
+  const [mijneReactie, setMijneReactie] = useState(null)
   const isThuis = w.home_team?.is_zvk
   const zvkScore = isThuis ? w.home_score : w.away_score
   const tegScore = isThuis ? w.away_score : w.home_score
   const tegenstander = isThuis ? w.away_team : w.home_team
   const datum = new Date(w.date)
   const typeKleur = TYPE_COLORS[w.type] ?? TYPE_COLORS.competitie
+
+  useEffect(() => { fetchReacties() }, [w.id])
+
+  async function fetchReacties() {
+    const { data } = await supabase.from('match_reactions').select('emoji, user_id').eq('match_id', w.id)
+    setReacties(data ?? [])
+    const mijn = (data ?? []).find(r => r.user_id === user?.id)
+    setMijneReactie(mijn?.emoji ?? null)
+  }
+
+  async function handleReactie(emoji) {
+    if (!user) return
+    if (mijneReactie === emoji) {
+      await supabase.from('match_reactions').delete().eq('match_id', w.id).eq('user_id', user.id)
+      setReacties(prev => prev.filter(r => r.user_id !== user.id))
+      setMijneReactie(null)
+    } else {
+      await supabase.from('match_reactions').upsert(
+        { match_id: w.id, user_id: user.id, emoji },
+        { onConflict: 'match_id,user_id' }
+      )
+      setReacties(prev => [...prev.filter(r => r.user_id !== user.id), { emoji, user_id: user.id }])
+      setMijneReactie(emoji)
+    }
+  }
+
+  const reactieTellers = {}
+  for (const r of reacties) reactieTellers[r.emoji] = (reactieTellers[r.emoji] || 0) + 1
 
   const resultaat = zvkScore > tegScore ? 'W' : zvkScore < tegScore ? 'V' : 'G'
   const resultaatKleur = { W: '#16a34a', V: '#ef4444', G: '#d97706' }[resultaat]
@@ -259,6 +293,37 @@ function GespeeldeKaart({ wedstrijd: w }) {
             </svg>
           )}
         </div>
+      </div>
+
+      {/* Emoji-reacties */}
+      <div
+        style={{ padding: '0 18px 12px', display: 'flex', gap: '6px' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {REACTIE_EMOJIS.map(emoji => {
+          const count = reactieTellers[emoji] || 0
+          const actief = mijneReactie === emoji
+          return (
+            <button
+              key={emoji}
+              onClick={() => handleReactie(emoji)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '4px',
+                padding: '3px 10px', borderRadius: '20px', border: '1.5px solid',
+                borderColor: actief ? '#6366f1' : '#e2e8f0',
+                background: actief ? '#eef2ff' : count > 0 ? '#f8fafc' : 'transparent',
+                cursor: 'pointer', fontSize: '14px', transition: 'all 0.15s',
+              }}
+            >
+              {emoji}
+              {count > 0 && (
+                <span style={{ fontSize: '12px', fontWeight: '700', color: actief ? '#6366f1' : '#64748b' }}>
+                  {count}
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
 
       {/* Uitklap: doelpunten + spelers */}
