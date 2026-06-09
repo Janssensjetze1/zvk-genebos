@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
+import { ArchiefKiezer } from '../components/ArchiefKiezer'
 
 export default function Spelers() {
   const { actief: seizoen, seizoenen, switchSeizoen } = useSeason()
@@ -13,15 +14,8 @@ export default function Spelers() {
   useEffect(() => { if (spelers.length > 0 && seizoen) fetchStats() }, [spelers, seizoen])
 
   async function fetchSpelers() {
-    const [{ data: sData }, { data: pData }] = await Promise.all([
-      supabase.from('players').select('*').order('name'),
-      supabase.from('profiles').select('player_id, flair').not('player_id', 'is', null),
-    ])
-    const flairMap = {}
-    for (const p of (pData ?? [])) {
-      if (p.player_id && p.flair) flairMap[p.player_id] = p.flair
-    }
-    setSpelers((sData ?? []).map(s => ({ ...s, flair: flairMap[s.id] ?? null })))
+    const { data: sData } = await supabase.from('players').select('*').order('name')
+    setSpelers(sData ?? [])
     setLoading(false)
   }
 
@@ -68,23 +62,8 @@ export default function Spelers() {
           <p style={{ fontSize: '14px', color: '#94a3b8' }}>{spelers.length} spelers in de selectie</p>
         </div>
 
-        {/* Seizoenfilter */}
-        {seizoenen?.length > 0 && (
-          <select
-            value={seizoen?.id ?? ''}
-            onChange={e => {
-              const s = seizoenen.find(s => s.id === e.target.value)
-              if (s) switchSeizoen(s)
-            }}
-            style={{
-              fontSize: '13px', border: '1px solid #e2e8f0', borderRadius: '8px',
-              padding: '7px 12px', color: '#334155', background: 'white',
-              outline: 'none', cursor: 'pointer',
-            }}
-          >
-            {seizoenen.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </select>
-        )}
+        {/* Archief kiezer */}
+        <ArchiefKiezer />
       </div>
 
       {/* Zoekbalk */}
@@ -188,21 +167,11 @@ function SpelerKaart({ speler, stats, isTopscorer }) {
       <div style={{ padding: '14px' }}>
         <p style={{
           fontSize: '14px', fontWeight: '700', color: '#0f172a',
-          marginBottom: speler.flair ? '4px' : '10px',
+          marginBottom: '10px',
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
           {speler.name}
         </p>
-        {speler.flair && (
-          <div style={{
-            display: 'inline-block', marginBottom: '8px',
-            fontSize: '11px', fontWeight: '600', color: '#7c3aed',
-            background: '#f5f3ff', padding: '2px 8px', borderRadius: '20px',
-            border: '1px solid #ddd6fe',
-          }}>
-            {speler.flair}
-          </div>
-        )}
 
         {/* Stats */}
         <div style={{ display: 'flex', gap: '0', borderRadius: '8px', overflow: 'hidden', border: '1px solid #f1f5f9' }}>

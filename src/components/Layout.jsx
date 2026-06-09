@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { useSeason } from '../context/SeasonContext'
 
 const navItems = [
   { label: 'Dashboard', path: '/', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
@@ -18,11 +19,11 @@ const NavLink = ({ item, active, onClick }) => (
   <Link
     to={item.path}
     onClick={onClick}
+    className="nav-item"
     style={{
       display: 'flex', alignItems: 'center', gap: '11px',
       padding: '10px 12px', borderRadius: '10px',
       textDecoration: 'none', fontSize: '14px', fontWeight: '500',
-      transition: 'all 0.18s',
       background: active ? 'rgba(59,130,246,0.18)' : 'transparent',
       color: active ? '#93c5fd' : 'rgba(255,255,255,0.5)',
       boxShadow: active ? 'inset 0 0 0 1px rgba(59,130,246,0.25)' : 'none',
@@ -217,6 +218,47 @@ function Sidebar({ onClose }) {
   )
 }
 
+function ArchiefBanner() {
+  const { isArchief, actief, huidigSeizoen, switchSeizoen } = useSeason()
+  if (!isArchief) return null
+
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, #92400e, #b45309)',
+      color: 'white',
+      padding: '12px 24px',
+      display: 'flex', alignItems: 'center', gap: '14px',
+      borderBottom: '1px solid rgba(255,255,255,0.15)',
+    }}>
+      <span style={{ fontSize: '18px', flexShrink: 0 }}>📦</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: '13px', fontWeight: '800', letterSpacing: '0.02em' }}>
+          ARCHIEFMODUS
+        </div>
+        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)', marginTop: '1px' }}>
+          Je bekijkt het archief van seizoen <strong style={{ color: 'white' }}>{actief?.name}</strong>. Gegevens zijn alleen-lezen.
+        </div>
+      </div>
+      {huidigSeizoen && (
+        <button
+          onClick={() => switchSeizoen(huidigSeizoen)}
+          style={{
+            background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)',
+            color: 'white', borderRadius: '8px', padding: '7px 14px',
+            fontSize: '12px', fontWeight: '700', cursor: 'pointer',
+            flexShrink: 0, whiteSpace: 'nowrap',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={e => e.target.style.background = 'rgba(255,255,255,0.25)'}
+          onMouseLeave={e => e.target.style.background = 'rgba(255,255,255,0.15)'}
+        >
+          ← Terug naar huidig seizoen
+        </button>
+      )}
+    </div>
+  )
+}
+
 export default function Layout({ children }) {
   const isMobile = useIsMobile()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -268,8 +310,11 @@ export default function Layout({ children }) {
           <Sidebar onClose={() => setDrawerOpen(false)} />
         </div>
 
-        <main style={{ flex: 1, padding: '24px 16px' }}>
-          {children}
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <ArchiefBanner />
+          <div style={{ padding: '24px 16px', flex: 1 }}>
+            {children}
+          </div>
         </main>
       </div>
     )
@@ -280,9 +325,12 @@ export default function Layout({ children }) {
       <div style={{ position: 'sticky', top: 0, height: '100vh', flexShrink: 0 }}>
         <Sidebar />
       </div>
-      <main style={{ flex: 1, padding: '40px 44px', overflowY: 'auto', minHeight: '100vh' }}>
-        {children}
-      </main>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', overflowY: 'auto' }}>
+        <ArchiefBanner />
+        <main style={{ flex: 1, padding: '40px 44px' }}>
+          {children}
+        </main>
+      </div>
     </div>
   )
 }

@@ -135,11 +135,15 @@ function Podium({ spelers, stat, label }) {
               <div style={{ fontSize: '18px', fontWeight: '900', color: kleur }}>{waarde}</div>
             </div>
             {/* Podiumblok */}
-            <div style={{
-              width: '100%', height: `${hoogte}px`, borderRadius: '10px 10px 0 0',
-              background: kleur, opacity: 0.15,
-              position: 'relative',
-            }}>
+            <div
+              className="podium-bar"
+              style={{
+                width: '100%', height: `${hoogte}px`, borderRadius: '10px 10px 0 0',
+                background: kleur, opacity: 0.15,
+                position: 'relative',
+                animationDelay: `${vi * 0.08}s`,
+              }}
+            >
               <span style={{
                 position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)',
                 fontSize: '20px', fontWeight: '900', color: kleur, opacity: 1,

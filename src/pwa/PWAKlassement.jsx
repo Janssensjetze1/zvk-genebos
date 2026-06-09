@@ -5,32 +5,42 @@ import { useSeason } from '../context/SeasonContext'
 export default function PWAKlassement() {
   const { actief: seizoen } = useSeason()
   const [wedstrijden, setWedstrijden] = useState([])
+  const [alleTeams, setAlleTeams] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { if (seizoen) fetchWedstrijden() }, [seizoen])
+  useEffect(() => { if (seizoen) fetchData() }, [seizoen])
 
-  async function fetchWedstrijden() {
+  async function fetchData() {
     setLoading(true)
-    const vandaag = new Date().toISOString().split('T')[0]
-    const { data } = await supabase
-      .from('matches')
-      .select('*, home_team:home_team_id(id,name,is_zvk), away_team:away_team_id(id,name,is_zvk)')
-      .eq('season_id', seizoen.id)
-      .eq('type', 'competitie')
-      .lt('date', vandaag)
-      .order('date', { ascending: true })
-    setWedstrijden(data ?? [])
+    const [{ data: teamsData }, { data: matchesData }] = await Promise.all([
+      supabase.from('teams').select('id, name, is_zvk').order('name'),
+      supabase
+        .from('matches')
+        .select('*, home_team:home_team_id(id,name,is_zvk), away_team:away_team_id(id,name,is_zvk)')
+        .eq('season_id', seizoen.id)
+        .eq('type', 'competitie')
+        .order('date', { ascending: true }),
+    ])
+    setAlleTeams(teamsData ?? [])
+    setWedstrijden(matchesData ?? [])
     setLoading(false)
   }
 
   function berekenKlassement() {
+    const vandaag = new Date().toISOString().split('T')[0]
+
+    // Stap 1: begin met ALLE teams op 0
     const teams = {}
+    for (const team of alleTeams) {
+      teams[team.id] = { id: team.id, name: team.name, is_zvk: team.is_zvk, g: 0, w: 0, ge: 0, v: 0, dv: 0, dt: 0, pnt: 0 }
+    }
+
+    // Stap 2: tel stats enkel voor gespeelde wedstrijden (datum in verleden + score ingevuld)
     for (const w of wedstrijden) {
-      const { home_team, away_team, home_score, away_score } = w
+      const { home_team, away_team, home_score, away_score, date } = w
       if (!home_team || !away_team) continue
-      for (const team of [home_team, away_team]) {
-        if (!teams[team.id]) teams[team.id] = { id: team.id, name: team.name, is_zvk: team.is_zvk, g: 0, w: 0, ge: 0, v: 0, dv: 0, dt: 0, pnt: 0 }
-      }
+      if (date >= vandaag) continue
+      if (home_score == null || away_score == null) continue
       const thuis = teams[home_team.id]
       const uit = teams[away_team.id]
       thuis.g++; uit.g++
@@ -40,6 +50,7 @@ export default function PWAKlassement() {
       else if (home_score < away_score) { uit.w++; uit.pnt += 3; thuis.v++ }
       else { thuis.ge++; thuis.pnt++; uit.ge++; uit.pnt++ }
     }
+
     return Object.values(teams).sort((a, b) => {
       if (b.pnt !== a.pnt) return b.pnt - a.pnt
       const saldoB = b.dv - b.dt, saldoA = a.dv - a.dt
@@ -59,7 +70,7 @@ export default function PWAKlassement() {
         <div style={{ textAlign: 'center', padding: '48px', color: '#94a3b8' }}>Laden...</div>
       ) : klassement.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '14px' }}>
-          Nog geen wedstrijden gespeeld.
+          Geen competitiewedstrijden ingepland dit seizoen.
         </div>
       ) : (
         <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden' }}>

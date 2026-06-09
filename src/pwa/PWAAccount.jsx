@@ -2,59 +2,32 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 
-const FLAIR_OPTIES = [
-  '🧱 De Muur',
-  '⚽ Doelpuntenmachine',
-  '🪑 Eeuwige Wisselspeler',
-  '🙋 Vrijwilliger van dienst',
-  '🎯 Assists-koning',
-  '🩹 Meest geblesseerd',
-  '🫥 Stille kracht',
-  '🌪️ Chaos agent',
-  '👴 De Veteraan',
-  '👻 Onzichtbare held',
-]
-
 export default function PWAAccount() {
   const { user, profile, patchProfile, signOut } = useAuth()
   const fotoInputRef = useRef(null)
 
-  // Speler
   const [speler, setSpeler] = useState(null)
-
-  // Naam & foto
   const [naam, setNaam] = useState('')
   const [origNaam, setOrigNaam] = useState('')
   const [fotoBestand, setFotoBestand] = useState(null)
   const [fotoPreview, setFotoPreview] = useState(null)
 
-  // Flair
-  const [flair, setFlair] = useState('')
-  const [origFlair, setOrigFlair] = useState('')
-  const [andersText, setAndersText] = useState('')
-
-  // Email
   const [email, setEmail] = useState(user?.email ?? '')
   const [origEmail] = useState(user?.email ?? '')
 
-  // Wachtwoord
   const [nieuwWachtwoord, setNieuwWachtwoord] = useState('')
   const [bevestigWachtwoord, setBevestigWachtwoord] = useState('')
   const [toonNieuw, setToonNieuw] = useState(false)
   const [toonBevestig, setToonBevestig] = useState(false)
 
-  // Opslaan
   const [bezig, setBezig] = useState(false)
   const [bericht, setBericht] = useState(null)
 
   useEffect(() => {
     const n = profile?.display_name ?? ''
-    const f = profile?.flair ?? ''
     setNaam(n); setOrigNaam(n)
-    setFlair(f); setOrigFlair(f)
-    if (f && !FLAIR_OPTIES.includes(f)) setAndersText(f)
     if (profile?.player_id) fetchSpeler(profile.player_id)
-  }, [profile?.player_id, profile?.flair, profile?.display_name])
+  }, [profile?.player_id, profile?.display_name])
 
   async function fetchSpeler(id) {
     const { data } = await supabase.from('players').select('*').eq('id', id).single()
@@ -70,30 +43,16 @@ export default function PWAAccount() {
     reader.readAsDataURL(bestand)
   }
 
-  function kiesFlair(optie) {
-    if (optie === '__anders__') { setFlair('__anders__') }
-    else { setFlair(optie); setAndersText('') }
-    setBericht(null)
-  }
-
-  // Dirty checks
-  const effectieveFlair = (flair === '__anders__' || (flair && !FLAIR_OPTIES.includes(flair) && flair !== '__anders__'))
-    ? andersText.trim()
-    : flair
-  const isAnders = flair === '__anders__' || (flair && !FLAIR_OPTIES.includes(flair))
-
   const naamDirty = naam !== origNaam || !!fotoBestand
-  const flairDirty = effectieveFlair !== origFlair
   const emailDirty = email !== origEmail
   const wachtwoordDirty = nieuwWachtwoord.length > 0
-  const isDirty = naamDirty || flairDirty || emailDirty || wachtwoordDirty
+  const isDirty = naamDirty || emailDirty || wachtwoordDirty
 
   async function handleOpslaan() {
     setBericht(null)
     setBezig(true)
 
     try {
-      // --- Naam & foto ---
       if (naamDirty) {
         let photo_url = speler?.photo_url ?? profile?.avatar_url ?? null
         if (fotoBestand) {
@@ -113,22 +72,11 @@ export default function PWAAccount() {
         setFotoPreview(null)
       }
 
-      // --- Flair ---
-      if (flairDirty) {
-        const waarde = effectieveFlair || null
-        await supabase.from('profiles').update({ flair: waarde }).eq('id', user.id)
-        patchProfile({ flair: waarde })
-        setOrigFlair(waarde ?? '')
-        if (!waarde) { setFlair(''); setAndersText('') }
-      }
-
-      // --- Email ---
       if (emailDirty) {
         const { error } = await supabase.auth.updateUser({ email })
         if (error) throw new Error(error.message)
       }
 
-      // --- Wachtwoord ---
       if (wachtwoordDirty) {
         if (nieuwWachtwoord !== bevestigWachtwoord) throw new Error('Wachtwoorden komen niet overeen.')
         if (nieuwWachtwoord.length < 6) throw new Error('Wachtwoord minimum 6 tekens.')
@@ -148,7 +96,6 @@ export default function PWAAccount() {
 
   const fotoSrc = fotoPreview ?? speler?.photo_url ?? profile?.avatar_url ?? null
   const weergaveNaam = naam || profile?.display_name || '?'
-  const huidigeFlair = origFlair
 
   return (
     <div style={{ padding: '20px 16px 120px' }}>
@@ -190,16 +137,6 @@ export default function PWAAccount() {
           <div style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {weergaveNaam}
           </div>
-          {huidigeFlair && (
-            <div style={{
-              display: 'inline-block', marginTop: '4px',
-              fontSize: '12px', fontWeight: '600', color: '#7c3aed',
-              background: '#f5f3ff', padding: '2px 8px', borderRadius: '20px',
-              border: '1px solid #ddd6fe',
-            }}>
-              {huidigeFlair}
-            </div>
-          )}
           <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {user?.email}
           </div>
@@ -222,74 +159,6 @@ export default function PWAAccount() {
           <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '8px' }}>
             Je bent nog niet gekoppeld aan een spelersfiche. Een admin doet dit.
           </p>
-        )}
-      </Kaart>
-
-      {/* Flair */}
-      <Kaart titel="✨ Profielflair">
-        <p style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '12px' }}>
-          Kies een grappige titel die naast je naam verschijnt.
-        </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
-          {FLAIR_OPTIES.map(optie => {
-            const actief = flair === optie
-            return (
-              <button
-                key={optie}
-                onClick={() => kiesFlair(optie)}
-                style={{
-                  padding: '6px 12px', borderRadius: '20px', border: '1.5px solid',
-                  borderColor: actief ? '#7c3aed' : '#e2e8f0',
-                  background: actief ? '#f5f3ff' : 'white',
-                  color: actief ? '#7c3aed' : '#475569',
-                  fontSize: '13px', fontWeight: actief ? '700' : '500',
-                  cursor: 'pointer',
-                }}
-              >
-                {optie}
-              </button>
-            )
-          })}
-          <button
-            onClick={() => kiesFlair('__anders__')}
-            style={{
-              padding: '6px 12px', borderRadius: '20px', border: '1.5px solid',
-              borderColor: isAnders ? '#7c3aed' : '#e2e8f0',
-              background: isAnders ? '#f5f3ff' : 'white',
-              color: isAnders ? '#7c3aed' : '#475569',
-              fontSize: '13px', fontWeight: isAnders ? '700' : '500',
-              cursor: 'pointer',
-            }}
-          >
-            ✏️ Anders...
-          </button>
-        </div>
-        {isAnders && (
-          <input
-            type="text"
-            value={andersText}
-            onChange={e => { setAndersText(e.target.value); setBericht(null) }}
-            placeholder="Typ je eigen flair..."
-            maxLength={40}
-            style={inputStijl(flairDirty)}
-          />
-        )}
-        {huidigeFlair && (
-          <button
-            onClick={async () => {
-              await supabase.from('profiles').update({ flair: null }).eq('id', user.id)
-              patchProfile({ flair: null })
-              setFlair(''); setOrigFlair(''); setAndersText('')
-              setBericht({ type: 'ok', tekst: 'Flair verwijderd.' })
-            }}
-            style={{
-              marginTop: '10px', background: 'none', border: '1px solid #e2e8f0',
-              borderRadius: '10px', padding: '6px 14px', fontSize: '12px',
-              color: '#94a3b8', cursor: 'pointer',
-            }}
-          >
-            Flair verwijderen
-          </button>
         )}
       </Kaart>
 

@@ -13,49 +13,48 @@ const TYPE_COLORS = {
 export default function Klassement() {
   const { actief: seizoen } = useSeason()
   const [wedstrijden, setWedstrijden] = useState([])
+  const [alleTeams, setAlleTeams] = useState([])
   const [loading, setLoading] = useState(true)
   const [actieveTab, setActieveTab] = useState('competitie')
 
-  useEffect(() => { if (seizoen) fetchWedstrijden() }, [seizoen])
+  useEffect(() => { if (seizoen) fetchData() }, [seizoen])
 
-  async function fetchWedstrijden() {
+  async function fetchData() {
     setLoading(true)
-    const vandaag = new Date().toISOString().split('T')[0]
-    const { data } = await supabase
-      .from('matches')
-      .select(`
-        *,
-        home_team:home_team_id(id, name, is_zvk),
-        away_team:away_team_id(id, name, is_zvk)
-      `)
-      .eq('season_id', seizoen.id)
-      .lt('date', vandaag) // enkel gespeelde wedstrijden
-      .order('date', { ascending: true })
-    setWedstrijden(data ?? [])
+    const [{ data: teamsData }, { data: matchesData }] = await Promise.all([
+      supabase.from('teams').select('id, name, is_zvk').order('name'),
+      supabase
+        .from('matches')
+        .select('*, home_team:home_team_id(id, name, is_zvk), away_team:away_team_id(id, name, is_zvk)')
+        .eq('season_id', seizoen.id)
+        .order('date', { ascending: true }),
+    ])
+    setAlleTeams(teamsData ?? [])
+    setWedstrijden(matchesData ?? [])
     setLoading(false)
   }
 
   // Bereken klassement voor een bepaald type wedstrijd
   function berekenKlassement(type) {
+    const vandaag = new Date().toISOString().split('T')[0]
     const gefilterd = wedstrijden.filter(w => w.type === type)
+
+    // Stap 1: begin met ALLE teams op 0
     const teams = {}
-
-    for (const w of gefilterd) {
-      const { home_team, away_team, home_score, away_score } = w
-      if (!home_team || !away_team) continue
-
-      // Initialiseer teams
-      for (const team of [home_team, away_team]) {
-        if (!teams[team.id]) {
-          teams[team.id] = {
-            id: team.id,
-            name: team.name,
-            is_zvk: team.is_zvk,
-            gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0,
-            doelpuntenVoor: 0, doelpuntenTegen: 0, punten: 0,
-          }
-        }
+    for (const team of alleTeams) {
+      teams[team.id] = {
+        id: team.id, name: team.name, is_zvk: team.is_zvk,
+        gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0,
+        doelpuntenVoor: 0, doelpuntenTegen: 0, punten: 0,
       }
+    }
+
+    // Stap 2: tel stats enkel voor wedstrijden die al gespeeld zijn (datum in verleden + score ingevuld)
+    for (const w of gefilterd) {
+      const { home_team, away_team, home_score, away_score, date } = w
+      if (!home_team || !away_team) continue
+      if (date >= vandaag) continue // nog niet gespeeld
+      if (home_score == null || away_score == null) continue // score niet ingevuld
 
       const thuis = teams[home_team.id]
       const uit = teams[away_team.id]
@@ -133,7 +132,7 @@ export default function Klassement() {
         <p style={{ fontSize: '14px', color: '#94a3b8' }}>Laden...</p>
       ) : klassement.length === 0 ? (
         <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '48px', textAlign: 'center' }}>
-          <p style={{ color: '#94a3b8', fontSize: '14px' }}>Nog geen {TYPE_LABELS[actieveTab].toLowerCase()}wedstrijden gespeeld dit seizoen.</p>
+          <p style={{ color: '#94a3b8', fontSize: '14px' }}>Geen {TYPE_LABELS[actieveTab].toLowerCase()}wedstrijden ingepland dit seizoen.</p>
         </div>
       ) : (
         <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
@@ -236,7 +235,7 @@ export default function Klassement() {
       {!isMobile && (
         <div style={{ marginTop: '16px', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
           {['G = Gespeeld', 'W = Gewonnen', 'G = Gelijkspel', 'V = Verloren', 'DV–DT = Doelpunten voor–tegen', 'Pnt = Punten'].map(label => (
-            <span key={label} style={{ fontSize: '11px', color: '#cbd5e1' }}>{label}</span>
+            <span key={label} style={{ fontSize: '11px', color: '#64748b' }}>{label}</span>
           ))}
         </div>
       )}

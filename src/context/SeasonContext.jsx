@@ -30,8 +30,11 @@ export function SeasonProvider({ children }) {
     localStorage.setItem('actief_seizoen_id', seizoen.id)
   }
 
+  const huidigSeizoen = seizoenen[0] ?? null
+  const isArchief = actief && huidigSeizoen && actief.id !== huidigSeizoen.id
+
   return (
-    <SeasonContext.Provider value={{ seizoenen, actief, switchSeizoen, loading }}>
+    <SeasonContext.Provider value={{ seizoenen, actief, switchSeizoen, loading, isArchief, huidigSeizoen }}>
       {children}
     </SeasonContext.Provider>
   )

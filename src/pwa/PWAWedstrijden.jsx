@@ -80,8 +80,9 @@ export default function PWAWedstrijden() {
 function WedstrijdKaart({ wedstrijd: w }) {
   const { user } = useAuth()
   const [open, setOpen] = useState(false)
-  const [reacties, setReacties] = useState([]) // [{emoji, user_id}]
+  const [reacties, setReacties] = useState([])
   const [mijneReactie, setMijneReactie] = useState(null)
+  const [gepoptEmoji, setGepoptEmoji] = useState(null)
 
   const isThuis = w.home_team?.is_zvk
   const tegenstander = isThuis ? w.away_team : w.home_team
@@ -113,14 +114,16 @@ function WedstrijdKaart({ wedstrijd: w }) {
 
   async function handleReactie(emoji) {
     if (!user) return
+    // Pop-animatie triggeren
+    setGepoptEmoji(emoji)
+    setTimeout(() => setGepoptEmoji(null), 350)
+
     if (mijneReactie === emoji) {
-      // Zelfde emoji → verwijder reactie
       await supabase.from('match_reactions').delete()
         .eq('match_id', w.id).eq('user_id', user.id)
       setReacties(prev => prev.filter(r => r.user_id !== user.id))
       setMijneReactie(null)
     } else {
-      // Nieuwe of andere emoji → upsert
       await supabase.from('match_reactions').upsert(
         { match_id: w.id, user_id: user.id, emoji },
         { onConflict: 'match_id,user_id' }
@@ -213,17 +216,19 @@ function WedstrijdKaart({ wedstrijd: w }) {
           {REACTIE_EMOJIS.map(emoji => {
             const count = reactieTellers[emoji] || 0
             const actief = mijneReactie === emoji
+            const popping = gepoptEmoji === emoji
             return (
               <button
                 key={emoji}
                 onClick={() => handleReactie(emoji)}
+                className={popping ? 'emoji-pop' : ''}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '4px',
                   padding: '4px 10px', borderRadius: '20px', border: '1.5px solid',
                   borderColor: actief ? '#6366f1' : '#e2e8f0',
                   background: actief ? '#eef2ff' : count > 0 ? '#f8fafc' : 'transparent',
                   cursor: 'pointer', fontSize: '15px',
-                  transition: 'all 0.15s',
+                  transition: 'border-color 0.15s, background 0.15s',
                 }}
               >
                 {emoji}

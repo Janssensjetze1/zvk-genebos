@@ -1,5 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useSeason } from '../context/SeasonContext'
+import { supabase } from '../lib/supabase'
 
 const ICON_SIZE = 20
 
@@ -51,9 +54,87 @@ const tabs = [
   },
 ]
 
+function useMatchdayCountdown(seizoenId) {
+  const [wedstrijd, setWedstrijd] = useState(null)
+  const [restTijd, setRestTijd] = useState(null) // null = nog niet berekend, false = voorbij
+
+  useEffect(() => {
+    if (!seizoenId) return
+    const vandaag = new Date().toISOString().split('T')[0]
+    supabase
+      .from('matches')
+      .select('id, time, home_team:home_team_id(name, is_zvk), away_team:away_team_id(name, is_zvk)')
+      .eq('season_id', seizoenId)
+      .eq('date', vandaag)
+      .not('time', 'is', null)
+      .order('time', { ascending: true })
+      .limit(1)
+      .single()
+      .then(({ data }) => setWedstrijd(data ?? null))
+  }, [seizoenId])
+
+  useEffect(() => {
+    if (!wedstrijd?.time) return
+
+    function bereken() {
+      const nu = new Date()
+      const [uur, min] = wedstrijd.time.split(':').map(Number)
+      const aftrap = new Date()
+      aftrap.setHours(uur, min, 0, 0)
+      const diff = aftrap - nu
+      if (diff <= 0) { setRestTijd(false); return }
+      const totMinuten = Math.floor(diff / 60000)
+      const uren = Math.floor(totMinuten / 60)
+      const minuten = totMinuten % 60
+      setRestTijd(uren > 0 ? `${uren}u${minuten < 10 ? '0' : ''}${minuten}m` : `${minuten}m`)
+    }
+
+    bereken()
+    const interval = setInterval(bereken, 30000) // update elke 30s
+    return () => clearInterval(interval)
+  }, [wedstrijd])
+
+  return { wedstrijd, restTijd }
+}
+
+function MatchdayBadge({ seizoenId }) {
+  const { wedstrijd, restTijd } = useMatchdayCountdown(seizoenId)
+
+  // Niet tonen als er geen wedstrijd is, of als de aftrap al geweest is
+  if (!wedstrijd || restTijd === null || restTijd === false) return null
+
+  const thuisNaam = wedstrijd.home_team?.name ?? '?'
+  const uitNaam = wedstrijd.away_team?.name ?? '?'
+  const tijdLabel = wedstrijd.time?.slice(0, 5)
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+      <div style={{
+        background: 'rgba(59,130,246,0.15)',
+        border: '1px solid rgba(59,130,246,0.3)',
+        borderRadius: '10px',
+        padding: '5px 10px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        gap: '1px',
+      }}>
+        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>
+          {thuisNaam} – {uitNaam}
+        </span>
+        <span className="pulse-soft" style={{
+          fontSize: '12px', fontWeight: '800', color: '#93c5fd', lineHeight: 1,
+          letterSpacing: '-0.3px',
+        }}>
+          ⚽ {tijdLabel} · nog {restTijd}
+        </span>
+      </div>
+    </div>
+  )
+}
+
 export default function PWALayout({ children }) {
   const location = useLocation()
   const { isAdmin } = useAuth()
+  const { actief: seizoen } = useSeason()
   const invullenActive = location.pathname.startsWith('/app/invullen')
 
   return (
@@ -69,6 +150,9 @@ export default function PWALayout({ children }) {
       }}>
         <img src="/logo.png" alt="ZVK" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
         <span style={{ fontSize: '16px', fontWeight: '700', color: 'white', flex: 1 }}>ZVK Genebos</span>
+
+        {/* Matchday countdown */}
+        <MatchdayBadge seizoenId={seizoen?.id} />
 
         {/* Invullen knop — enkel voor admins */}
         {isAdmin && (
@@ -121,15 +205,31 @@ export default function PWALayout({ children }) {
                 textDecoration: 'none',
                 color: active ? '#93c5fd' : 'rgba(255,255,255,0.35)',
                 gap: '2px',
-                transition: 'color 0.15s',
-                minWidth: 0,
+                transition: 'color 0.2s',
+                minWidth: 0, position: 'relative',
               }}
             >
-              <div style={{ opacity: active ? 1 : 0.6, flexShrink: 0 }}>{tab.icon}</div>
+              {/* Actieve indicator streepje */}
+              <div style={{
+                position: 'absolute', top: 0, left: '50%',
+                transform: 'translateX(-50%)',
+                width: active ? '20px' : '0px', height: '2px',
+                background: '#93c5fd', borderRadius: '0 0 4px 4px',
+                transition: 'width 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+              }} />
+
+              <div
+                className={active ? 'tab-bounce' : ''}
+                key={active ? 'active' : 'inactive'}
+                style={{ opacity: active ? 1 : 0.5, flexShrink: 0, transition: 'opacity 0.2s' }}
+              >
+                {tab.icon}
+              </div>
               <span style={{
                 fontSize: '9px', fontWeight: active ? '700' : '500',
                 letterSpacing: '0.01em', whiteSpace: 'nowrap',
                 overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
+                transition: 'font-weight 0.15s',
               }}>
                 {tab.label}
               </span>

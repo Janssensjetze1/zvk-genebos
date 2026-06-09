@@ -14,18 +14,12 @@ export default function PWASpelers() {
   async function fetchData() {
     setLoading(true)
     const vandaag = new Date().toISOString().split('T')[0]
-    const [{ data: sData }, { data: gData }, { data: pData }] = await Promise.all([
+    const [{ data: sData }, { data: gData }] = await Promise.all([
       supabase.from('players').select('*').order('name'),
       supabase.from('goals').select('scorer_id, match:match_id(date, season_id)')
         .eq('match.season_id', seizoen.id),
-      supabase.from('profiles').select('player_id, flair').not('player_id', 'is', null),
     ])
-    // Merge flair into players
-    const flairMap = {}
-    for (const p of (pData ?? [])) {
-      if (p.player_id && p.flair) flairMap[p.player_id] = p.flair
-    }
-    setSpelers((sData ?? []).map(s => ({ ...s, flair: flairMap[s.id] ?? null })))
+    setSpelers(sData ?? [])
     setGoals((gData ?? []).filter(g => g.match?.date < vandaag))
     setLoading(false)
   }
@@ -86,23 +80,14 @@ export default function PWASpelers() {
                 }
               </div>
 
-              {/* Naam + flair */}
+              {/* Naam */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {speler.name}
                 </div>
-                {speler.flair ? (
-                  <div style={{
-                    display: 'inline-block', marginTop: '3px',
-                    fontSize: '11px', fontWeight: '600', color: '#7c3aed',
-                    background: '#f5f3ff', padding: '1px 7px', borderRadius: '20px',
-                    border: '1px solid #ddd6fe',
-                  }}>
-                    {speler.flair}
-                  </div>
-                ) : speler.position ? (
+                {speler.position && (
                   <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{speler.position}</div>
-                ) : null}
+                )}
               </div>
 
               {/* Goals */}

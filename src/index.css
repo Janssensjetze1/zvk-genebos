@@ -71,3 +71,82 @@ textarea {
 
 /* Smooth scrolling */
 html { scroll-behavior: smooth; }
+
+/* ── Micro-interacties ─────────────────────────────────────── */
+
+/* Knoppen & klikbare kaarten: subtiel indrukken */
+button:active:not(:disabled) {
+  transform: scale(0.96);
+  transition: transform 0.08s ease;
+}
+
+/* Algemene klikbare kaarten */
+.kaart-klikbaar {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+.kaart-klikbaar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+.kaart-klikbaar:active {
+  transform: scale(0.98);
+}
+
+/* Emoji reactie pop */
+@keyframes emoji-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+.emoji-pop {
+  animation: emoji-pop 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* Bottom nav tab bounce */
+@keyframes tab-bounce {
+  0%   { transform: translateY(0); }
+  35%  { transform: translateY(-4px); }
+  65%  { transform: translateY(1px); }
+  100% { transform: translateY(0); }
+}
+.tab-bounce {
+  animation: tab-bounce 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* Cijfers optellen (count-up via clip-path fade-in) */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fade-up 0.4s ease both;
+}
+
+/* Sidebar nav item hover gloed */
+.nav-item {
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+.nav-item:hover {
+  box-shadow: inset 0 0 0 1px rgba(147,197,253,0.15);
+}
+
+/* Podium bars groeien omhoog */
+@keyframes bar-grow {
+  from { transform: scaleY(0); opacity: 0; }
+  to   { transform: scaleY(1); opacity: 0.15; }
+}
+.podium-bar {
+  transform-origin: bottom;
+  animation: bar-grow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Pulse voor countdown */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+.pulse-soft {
+  animation: pulse-soft 1.5s ease-in-out infinite;
+}
