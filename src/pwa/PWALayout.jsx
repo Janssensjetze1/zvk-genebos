@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
 import { useMatchdayCountdown } from '../hooks/useMatchdayCountdown'
+import { AnnouncementPopup } from '../components/AnnouncementPopup'
 
 const ICON_SIZE = 20
 
@@ -137,6 +138,8 @@ export default function PWALayout({ children }) {
       <main style={{ flex: 1, overflowY: 'auto', paddingBottom: '100px' }}>
         {children}
       </main>
+
+      <AnnouncementPopup />
 
       {/* Bottom nav */}
       <nav style={{

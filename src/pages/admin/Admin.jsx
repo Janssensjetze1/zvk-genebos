@@ -4,6 +4,7 @@ import TabSpelers from './tabs/TabSpelers'
 import TabTeams from './tabs/TabTeams'
 import TabWedstrijden from './tabs/TabWedstrijden'
 import TabSeizoen from './tabs/TabSeizoen'
+import TabMeldingen from './tabs/TabMeldingen'
 
 const tabs = [
   { id: 'leden', label: 'Ledenbeheer' },
@@ -11,6 +12,7 @@ const tabs = [
   { id: 'teams', label: 'Teams' },
   { id: 'wedstrijden', label: 'Wedstrijden' },
   { id: 'seizoen', label: 'Seizoenen' },
+  { id: 'meldingen', label: 'Meldingen' },
 ]
 
 export default function Admin() {
@@ -60,6 +62,7 @@ export default function Admin() {
       {actieveTab === 'teams' && <TabTeams />}
       {actieveTab === 'wedstrijden' && <TabWedstrijden />}
       {actieveTab === 'seizoen' && <TabSeizoen />}
+      {actieveTab === 'meldingen' && <TabMeldingen />}
     </div>
   )
 }
