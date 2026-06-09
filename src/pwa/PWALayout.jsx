@@ -49,33 +49,46 @@ const tabs = [
   },
 ]
 
-const adminTab = {
-  path: '/app/invullen',
-  label: 'Invullen',
-  icon: (
-    <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-    </svg>
-  ),
-}
-
 export default function PWALayout({ children }) {
   const location = useLocation()
   const { isAdmin } = useAuth()
-  const allTabs = isAdmin ? [...tabs, adminTab] : tabs
+  const invullenActive = location.pathname.startsWith('/app/invullen')
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f8fafc' }}>
+
       {/* Top header */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 50,
         background: 'rgba(10,10,20,0.97)',
         padding: '0 20px',
-        height: '52px', display: 'flex', alignItems: 'center',
+        height: '62px', display: 'flex', alignItems: 'center',
         gap: '10px',
       }}>
-        <img src="/logo.png" alt="ZVK" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
-        <span style={{ fontSize: '15px', fontWeight: '700', color: 'white' }}>ZVK Genebos</span>
+        <img src="/logo.png" alt="ZVK" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+        <span style={{ fontSize: '16px', fontWeight: '700', color: 'white', flex: 1 }}>ZVK Genebos</span>
+
+        {/* Invullen knop — enkel voor admins */}
+        {isAdmin && (
+          <Link
+            to="/app/invullen"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              textDecoration: 'none',
+              background: invullenActive ? '#3b82f6' : 'rgba(255,255,255,0.1)',
+              color: invullenActive ? 'white' : 'rgba(255,255,255,0.8)',
+              borderRadius: '10px',
+              padding: '7px 13px',
+              fontSize: '13px', fontWeight: '600',
+              transition: 'background 0.15s',
+            }}
+          >
+            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Invullen
+          </Link>
+        )}
       </header>
 
       {/* Page content */}
@@ -91,7 +104,7 @@ export default function PWALayout({ children }) {
         display: 'flex',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}>
-        {allTabs.map(tab => {
+        {tabs.map(tab => {
           const active = tab.path === '/app'
             ? location.pathname === '/app'
             : location.pathname.startsWith(tab.path)

@@ -95,8 +95,8 @@ function Podium({ spelers, stat, label }) {
     : spelers.length === 2
     ? [spelers[1], spelers[0]]
     : [spelers[0]]
-  const hoogtes = [80, 110, 60]
-  const kleuren = ['#94a3b8', '#fbbf24', '#b45309']
+  const hoogtes = [110, 80, 60]
+  const kleuren = ['#fbbf24', '#94a3b8', '#b45309']
   const origineel = spelers.length >= 3
     ? [1, 0, 2]
     : spelers.length === 2 ? [1, 0] : [0]
