@@ -1,26 +1,26 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
-// Route die enkel toegankelijk is voor ingelogde, goedgekeurde gebruikers
 export function ProtectedRoute({ children, skipOnboarding = false }) {
   const { user, profile, isApproved, loading } = useAuth()
+  const location = useLocation()
 
   if (loading) return <LoadingScreen />
-  if (!user) return <Navigate to="/login" replace />
-  if (!profile) return <LoadingScreen /> // Profiel laadt nog
+  if (!user) return <Navigate to="/login" state={{ from: location.pathname }} replace />
+  if (!profile) return <LoadingScreen />
   if (!isApproved) return <Navigate to="/pending" replace />
   if (!skipOnboarding && !profile.onboarding_done) return <Navigate to="/onboarding" replace />
 
   return children
 }
 
-// Route die enkel toegankelijk is voor admins
 export function AdminRoute({ children, skipOnboarding = true }) {
   const { user, profile, isApproved, isAdmin, loading } = useAuth()
+  const location = useLocation()
 
   if (loading) return <LoadingScreen />
-  if (!user) return <Navigate to="/login" replace />
-  if (!profile) return <LoadingScreen /> // Profiel laadt nog
+  if (!user) return <Navigate to="/login" state={{ from: location.pathname }} replace />
+  if (!profile) return <LoadingScreen />
   if (!isApproved) return <Navigate to="/pending" replace />
   if (!isAdmin) return <Navigate to="/" replace />
   if (!skipOnboarding && !profile.onboarding_done) return <Navigate to="/onboarding" replace />
