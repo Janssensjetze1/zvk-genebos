@@ -60,13 +60,13 @@ export default function Onboarding() {
     navigate('/', { replace: true })
 
     // DB-update op de achtergrond (niet awaited, navigatie is al klaar)
-    supabase.from('profiles').update(profileUpdate).eq('id', user.id)
+    supabase.from('profiles').update(profileUpdate).eq('id', user.id).then()
 
     // Als de gebruiker ook gekoppeld is aan een speler, update ook de players-tabel
     if (heeftSpeler && naam.trim()) {
       const updateData = { name: naam.trim() }
       if (photo_url) updateData.photo_url = photo_url
-      supabase.from('players').update(updateData).eq('id', profile.player_id)
+      supabase.from('players').update(updateData).eq('id', profile.player_id).then()
     }
   }
 

@@ -16,24 +16,20 @@ export function useMatchdayCountdown(seizoenId) {
     if (!seizoenId) return
 
     const nu = new Date()
-    const morgen = new Date(nu)
-    morgen.setDate(morgen.getDate() + 1)
 
     supabase
       .from('matches')
       .select('id, date, time, home_team:home_team_id(name, is_zvk), away_team:away_team_id(name, is_zvk)')
       .eq('season_id', seizoenId)
-      .in('date', [datumString(nu), datumString(morgen)])
+      .eq('date', datumString(nu))
       .not('time', 'is', null)
-      .order('date', { ascending: true })
       .order('time', { ascending: true })
       .then(({ data }) => {
-        // Vind de eerste wedstrijd die binnen 24 uur valt én nog niet begonnen is
-        const grens = new Date(nu.getTime() + 24 * 60 * 60 * 1000)
+        // Eerste wedstrijd van vandaag die nog niet begonnen is
         const gevonden = (data ?? []).find(w => {
           const [uur, min] = w.time.slice(0, 5).split(':').map(Number)
           const aftrap = new Date(`${w.date}T${String(uur).padStart(2,'0')}:${String(min).padStart(2,'0')}:00`)
-          return aftrap > nu && aftrap <= grens
+          return aftrap > nu
         })
         setWedstrijd(gevonden ?? null)
       })
