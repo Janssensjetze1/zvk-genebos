@@ -60,13 +60,13 @@ export default function PWALayout({ children }) {
       {/* Top header */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 50,
-        background: 'white', borderBottom: '1px solid #e2e8f0',
+        background: 'rgba(10,10,20,0.97)',
         padding: '0 20px',
         height: '52px', display: 'flex', alignItems: 'center',
         gap: '10px',
       }}>
         <img src="/logo.png" alt="ZVK" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
-        <span style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>ZVK Genebos</span>
+        <span style={{ fontSize: '15px', fontWeight: '700', color: 'white' }}>ZVK Genebos</span>
       </header>
 
       {/* Page content */}
@@ -77,7 +77,8 @@ export default function PWALayout({ children }) {
       {/* Bottom nav */}
       <nav style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
-        background: 'white', borderTop: '1px solid #e2e8f0',
+        background: 'rgba(10,10,20,0.97)',
+        borderTop: '1px solid rgba(255,255,255,0.07)',
         display: 'flex',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}>
@@ -94,12 +95,12 @@ export default function PWALayout({ children }) {
                 alignItems: 'center', justifyContent: 'center',
                 padding: '10px 4px 8px',
                 textDecoration: 'none',
-                color: active ? '#3b82f6' : '#94a3b8',
+                color: active ? '#93c5fd' : 'rgba(255,255,255,0.35)',
                 gap: '3px',
                 transition: 'color 0.15s',
               }}
             >
-              <div style={{ opacity: active ? 1 : 0.7 }}>{tab.icon}</div>
+              <div style={{ opacity: active ? 1 : 0.6 }}>{tab.icon}</div>
               <span style={{ fontSize: '10px', fontWeight: active ? '700' : '500', letterSpacing: '0.01em' }}>
                 {tab.label}
               </span>
