@@ -189,7 +189,13 @@ export default function PWALayout({ children }) {
         borderTop: '1px solid rgba(255,255,255,0.07)',
         display: 'flex',
         paddingBottom: 'env(safe-area-inset-bottom)',
+        position: 'relative',
       }}>
+        <span style={{
+          position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom) + 2px)', right: '8px',
+          fontSize: '9px', color: 'rgba(255,255,255,0.12)', pointerEvents: 'none',
+        }}>v0.1</span>
+
         {tabs.map(tab => {
           const active = tab.path === '/app'
             ? location.pathname === '/app'

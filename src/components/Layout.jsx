@@ -205,14 +205,27 @@ function Sidebar({ onClose }) {
         </Link>
         <button
           onClick={handleSignOut}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = 'rgba(239,68,68,0.08)'
+            e.currentTarget.style.color = '#fca5a5'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.color = 'rgba(255,255,255,0.25)'
+          }}
           style={{
-            width: '100%', background: 'none', border: 'none', cursor: 'pointer',
-            fontSize: '12px', color: 'rgba(255,255,255,0.25)', padding: '4px 10px',
-            textAlign: 'left', borderRadius: '8px', transition: 'color 0.15s',
+            width: '100%', background: 'transparent', border: 'none', cursor: 'pointer',
+            fontSize: '12px', color: 'rgba(255,255,255,0.25)', padding: '7px 10px',
+            textAlign: 'left', borderRadius: '8px', transition: 'background 0.15s, color 0.15s',
+            display: 'flex', alignItems: 'center', gap: '8px',
           }}
         >
+          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
           Afmelden
         </button>
+        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.1)', padding: '2px 10px', display: 'block' }}>v0.1</span>
       </div>
     </aside>
   )
