@@ -38,6 +38,15 @@ const tabs = [
       </svg>
     ),
   },
+  {
+    path: '/app/account',
+    label: 'Account',
+    icon: (
+      <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    ),
+  },
 ]
 
 const adminTab = {
@@ -70,7 +79,7 @@ export default function PWALayout({ children }) {
       </header>
 
       {/* Page content */}
-      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: '80px' }}>
+      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: '100px' }}>
         {children}
       </main>
 
@@ -93,7 +102,7 @@ export default function PWALayout({ children }) {
               style={{
                 flex: 1, display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
-                padding: '14px 4px 10px',
+                padding: '18px 4px 14px',
                 textDecoration: 'none',
                 color: active ? '#93c5fd' : 'rgba(255,255,255,0.35)',
                 gap: '3px',

@@ -26,6 +26,7 @@ import PWAWedstrijden from './pwa/PWAWedstrijden'
 import PWAKlassement from './pwa/PWAKlassement'
 import PWAStats from './pwa/PWAStats'
 import PWASpelers from './pwa/PWASpelers'
+import PWAAccount from './pwa/PWAAccount'
 import Invullen from './pages/Invullen'
 
 function AppRoutes() {
@@ -70,6 +71,11 @@ function AppRoutes() {
         <Route path="/app/spelers" element={
           <ProtectedRoute>
             <PWALayout><PWASpelers /></PWALayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/app/account" element={
+          <ProtectedRoute>
+            <PWALayout><PWAAccount /></PWALayout>
           </ProtectedRoute>
         } />
         <Route path="/app/invullen" element={

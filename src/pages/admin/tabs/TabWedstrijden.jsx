@@ -198,10 +198,11 @@ function NieuweWedstrijd({ seizoenId, zvkTeam, tegenstanders, wedstrijd, onSluit
   const tegenstander = isBewerk ? (isThuis ? wedstrijd.away_team : wedstrijd.home_team) : null
 
   const [datum, setDatum] = useState(isBewerk ? wedstrijd.date : '')
+  const [uur, setUur] = useState(isBewerk ? (wedstrijd.time ?? '') : '')
   const [type, setType] = useState(isBewerk ? wedstrijd.type : 'competitie')
   const [tegenstanderId, setTegenstanderId] = useState(tegenstander?.id ?? '')
   const [thuis, setThuis] = useState(isThuis)
-  const [locatie, setLocatie] = useState(isBewerk ? (wedstrijd.location ?? '') : '')
+  const [locatie, setLocatie] = useState(isBewerk ? (wedstrijd.location ?? '') : 'De Voordijcker')
   const [opslaan, setOpslaan] = useState(false)
   const [fout, setFout] = useState('')
 
@@ -216,14 +217,14 @@ function NieuweWedstrijd({ seizoenId, zvkTeam, tegenstanders, wedstrijd, onSluit
 
     if (isBewerk) {
       const { error } = await supabase.from('matches').update({
-        date: datum, type, location: locatie || null,
+        date: datum, time: (uur && uur !== '__anders__') ? uur : null, type, location: locatie || null,
         home_team_id: homeTeamId, away_team_id: awayTeamId,
       }).eq('id', wedstrijd.id)
       setOpslaan(false)
       if (error) { setFout('Opslaan mislukt: ' + error.message); return }
     } else {
       const { error } = await supabase.from('matches').insert({
-        season_id: seizoenId, date: datum, type, location: locatie || null,
+        season_id: seizoenId, date: datum, time: (uur && uur !== '__anders__') ? uur : null, type, location: locatie || null,
         home_team_id: homeTeamId, away_team_id: awayTeamId,
         home_score: 0, away_score: 0,
       })
@@ -247,9 +248,37 @@ function NieuweWedstrijd({ seizoenId, zvkTeam, tegenstanders, wedstrijd, onSluit
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '150px' }}>
+          <div style={{ flex: 1, minWidth: '140px' }}>
             <label style={labelStijl}>Datum *</label>
             <input type="date" value={datum} onChange={e => setDatum(e.target.value)} required style={inputStijl} />
+          </div>
+          <div style={{ flexShrink: 0 }}>
+            <label style={labelStijl}>Uur</label>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              {['18:00', '19:00'].map(t => (
+                <button key={t} type="button" onClick={() => setUur(t)} style={{
+                  padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500',
+                  cursor: 'pointer', border: 'none',
+                  background: uur === t ? '#0f172a' : '#f1f5f9',
+                  color: uur === t ? 'white' : '#64748b',
+                }}>{t}u</button>
+              ))}
+              <button type="button" onClick={() => setUur(uur === '18:00' || uur === '19:00' || uur === '' ? '__anders__' : uur)} style={{
+                padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500',
+                cursor: 'pointer', border: 'none',
+                background: uur !== '18:00' && uur !== '19:00' && uur !== '' ? '#0f172a' : '#f1f5f9',
+                color: uur !== '18:00' && uur !== '19:00' && uur !== '' ? 'white' : '#64748b',
+              }}>Anders</button>
+              {uur !== '18:00' && uur !== '19:00' && uur !== '' && (
+                <input
+                  type="time"
+                  value={uur === '__anders__' ? '' : uur}
+                  onChange={e => setUur(e.target.value)}
+                  style={{ ...inputStijl, width: '110px', padding: '6px 10px' }}
+                  autoFocus
+                />
+              )}
+            </div>
           </div>
           <div style={{ flex: 2, minWidth: '180px' }}>
             <label style={labelStijl}>Tegenstander *</label>
@@ -259,8 +288,8 @@ function NieuweWedstrijd({ seizoenId, zvkTeam, tegenstanders, wedstrijd, onSluit
             </select>
           </div>
           <div style={{ flex: 2, minWidth: '180px' }}>
-            <label style={labelStijl}>Locatie (optioneel)</label>
-            <input type="text" value={locatie} onChange={e => setLocatie(e.target.value)} placeholder="bv. Sporthal De Brug" style={inputStijl} />
+            <label style={labelStijl}>Locatie</label>
+            <input type="text" value={locatie} onChange={e => setLocatie(e.target.value)} placeholder="De Voordijcker" style={inputStijl} />
           </div>
         </div>
 
@@ -429,7 +458,7 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
                   <input
                     type="number" min="0" value={zvkScore}
                     onChange={e => setZvkScore(parseInt(e.target.value) || 0)}
-                    style={{ ...inputStijl, width: '80px', textAlign: 'center', fontSize: '28px', fontWeight: '800', padding: '12px 8px' }}
+                    style={{ ...inputStijl, width: '80px', textAlign: 'center', fontSize: '28px', fontWeight: '800', padding: '12px 8px', height: 'auto' }}
                   />
                 </div>
                 <span style={{ fontSize: '24px', color: '#e2e8f0', marginTop: '22px' }}>–</span>
@@ -438,7 +467,7 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
                   <input
                     type="number" min="0" value={tegScore}
                     onChange={e => setTegScore(parseInt(e.target.value) || 0)}
-                    style={{ ...inputStijl, width: '80px', textAlign: 'center', fontSize: '28px', fontWeight: '800', padding: '12px 8px' }}
+                    style={{ ...inputStijl, width: '80px', textAlign: 'center', fontSize: '28px', fontWeight: '800', padding: '12px 8px', height: 'auto' }}
                   />
                 </div>
               </div>
@@ -593,6 +622,7 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, actief, onBewerken, on
               fontSize: '11px', fontWeight: '600', padding: '1px 7px', borderRadius: '10px',
               background: TYPE_COLORS[w.type]?.bg, color: TYPE_COLORS[w.type]?.color,
             }}>{TYPE_LABELS[w.type]}</span>
+            {w.time && <span style={{ fontSize: '11px', color: '#94a3b8' }}>🕐 {w.time.slice(0,5)}</span>}
             {w.location && <span style={{ fontSize: '11px', color: '#94a3b8' }}>📍 {w.location}</span>}
           </div>
         </div>
@@ -798,14 +828,14 @@ function AndereWedstrijd({ seizoenId, teams, wedstrijd, onSluiten, onOpgeslagen 
               <label style={{ ...labelStijl, textAlign: 'center' }}>{thuisTeam?.name ?? 'Thuis'}</label>
               <input type="number" min="0" value={thuisScore}
                 onChange={e => setThuisScore(parseInt(e.target.value) || 0)}
-                style={{ ...inputStijl, width: '64px', textAlign: 'center', fontSize: '20px', fontWeight: '700', padding: '8px 4px' }} />
+                style={{ ...inputStijl, width: '64px', textAlign: 'center', fontSize: '20px', fontWeight: '700', padding: '8px 4px', height: 'auto' }} />
             </div>
             <span style={{ fontSize: '18px', color: '#cbd5e1', paddingBottom: '10px' }}>–</span>
             <div style={{ textAlign: 'center' }}>
               <label style={{ ...labelStijl, textAlign: 'center' }}>{uitTeam?.name ?? 'Uit'}</label>
               <input type="number" min="0" value={uitScore}
                 onChange={e => setUitScore(parseInt(e.target.value) || 0)}
-                style={{ ...inputStijl, width: '64px', textAlign: 'center', fontSize: '20px', fontWeight: '700', padding: '8px 4px' }} />
+                style={{ ...inputStijl, width: '64px', textAlign: 'center', fontSize: '20px', fontWeight: '700', padding: '8px 4px', height: 'auto' }} />
             </div>
           </div>
 

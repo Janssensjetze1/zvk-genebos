@@ -47,7 +47,7 @@ export default function PWASpelers() {
           value={zoek} onChange={e => setZoek(e.target.value)}
           placeholder="Zoek speler..."
           style={{
-            width: '100%', padding: '12px 14px 12px 42px', fontSize: '15px',
+            width: '100%', padding: '0 14px 0 42px', height: '44px', fontSize: '15px',
             border: '1.5px solid #e2e8f0', borderRadius: '12px', outline: 'none',
             background: 'white', boxSizing: 'border-box', color: '#0f172a',
           }}

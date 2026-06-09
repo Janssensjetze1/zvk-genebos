@@ -37,9 +37,33 @@ body {
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
-/* Inputs — donker thema */
-input, select, textarea {
-  color-scheme: dark;
+/* Consistente inputhoogte doorheen de app */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select {
+  height: 40px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #0f172a;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+  color-scheme: light;
+}
+
+textarea {
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #0f172a;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+  color-scheme: light;
 }
 
 /* Geen blauwe highlight op mobile tap */
