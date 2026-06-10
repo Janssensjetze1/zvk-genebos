@@ -1,40 +1,61 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { BADGES, berekenBadges, CATEGORIE_VOLGORDE, CAT } from '../data/badges'
 
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
 
-const CAT = {
-  brons:     { ro: '#e8a87c', ri: '#9a5c1a', rc: '#fff3e0', label: 'Brons',     lb: '#fff7ed', lc: '#c2410c', lbo: '#fed7aa' },
-  zilver:    { ro: '#cfd8dc', ri: '#546e7a', rc: '#eceff1', label: 'Zilver',    lb: '#f8fafc', lc: '#475569', lbo: '#cbd5e1' },
-  goud:      { ro: '#ffe082', ri: '#b06c00', rc: '#fff8e1', label: 'Goud',      lb: '#fefce8', lc: '#a16207', lbo: '#fde68a' },
-  legendary: { ro: '#a78bfa', ri: '#4c1d95', rc: '#ede9fe', label: 'Legendary', lb: '#faf5ff', lc: '#7c3aed', lbo: '#ddd6fe' },
-  geheim:    { ro: '#334155', ri: '#0f172a', rc: '#1e293b', label: '???',       lb: '#0f172a', lc: '#94a3b8', lbo: '#1e293b' },
+// ── Stats berekenen ─────────────────────────────────────────────────────────
+function computeStats({ goalsArr, assistsArr, matchesArr, seizoenId, userCreatedAt }) {
+  const goalsByMatch   = {}
+  const assistsByMatch = {}
+
+  goalsArr.forEach(g => {
+    if (g.match_id) goalsByMatch[g.match_id] = (goalsByMatch[g.match_id] || 0) + 1
+  })
+  assistsArr.forEach(a => {
+    if (a.match_id) assistsByMatch[a.match_id] = (assistsByMatch[a.match_id] || 0) + 1
+  })
+
+  const hattrickMatchIds = Object.entries(goalsByMatch)
+    .filter(([, n]) => n >= 3).map(([id]) => id)
+
+  const goalMatchSet   = new Set(Object.keys(goalsByMatch))
+  const assistMatchSet = new Set(Object.keys(assistsByMatch))
+
+  return {
+    aantalGoals:       goalsArr.length,
+    aantalAssists:     assistsArr.length,
+    aantalWedstrijden: matchesArr.length,
+
+    seizoenGoals: goalsArr.filter(g => g.match?.season_id === seizoenId).length,
+
+    hattricks:             hattrickMatchIds.length,
+    maxGoalsInWedstrijd:   Math.max(0, ...Object.values(goalsByMatch)),
+    maxAssistsInWedstrijd: Math.max(0, ...Object.values(assistsByMatch)),
+
+    hattrickMetAssist:          hattrickMatchIds.filter(id => assistsByMatch[id] >= 1).length,
+    wedstrijdenMetGoalEnAssist: [...goalMatchSet].filter(id => assistMatchSet.has(id)).length,
+
+    seizoenenMetGoal: new Set(goalsArr.map(g => g.match?.season_id).filter(Boolean)).size,
+    aantalSeizoenen:  new Set(matchesArr.map(m => m.match?.season_id).filter(Boolean)).size,
+
+    accountLeeftijdDagen: userCreatedAt
+      ? Math.floor((Date.now() - new Date(userCreatedAt).getTime()) / 86400000)
+      : 0,
+
+    nooitGespeeld: matchesArr.length === 0 &&
+      (userCreatedAt
+        ? Math.floor((Date.now() - new Date(userCreatedAt).getTime()) / 86400000)
+        : 0) >= 60,
+
+    aantalWedstrijdenRij: 0, maxWedstrijdenRij: 0,
+    seizonenVolledigAanwezig: 0, topScorerSeizoenen: 0,
+    grootsteWinstMarge: 0, nachtbraker: false, gewonnenOpVerjaardag: false,
+  }
 }
 
-// Preview badges — conditie gebaseerd op speler stats
-const BADGES = [
-  {
-    id: 'welkom',
-    emoji: '🔐',
-    naam: 'Welkom',
-    beschrijving: 'Eerste wedstrijd gespeeld voor ZVK Genebos.',
-    categorie: 'brons',
-    conditieTekst: 'Verdiend bij je eerste match.',
-    conditie: (s) => s.aantalWedstrijden >= 1,
-  },
-  {
-    id: 'test_badge',
-    emoji: '🧪',
-    naam: 'Test badge',
-    beschrijving: 'Een badge die nog wacht om verdiend te worden.',
-    categorie: 'zilver',
-    conditieTekst: null,
-    conditie: () => false,
-  },
-]
-
-// ── Hex badge component ─────────────────────────────────────────────────────
-function BadgeHex({ emoji, categorie, size = 70, verdiend }) {
+// ── Hex badge ───────────────────────────────────────────────────────────────
+function BadgeHex({ emoji, categorie, size = 64, verdiend }) {
   const cat = CAT[categorie] ?? CAT.zilver
   const H  = Math.round(size * 1.155)
   const iW = Math.round(size * 0.8125)
@@ -82,8 +103,6 @@ function StatChip({ waarde, label, kleur, tekstkleur }) {
 function StatsTab({ stats }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
-
-      {/* Dit seizoen */}
       <div>
         <div style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>
           Dit seizoen
@@ -94,23 +113,17 @@ function StatsTab({ stats }) {
           <StatChip waarde={stats.seizoenMatches} label="Matchen" kleur="#f8fafc" tekstkleur="#475569" />
         </div>
       </div>
-
-      {/* Divider */}
       <div style={{ height: '1px', background: '#f1f5f9' }} />
-
-      {/* All-time */}
       <div>
         <div style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>
           All-time
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <StatChip waarde={stats.aantalGoals}     label="Goals"   kleur="#eff6ff" tekstkleur="#1d4ed8" />
-          <StatChip waarde={stats.aantalAssists}   label="Assists" kleur="#f0fdf4" tekstkleur="#15803d" />
+          <StatChip waarde={stats.aantalGoals}       label="Goals"   kleur="#eff6ff" tekstkleur="#1d4ed8" />
+          <StatChip waarde={stats.aantalAssists}     label="Assists" kleur="#f0fdf4" tekstkleur="#15803d" />
           <StatChip waarde={stats.aantalWedstrijden} label="Matchen" kleur="#f8fafc" tekstkleur="#475569" />
         </div>
       </div>
-
-      {/* Hattrick bonus */}
       {stats.hattricks > 0 && (
         <div style={{
           background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '14px',
@@ -118,12 +131,8 @@ function StatsTab({ stats }) {
         }}>
           <span style={{ fontSize: '22px', flexShrink: 0 }}>🔥</span>
           <div>
-            <div style={{ fontSize: '14px', fontWeight: '700', color: '#c2410c' }}>
-              {stats.hattricks}× Hattrick
-            </div>
-            <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
-              3+ goals in één wedstrijd gescoord
-            </div>
+            <div style={{ fontSize: '14px', fontWeight: '700', color: '#c2410c' }}>{stats.hattricks}× Hattrick</div>
+            <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>3+ goals in één wedstrijd</div>
           </div>
         </div>
       )}
@@ -132,101 +141,131 @@ function StatsTab({ stats }) {
 }
 
 // ── Badges tab ──────────────────────────────────────────────────────────────
-function BadgesTab({ badges, geselecteerdeBadge, setGeselecteerdeBadge }) {
+function BadgesTab({ badgesMetStatus, geselecteerdeBadge, setGeselecteerdeBadge }) {
+  const aantalVerdiend = badgesMetStatus.filter(b => b.verdiend).length
+
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-        {badges.map(badge => {
-          const cat = CAT[badge.categorie]
-          return (
-            <div
-              key={badge.id}
-              onClick={() => badge.verdiend && setGeselecteerdeBadge(badge)}
-              style={{
-                background: 'white', border: `1.5px solid ${badge.verdiend ? cat.lbo : '#e2e8f0'}`,
-                borderRadius: '16px', padding: '16px 12px 14px',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
-                cursor: badge.verdiend ? 'pointer' : 'default', position: 'relative',
-                transition: 'transform 0.12s',
-              }}
-              onPointerDown={e => badge.verdiend && (e.currentTarget.style.transform = 'scale(0.96)')}
-              onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
-              onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-            >
-              <div style={{
-                position: 'absolute', top: '8px', right: '8px',
-                width: '20px', height: '20px', borderRadius: '50%',
-                background: badge.verdiend ? '#dcfce7' : '#f1f5f9',
-                border: `1.5px solid ${badge.verdiend ? '#86efac' : '#e2e8f0'}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '10px', color: badge.verdiend ? '#16a34a' : undefined,
-              }}>
-                {badge.verdiend ? '✓' : '🔒'}
-              </div>
-
-              <BadgeHex emoji={badge.emoji} categorie={badge.categorie} size={72} verdiend={badge.verdiend} />
-
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '12px', fontWeight: '700', color: badge.verdiend ? '#0f172a' : '#94a3b8', marginBottom: '5px' }}>
-                  {badge.naam}
-                </div>
-                <span style={{
-                  fontSize: '10px', fontWeight: '600', padding: '2px 8px', borderRadius: '99px',
-                  background: badge.verdiend ? cat.lb : '#f1f5f9',
-                  color: badge.verdiend ? cat.lc : '#94a3b8',
-                  border: `1px solid ${badge.verdiend ? cat.lbo : '#e2e8f0'}`,
-                }}>
-                  {cat.label}
-                </span>
-              </div>
-            </div>
-          )
-        })}
+      {/* Voortgang */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+        <div style={{ flex: 1, height: '5px', background: '#f1f5f9', borderRadius: '99px', overflow: 'hidden' }}>
+          <div style={{
+            height: '100%',
+            width: `${(aantalVerdiend / BADGES.length) * 100}%`,
+            background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
+            borderRadius: '99px', transition: 'width 0.6s',
+          }} />
+        </div>
+        <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600', flexShrink: 0 }}>
+          {aantalVerdiend}/{BADGES.length}
+        </span>
       </div>
+
+      {/* Per categorie */}
+      {CATEGORIE_VOLGORDE.map((cat, catIdx) => {
+        const groep = badgesMetStatus.filter(b => b.categorie === cat)
+        if (groep.length === 0) return null
+        const catInfo = CAT[cat]
+        const verdiendInGroep = groep.filter(b => b.verdiend).length
+        return (
+          <div key={cat} style={{ marginBottom: '18px', marginTop: catIdx === 0 ? 0 : '4px' }}>
+            {/* Categorie header — horizontale scheidingslijn */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+              <span style={{
+                fontSize: '10px', fontWeight: '800', color: catInfo.lc,
+                textTransform: 'uppercase', letterSpacing: '0.1em', flexShrink: 0,
+              }}>
+                {catInfo.label}
+              </span>
+              <div style={{ flex: 1, height: '1px', background: catInfo.lbo }} />
+              <span style={{ fontSize: '10px', color: '#94a3b8', flexShrink: 0, fontWeight: '600' }}>
+                {verdiendInGroep}/{groep.length}
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+              {groep.map(badge => {
+                const c = CAT[badge.categorie]
+                const isGeheim = badge.categorie === 'geheim' && !badge.verdiend
+                const isSelected = geselecteerdeBadge?.id === badge.id
+                return (
+                  <div
+                    key={badge.id}
+                    onClick={() => badge.verdiend && setGeselecteerdeBadge(isSelected ? null : badge)}
+                    style={{
+                      background: 'white',
+                      border: `1.5px solid ${isSelected ? c.lc : badge.verdiend ? c.lbo : '#e2e8f0'}`,
+                      borderRadius: '11px', padding: '9px 5px 7px',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                      cursor: badge.verdiend ? 'pointer' : 'default',
+                      position: 'relative', transition: 'transform 0.1s',
+                    }}
+                    onPointerDown={e => badge.verdiend && (e.currentTarget.style.transform = 'scale(0.95)')}
+                    onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+                    onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                  >
+                    <div style={{
+                      position: 'absolute', top: '5px', right: '5px',
+                      width: '13px', height: '13px', borderRadius: '50%',
+                      background: badge.verdiend ? '#dcfce7' : '#f1f5f9',
+                      border: `1px solid ${badge.verdiend ? '#86efac' : '#e2e8f0'}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '7px', color: badge.verdiend ? '#16a34a' : undefined,
+                    }}>
+                      {badge.verdiend ? '✓' : '🔒'}
+                    </div>
+                    <BadgeHex emoji={badge.emoji} categorie={badge.categorie} size={42} verdiend={badge.verdiend} />
+                    <div style={{
+                      fontSize: '10px', fontWeight: '700', textAlign: 'center',
+                      color: badge.verdiend ? '#0f172a' : '#94a3b8', lineHeight: 1.3,
+                    }}>
+                      {isGeheim ? '???' : badge.naam}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
 
       {/* Badge detail inline */}
       {geselecteerdeBadge && (() => {
-        const badge = geselecteerdeBadge
-        const cat = CAT[badge.categorie]
+        const b = geselecteerdeBadge
+        const c = CAT[b.categorie]
         return (
           <div style={{
-            marginTop: '16px', background: 'white', border: `1.5px solid ${cat.lbo}`,
-            borderRadius: '16px', padding: '20px',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px',
+            marginTop: '8px',
+            background: 'white', border: `1.5px solid ${c.lbo}`,
+            borderRadius: '14px', padding: '18px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
           }}>
-            <BadgeHex emoji={badge.emoji} categorie={badge.categorie} size={80} verdiend />
+            <BadgeHex emoji={b.emoji} categorie={b.categorie} size={72} verdiend />
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', marginBottom: '8px' }}>{badge.naam}</div>
-              <p style={{ fontSize: '13px', color: '#64748b', margin: 0, lineHeight: 1.6 }}>{badge.beschrijving}</p>
+              <div style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>{b.naam}</div>
+              <p style={{ fontSize: '12px', color: '#64748b', margin: 0, lineHeight: 1.6 }}>{b.beschrijving}</p>
             </div>
             <div style={{
               width: '100%', background: '#f0fdf4', border: '1px solid #bbf7d0',
-              borderRadius: '12px', padding: '12px 14px',
-              display: 'flex', alignItems: 'center', gap: '10px',
+              borderRadius: '10px', padding: '10px 12px',
+              display: 'flex', alignItems: 'center', gap: '8px',
             }}>
               <div style={{
-                width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0,
+                width: '22px', height: '22px', borderRadius: '50%', flexShrink: 0,
                 background: '#dcfce7', border: '1.5px solid #86efac',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '12px', color: '#16a34a', fontWeight: '700',
+                fontSize: '10px', color: '#16a34a', fontWeight: '700',
               }}>✓</div>
-              <div>
-                <div style={{ fontSize: '12px', fontWeight: '700', color: '#166534' }}>Verdiend!</div>
-                {badge.conditieTekst && (
-                  <div style={{ fontSize: '11px', color: '#4ade80', marginTop: '2px' }}>{badge.conditieTekst}</div>
-                )}
-              </div>
+              <div style={{ fontSize: '12px', fontWeight: '700', color: '#166534' }}>Verdiend!</div>
             </div>
             <button
               onClick={() => setGeselecteerdeBadge(null)}
               style={{
                 background: '#f1f5f9', border: 'none', borderRadius: '10px',
-                padding: '8px 20px', fontSize: '13px', fontWeight: '600',
+                padding: '7px 20px', fontSize: '12px', fontWeight: '600',
                 color: '#475569', cursor: 'pointer',
               }}
-            >
-              Sluiten
-            </button>
+            >Sluiten</button>
           </div>
         )
       })()}
@@ -235,11 +274,10 @@ function BadgesTab({ badges, geselecteerdeBadge, setGeselecteerdeBadge }) {
 }
 
 // ── Hoofd component ─────────────────────────────────────────────────────────
-// variant: 'sheet' (bottom sheet, PWA) | 'modal' (centered modal, desktop)
 export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sheet' }) {
   const [tab, setTab] = useState('stats')
-  const [stats, setStats] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [rawStats, setRawStats]     = useState(null)
+  const [loading, setLoading]       = useState(true)
   const [geselecteerdeBadge, setGeselecteerdeBadge] = useState(null)
 
   useEffect(() => {
@@ -261,37 +299,26 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
     ])
 
     const goalsArr   = goalsRes.data   ?? []
-    const assistArr  = assistsRes.data  ?? []
+    const assistsArr = assistsRes.data  ?? []
     const matchesArr = matchesRes.data  ?? []
 
-    // Hattricks: groepeer goals per match
-    const goalsByMatch = {}
-    goalsArr.forEach(g => {
-      if (g.match_id) goalsByMatch[g.match_id] = (goalsByMatch[g.match_id] || 0) + 1
-    })
-    const hattricks = Object.values(goalsByMatch).filter(n => n >= 3).length
-    const maxGoalsInWedstrijd = Math.max(0, ...Object.values(goalsByMatch))
+    // Seizoen-specifieke stats
+    const seizoenGoals   = goalsArr.filter(g => g.match?.season_id === seizoenId).length
+    const seizoenAssists = assistsArr.filter(a => a.match?.season_id === seizoenId).length
+    const seizoenMatches = matchesArr.filter(m => m.match?.season_id === seizoenId).length
 
-    setStats({
-      // All-time
-      aantalGoals:       goalsArr.length,
-      aantalAssists:     assistArr.length,
-      aantalWedstrijden: matchesArr.length,
-      // Dit seizoen
-      seizoenGoals:   goalsArr.filter(g => g.match?.season_id === seizoenId).length,
-      seizoenAssists: assistArr.filter(g => g.match?.season_id === seizoenId).length,
-      seizoenMatches: matchesArr.filter(m => m.match?.season_id === seizoenId).length,
-      // Badges
-      hattricks,
-      maxGoalsInWedstrijd,
-    })
+    const computed = computeStats({ goalsArr, assistsArr, matchesArr, seizoenId })
+
+    setRawStats({ ...computed, seizoenGoals, seizoenAssists, seizoenMatches })
     setLoading(false)
   }
 
-  const badgesMetStatus = BADGES.map(b => ({
-    ...b,
-    verdiend: stats ? b.conditie(stats) : false,
-  }))
+  const badgesMetStatus = rawStats
+    ? BADGES.map(b => ({
+        ...b,
+        verdiend: (() => { try { return b.conditie(rawStats) } catch { return false } })(),
+      }))
+    : BADGES.map(b => ({ ...b, verdiend: false }))
 
   // ── Gedeelde blokken ────────────────────────────────────────────────────
   const spelerHeader = (
@@ -357,12 +384,16 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
       <span style={{ fontSize: '13px', color: '#94a3b8' }}>Stats laden...</span>
     </div>
   ) : tab === 'stats' ? (
-    <StatsTab stats={stats} />
+    <StatsTab stats={rawStats} />
   ) : (
-    <BadgesTab badges={badgesMetStatus} geselecteerdeBadge={geselecteerdeBadge} setGeselecteerdeBadge={setGeselecteerdeBadge} />
+    <BadgesTab
+      badgesMetStatus={badgesMetStatus}
+      geselecteerdeBadge={geselecteerdeBadge}
+      setGeselecteerdeBadge={setGeselecteerdeBadge}
+    />
   )
 
-  // ── Bottom sheet (PWA) ──────────────────────────────────────────────────
+  // ── Bottom sheet ────────────────────────────────────────────────────────
   if (variant === 'sheet') {
     return (
       <>
@@ -373,14 +404,12 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
           maxHeight: '90vh', display: 'flex', flexDirection: 'column',
           boxShadow: '0 -12px 48px rgba(0,0,0,0.25)',
         }}>
-          {/* Handle + header + tabs */}
           <div style={{ padding: '12px 24px 0', flexShrink: 0 }}>
             <div style={{ width: '36px', height: '4px', background: '#e2e8f0', borderRadius: '2px', margin: '0 auto 20px' }} />
             {spelerHeader}
             {tabBar}
             <div style={{ height: '20px' }} />
           </div>
-          {/* Scrollbaar inhoudsgebied */}
           <div style={{ overflow: 'auto', flex: 1, padding: '0 24px calc(env(safe-area-inset-bottom) + 40px)' }}>
             {inhoud}
           </div>
@@ -389,13 +418,13 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
     )
   }
 
-  // ── Modal (desktop) ─────────────────────────────────────────────────────
+  // ── Modal ───────────────────────────────────────────────────────────────
   return (
     <>
-      <div
-        onClick={onClose}
-        style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
-      />
+      <div onClick={onClose} style={{
+        position: 'fixed', inset: 0, zIndex: 300,
+        background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+      }} />
       <div style={{
         position: 'fixed', top: '50%', left: '50%', zIndex: 301,
         transform: 'translate(-50%, -50%)',
@@ -404,7 +433,6 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
         maxHeight: '85vh', display: 'flex', flexDirection: 'column',
         boxShadow: '0 24px 64px rgba(0,0,0,0.18)',
       }}>
-        {/* Sluitknop */}
         <button
           onClick={onClose}
           style={{
@@ -417,7 +445,6 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
           onMouseEnter={e => (e.currentTarget.style.background = '#e2e8f0')}
           onMouseLeave={e => (e.currentTarget.style.background = '#f1f5f9')}
         >✕</button>
-
         <div style={{ padding: '28px 28px 0', flexShrink: 0 }}>
           {spelerHeader}
           {tabBar}

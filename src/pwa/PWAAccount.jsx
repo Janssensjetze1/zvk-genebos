@@ -1,39 +1,65 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useSeason } from '../context/SeasonContext'
 import { supabase } from '../lib/supabase'
+import { BADGES, berekenBadges, CATEGORIE_VOLGORDE, CAT } from '../data/badges'
 
-// ── Badge rendering ─────────────────────────────────────────────────────────
+// ── Hex clip-path ───────────────────────────────────────────────────────────
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
 
-const CAT = {
-  brons:     { ro: '#e8a87c', ri: '#9a5c1a', rc: '#fff3e0', label: 'Brons',     lb: '#fff7ed', lc: '#c2410c', lbo: '#fed7aa' },
-  zilver:    { ro: '#cfd8dc', ri: '#546e7a', rc: '#eceff1', label: 'Zilver',    lb: '#f8fafc', lc: '#475569', lbo: '#cbd5e1' },
-  goud:      { ro: '#ffe082', ri: '#b06c00', rc: '#fff8e1', label: 'Goud',      lb: '#fefce8', lc: '#a16207', lbo: '#fde68a' },
-  legendary: { ro: '#a78bfa', ri: '#4c1d95', rc: '#ede9fe', label: 'Legendary', lb: '#faf5ff', lc: '#7c3aed', lbo: '#ddd6fe' },
-  geheim:    { ro: '#334155', ri: '#0f172a', rc: '#1e293b', label: '???',       lb: '#0f172a', lc: '#94a3b8', lbo: '#1e293b' },
+// ── Stats berekenen uit ruwe Supabase data ──────────────────────────────────
+function computeStats({ goalsArr, assistsArr, matchesArr, seizoenId, userCreatedAt }) {
+  const goalsByMatch   = {}
+  const assistsByMatch = {}
+
+  goalsArr.forEach(g => {
+    if (g.match_id) goalsByMatch[g.match_id] = (goalsByMatch[g.match_id] || 0) + 1
+  })
+  assistsArr.forEach(a => {
+    if (a.match_id) assistsByMatch[a.match_id] = (assistsByMatch[a.match_id] || 0) + 1
+  })
+
+  const hattrickMatchIds = Object.entries(goalsByMatch)
+    .filter(([, n]) => n >= 3).map(([id]) => id)
+
+  const goalMatchSet   = new Set(Object.keys(goalsByMatch))
+  const assistMatchSet = new Set(Object.keys(assistsByMatch))
+
+  return {
+    aantalGoals:       goalsArr.length,
+    aantalAssists:     assistsArr.length,
+    aantalWedstrijden: matchesArr.length,
+
+    seizoenGoals:   goalsArr.filter(g => g.match?.season_id === seizoenId).length,
+
+    hattricks:           hattrickMatchIds.length,
+    maxGoalsInWedstrijd: Math.max(0, ...Object.values(goalsByMatch)),
+    maxAssistsInWedstrijd: Math.max(0, ...Object.values(assistsByMatch)),
+
+    hattrickMetAssist: hattrickMatchIds.filter(id => assistsByMatch[id] >= 1).length,
+    wedstrijdenMetGoalEnAssist: [...goalMatchSet].filter(id => assistMatchSet.has(id)).length,
+
+    seizoenenMetGoal: new Set(goalsArr.map(g => g.match?.season_id).filter(Boolean)).size,
+    aantalSeizoenen:  new Set(matchesArr.map(m => m.match?.season_id).filter(Boolean)).size,
+
+    accountLeeftijdDagen: userCreatedAt
+      ? Math.floor((Date.now() - new Date(userCreatedAt).getTime()) / 86400000)
+      : 0,
+
+    // Spook badge: enkel als account minstens 60 dagen oud is én nooit gespeeld
+    nooitGespeeld: matchesArr.length === 0 &&
+      (userCreatedAt
+        ? Math.floor((Date.now() - new Date(userCreatedAt).getTime()) / 86400000)
+        : 0) >= 60,
+
+    // Nog niet berekenbaar zonder extra queries:
+    aantalWedstrijdenRij: 0, maxWedstrijdenRij: 0,
+    seizonenVolledigAanwezig: 0, topScorerSeizoenen: 0,
+    grootsteWinstMarge: 0, nachtbraker: false, gewonnenOpVerjaardag: false,
+  }
 }
 
-const BADGES = [
-  {
-    id: 'welkom',
-    emoji: '🔐',
-    naam: 'Welkom',
-    beschrijving: 'Je bent ingelogd bij ZVK Genebos. Welkom in de club!',
-    categorie: 'brons',
-    conditieTekst: 'Verdiend bij je eerste aanmelding.',
-    conditie: () => true,
-  },
-  {
-    id: 'test_badge',
-    emoji: '🧪',
-    naam: 'Test badge',
-    beschrijving: 'Een badge die nog wacht om verdiend te worden.',
-    categorie: 'zilver',
-    conditieTekst: null,
-    conditie: () => false,
-  },
-]
-
+// ── Hex badge component ─────────────────────────────────────────────────────
 function BadgeHex({ emoji, categorie, size = 72, verdiend }) {
   const cat = CAT[categorie] ?? CAT.zilver
   const H  = Math.round(size * 1.155)
@@ -67,43 +93,46 @@ function BadgeHex({ emoji, categorie, size = 72, verdiend }) {
   )
 }
 
-// ── Input stijl hulpfunctie ─────────────────────────────────────────────────
+// ── Input stijl ─────────────────────────────────────────────────────────────
 const inputStijl = (dirty) => ({
   flex: 1, border: 'none', outline: 'none',
   fontSize: '14px', background: 'transparent',
   color: dirty ? '#1d4ed8' : '#0f172a',
   fontWeight: dirty ? '500' : '400',
-  padding: '0', textAlign: 'right',
-  fontFamily: 'inherit',
+  padding: '0', textAlign: 'right', fontFamily: 'inherit',
 })
 
 // ── Hoofd component ─────────────────────────────────────────────────────────
 export default function PWAAccount() {
   const { user, profile, patchProfile, signOut } = useAuth()
+  const { actief: seizoen } = useSeason()
   const fotoInputRef = useRef(null)
 
   const [tab, setTab] = useState('badges')
 
-  // Form state
-  const [speler, setSpeler]       = useState(null)
-  const [naam, setNaam]           = useState('')
-  const [origNaam, setOrigNaam]   = useState('')
-  const [bijnaam, setBijnaam]     = useState('')
+  // Settings state
+  const [speler, setSpeler]           = useState(null)
+  const [naam, setNaam]               = useState('')
+  const [origNaam, setOrigNaam]       = useState('')
+  const [bijnaam, setBijnaam]         = useState('')
   const [origBijnaam, setOrigBijnaam] = useState('')
-  const [gebdatum, setGebdatum]   = useState('')
+  const [gebdatum, setGebdatum]       = useState('')
   const [origGebdatum, setOrigGebdatum] = useState('')
-  const [email, setEmail]         = useState(user?.email ?? '')
-  const [origEmail]               = useState(user?.email ?? '')
-  const [nieuwPw, setNieuwPw]     = useState('')
-  const [bevestigPw, setBevestigPw] = useState('')
-  const [toonPw, setToonPw]       = useState(false)
-  const [pwExpanded, setPwExpanded] = useState(false)
+  const [email, setEmail]             = useState(user?.email ?? '')
+  const [origEmail]                   = useState(user?.email ?? '')
+  const [nieuwPw, setNieuwPw]         = useState('')
+  const [bevestigPw, setBevestigPw]   = useState('')
+  const [toonPw, setToonPw]           = useState(false)
+  const [pwExpanded, setPwExpanded]   = useState(false)
   const [fotoBestand, setFotoBestand] = useState(null)
   const [fotoPreview, setFotoPreview] = useState(null)
-  const [bezig, setBezig]         = useState(false)
-  const [bericht, setBericht]     = useState(null)
+  const [bezig, setBezig]             = useState(false)
+  const [bericht, setBericht]         = useState(null)
 
-  // Badge detail state
+  // Badge state
+  const [badgesLoading, setBadgesLoading] = useState(false)
+  const [badgeStats, setBadgeStats]       = useState(null)
+  const [dbBadgeIds, setDbBadgeIds]       = useState(new Set())
   const [geselecteerdeBadge, setGeselecteerdeBadge] = useState(null)
 
   useEffect(() => {
@@ -113,17 +142,53 @@ export default function PWAAccount() {
     setBijnaam(b); setOrigBijnaam(b)
     const g = profile?.birth_date ?? ''
     setGebdatum(g); setOrigGebdatum(g)
-    if (profile?.player_id) fetchSpeler(profile.player_id)
+    if (profile?.player_id) {
+      fetchSpeler(profile.player_id)
+      fetchBadgeData(profile.player_id)
+    }
   }, [profile?.player_id, profile?.display_name])
 
   async function fetchSpeler(id) {
     const { data } = await supabase.from('players').select('*').eq('id', id).single()
     if (data) {
       setSpeler(data)
-      setNaam(data.name);       setOrigNaam(data.name)
+      setNaam(data.name);         setOrigNaam(data.name)
       setBijnaam(data.nickname ?? ''); setOrigBijnaam(data.nickname ?? '')
       setGebdatum(data.birth_date ?? ''); setOrigGebdatum(data.birth_date ?? '')
     }
+  }
+
+  async function fetchBadgeData(playerId) {
+    setBadgesLoading(true)
+    const [goalsRes, assistsRes, matchesRes, dbRes] = await Promise.all([
+      supabase.from('goals')
+        .select('id, match_id, match:match_id(season_id)')
+        .eq('scorer_id', playerId),
+      supabase.from('goals')
+        .select('id, match_id, match:match_id(season_id)')
+        .eq('assist_id', playerId),
+      supabase.from('match_players')
+        .select('match_id, match:match_id(season_id)')
+        .eq('player_id', playerId),
+      supabase.from('player_badges')
+        .select('badge_id')
+        .eq('player_id', playerId),
+    ])
+
+    const stats = computeStats({
+      goalsArr:    goalsRes.data   ?? [],
+      assistsArr:  assistsRes.data  ?? [],
+      matchesArr:  matchesRes.data  ?? [],
+      seizoenId:   seizoen?.id,
+      userCreatedAt: user?.created_at,
+    })
+    setBadgeStats(stats)
+
+    // DB badges (tabel bestaat mogelijk nog niet → fout negeren)
+    const ids = (dbRes.data ?? []).map(r => r.badge_id)
+    setDbBadgeIds(new Set(ids))
+
+    setBadgesLoading(false)
   }
 
   function handleFotoKiezen(e) {
@@ -135,12 +200,12 @@ export default function PWAAccount() {
     reader.readAsDataURL(bestand)
   }
 
-  const naamDirty      = naam !== origNaam || !!fotoBestand
-  const bijnaamDirty   = bijnaam !== origBijnaam
-  const gebdatumDirty  = gebdatum !== origGebdatum
-  const emailDirty     = email !== origEmail
-  const pwDirty        = nieuwPw.length > 0
-  const isDirty        = naamDirty || bijnaamDirty || gebdatumDirty || emailDirty || pwDirty
+  const naamDirty     = naam !== origNaam || !!fotoBestand
+  const bijnaamDirty  = bijnaam !== origBijnaam
+  const gebdatumDirty = gebdatum !== origGebdatum
+  const emailDirty    = email !== origEmail
+  const pwDirty       = nieuwPw.length > 0
+  const isDirty       = naamDirty || bijnaamDirty || gebdatumDirty || emailDirty || pwDirty
 
   async function handleOpslaan() {
     setBericht(null); setBezig(true)
@@ -149,10 +214,7 @@ export default function PWAAccount() {
         let photo_url = speler?.photo_url ?? profile?.avatar_url ?? null
         if (fotoBestand) {
           const ext = fotoBestand.name.split('.').pop()
-          const { error: uf } = await supabase.storage
-            .from('player-photos')
-            .upload(`${Date.now()}.${ext}`, fotoBestand, { upsert: true })
-          if (uf) throw new Error('Foto uploaden mislukt.')
+          await supabase.storage.from('player-photos').upload(`${Date.now()}.${ext}`, fotoBestand, { upsert: true })
           const { data: urlData } = supabase.storage.from('player-photos').getPublicUrl(`${Date.now()}.${ext}`)
           photo_url = urlData.publicUrl
         }
@@ -181,9 +243,17 @@ export default function PWAAccount() {
     setBezig(false)
   }
 
-  const fotoSrc     = fotoPreview ?? speler?.photo_url ?? profile?.avatar_url ?? null
+  const fotoSrc      = fotoPreview ?? speler?.photo_url ?? profile?.avatar_url ?? null
   const weergaveNaam = naam || profile?.display_name || user?.email?.split('@')[0] || '?'
-  const badgesMetStatus = BADGES.map(b => ({ ...b, verdiend: b.conditie() }))
+
+  // Badge earned check: stats-conditie OF in DB
+  const badgesMetStatus = badgeStats
+    ? BADGES.map(b => ({
+        ...b,
+        verdiend: dbBadgeIds.has(b.id) || (() => { try { return b.conditie(badgeStats) } catch { return false } })(),
+      }))
+    : BADGES.map(b => ({ ...b, verdiend: false }))
+
   const aantalVerdiend = badgesMetStatus.filter(b => b.verdiend).length
 
   return (
@@ -195,7 +265,6 @@ export default function PWAAccount() {
         padding: '28px 20px 22px',
         display: 'flex', alignItems: 'center', gap: '16px',
       }}>
-        {/* Avatar */}
         <div
           onClick={() => fotoInputRef.current?.click()}
           style={{
@@ -222,17 +291,16 @@ export default function PWAAccount() {
           <input ref={fotoInputRef} type="file" accept="image/*" onChange={handleFotoKiezen} style={{ display: 'none' }} />
         </div>
 
-        {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: '18px', fontWeight: '700', color: 'white', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {weergaveNaam}
           </div>
           {bijnaam && (
-            <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', marginBottom: '3px' }}>
+            <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', fontStyle: 'italic', marginBottom: '3px' }}>
               "{bijnaam}"
             </div>
           )}
-          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {user?.email}
           </div>
           {fotoPreview && (
@@ -240,11 +308,12 @@ export default function PWAAccount() {
           )}
         </div>
 
-        {/* Badge teller */}
-        <div style={{ flexShrink: 0, textAlign: 'center' }}>
-          <div style={{ fontSize: '20px', fontWeight: '800', color: 'white', lineHeight: 1 }}>{aantalVerdiend}</div>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>badges</div>
-        </div>
+        {profile?.player_id && (
+          <div style={{ flexShrink: 0, textAlign: 'center' }}>
+            <div style={{ fontSize: '22px', fontWeight: '800', color: 'white', lineHeight: 1 }}>{aantalVerdiend}</div>
+            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', marginTop: '2px' }}>badges</div>
+          </div>
+        )}
       </div>
 
       {/* ── Tab bar ── */}
@@ -255,7 +324,7 @@ export default function PWAAccount() {
           margin: '16px 0',
         }}>
           {[
-            { id: 'badges', label: '🏅 Badges' },
+            { id: 'badges',       label: '🏅 Badges' },
             { id: 'instellingen', label: '⚙️ Instellingen' },
           ].map(t => (
             <button
@@ -280,114 +349,160 @@ export default function PWAAccount() {
       {/* ── Tab: Badges ── */}
       {tab === 'badges' && (
         <div style={{ padding: '0 16px' }}>
-          {/* Progress */}
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '14px',
-            marginBottom: '16px',
-          }}>
-            <div style={{ flex: 1, height: '6px', background: '#e2e8f0', borderRadius: '99px', overflow: 'hidden' }}>
-              <div style={{
-                height: '100%',
-                width: `${(aantalVerdiend / BADGES.length) * 100}%`,
-                background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
-                borderRadius: '99px', transition: 'width 0.6s ease',
-              }} />
-            </div>
-            <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', flexShrink: 0 }}>
-              {aantalVerdiend}/{BADGES.length} verdiend
-            </div>
-          </div>
 
-          {/* Badge grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-            {badgesMetStatus.map(badge => {
-              const cat = CAT[badge.categorie]
-              return (
-                <div
-                  key={badge.id}
-                  onClick={() => badge.verdiend && setGeselecteerdeBadge(badge)}
-                  style={{
-                    background: 'white',
-                    border: `1.5px solid ${badge.verdiend ? cat.lbo : '#e2e8f0'}`,
-                    borderRadius: '16px', padding: '18px 12px 14px',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
-                    cursor: badge.verdiend ? 'pointer' : 'default', position: 'relative',
-                  }}
-                  onPointerDown={e => badge.verdiend && (e.currentTarget.style.transform = 'scale(0.96)')}
-                  onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
-                  onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-                >
-                  <div style={{
-                    position: 'absolute', top: '8px', right: '8px',
-                    width: '20px', height: '20px', borderRadius: '50%',
-                    background: badge.verdiend ? '#dcfce7' : '#f1f5f9',
-                    border: `1.5px solid ${badge.verdiend ? '#86efac' : '#e2e8f0'}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '10px', color: badge.verdiend ? '#16a34a' : undefined,
-                  }}>
-                    {badge.verdiend ? '✓' : '🔒'}
-                  </div>
-                  <BadgeHex emoji={badge.emoji} categorie={badge.categorie} size={72} verdiend={badge.verdiend} />
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '12px', fontWeight: '700', color: badge.verdiend ? '#0f172a' : '#94a3b8', marginBottom: '5px' }}>
-                      {badge.naam}
-                    </div>
-                    <span style={{
-                      fontSize: '10px', fontWeight: '600', padding: '2px 8px', borderRadius: '99px',
-                      background: badge.verdiend ? cat.lb : '#f1f5f9',
-                      color: badge.verdiend ? cat.lc : '#94a3b8',
-                      border: `1px solid ${badge.verdiend ? cat.lbo : '#e2e8f0'}`,
-                    }}>
-                      {cat.label}
-                    </span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Badge detail sheet */}
-          {geselecteerdeBadge && (() => {
-            const b = geselecteerdeBadge
-            const cat = CAT[b.categorie]
-            return (
-              <div style={{
-                marginTop: '16px', background: 'white',
-                border: `1.5px solid ${cat.lbo}`, borderRadius: '18px',
-                padding: '22px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px',
-              }}>
-                <BadgeHex emoji={b.emoji} categorie={b.categorie} size={80} verdiend />
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '17px', fontWeight: '800', color: '#0f172a', marginBottom: '8px' }}>{b.naam}</div>
-                  <p style={{ fontSize: '13px', color: '#64748b', margin: 0, lineHeight: 1.6 }}>{b.beschrijving}</p>
-                </div>
-                <div style={{
-                  width: '100%', background: '#f0fdf4', border: '1px solid #bbf7d0',
-                  borderRadius: '12px', padding: '12px 14px',
-                  display: 'flex', alignItems: 'center', gap: '10px',
-                }}>
-                  <div style={{
-                    width: '26px', height: '26px', borderRadius: '50%', flexShrink: 0,
-                    background: '#dcfce7', border: '1.5px solid #86efac',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '11px', color: '#16a34a', fontWeight: '700',
-                  }}>✓</div>
-                  <div>
-                    <div style={{ fontSize: '12px', fontWeight: '700', color: '#166534' }}>Verdiend!</div>
-                    {b.conditieTekst && <div style={{ fontSize: '11px', color: '#4ade80', marginTop: '2px' }}>{b.conditieTekst}</div>}
-                  </div>
-                </div>
-                <button
-                  onClick={() => setGeselecteerdeBadge(null)}
-                  style={{
-                    background: '#f1f5f9', border: 'none', borderRadius: '10px',
-                    padding: '8px 22px', fontSize: '13px', fontWeight: '600',
-                    color: '#475569', cursor: 'pointer',
-                  }}
-                >Sluiten</button>
+          {/* Geen spelersfiche gekoppeld */}
+          {!profile?.player_id ? (
+            <div style={{
+              background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px',
+              padding: '32px 24px', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '40px', marginBottom: '14px' }}>🔗</div>
+              <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>
+                Geen spelersfiche gekoppeld
               </div>
-            )
-          })()}
+              <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
+                Je account is nog niet gekoppeld aan een spelersfiche. Een admin doet dit.
+                Pas dan worden jouw badges berekend.
+              </p>
+            </div>
+          ) : badgesLoading ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 0', gap: '12px' }}>
+              <div style={{ width: '22px', height: '22px', border: '2.5px solid #e2e8f0', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+              <span style={{ fontSize: '13px', color: '#94a3b8' }}>Badges berekenen...</span>
+            </div>
+          ) : (
+            <>
+              {/* Voortgangsbalk */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                <div style={{ flex: 1, height: '6px', background: '#e2e8f0', borderRadius: '99px', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${(aantalVerdiend / BADGES.length) * 100}%`,
+                    background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
+                    borderRadius: '99px', transition: 'width 0.6s ease',
+                  }} />
+                </div>
+                <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', flexShrink: 0 }}>
+                  {aantalVerdiend}/{BADGES.length}
+                </span>
+              </div>
+
+              {/* Badges per categorie */}
+              {CATEGORIE_VOLGORDE.map((cat, catIdx) => {
+                const groep = badgesMetStatus.filter(b => b.categorie === cat)
+                if (groep.length === 0) return null
+                const catInfo = CAT[cat]
+                const verdiendInGroep = groep.filter(b => b.verdiend).length
+                return (
+                  <div key={cat} style={{ marginBottom: '20px', marginTop: catIdx === 0 ? 0 : '4px' }}>
+                    {/* Categorie header — horizontale scheidingslijn */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                      <span style={{
+                        fontSize: '11px', fontWeight: '800', color: catInfo.lc,
+                        textTransform: 'uppercase', letterSpacing: '0.1em', flexShrink: 0,
+                      }}>
+                        {catInfo.label}
+                      </span>
+                      <div style={{ flex: 1, height: '1px', background: catInfo.lbo }} />
+                      <span style={{ fontSize: '10px', color: '#94a3b8', flexShrink: 0, fontWeight: '600' }}>
+                        {verdiendInGroep}/{groep.length}
+                      </span>
+                    </div>
+
+                    {/* 3-koloms grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '7px' }}>
+                      {groep.map(badge => {
+                        const c = CAT[badge.categorie]
+                        const isGeheim = badge.categorie === 'geheim' && !badge.verdiend
+                        return (
+                          <div
+                            key={badge.id}
+                            onClick={() => badge.verdiend && setGeselecteerdeBadge(
+                              geselecteerdeBadge?.id === badge.id ? null : badge
+                            )}
+                            style={{
+                              background: 'white',
+                              border: `1.5px solid ${badge.verdiend ? c.lbo : '#e2e8f0'}`,
+                              borderRadius: '12px', padding: '10px 6px 8px',
+                              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                              cursor: badge.verdiend ? 'pointer' : 'default',
+                              position: 'relative',
+                              transition: 'transform 0.1s',
+                            }}
+                            onPointerDown={e => badge.verdiend && (e.currentTarget.style.transform = 'scale(0.96)')}
+                            onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+                            onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                          >
+                            <div style={{
+                              position: 'absolute', top: '5px', right: '5px',
+                              width: '14px', height: '14px', borderRadius: '50%',
+                              background: badge.verdiend ? '#dcfce7' : '#f1f5f9',
+                              border: `1px solid ${badge.verdiend ? '#86efac' : '#e2e8f0'}`,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: '7px', color: badge.verdiend ? '#16a34a' : undefined,
+                            }}>
+                              {badge.verdiend ? '✓' : '🔒'}
+                            </div>
+
+                            <BadgeHex
+                              emoji={badge.emoji}
+                              categorie={badge.categorie}
+                              size={46}
+                              verdiend={badge.verdiend}
+                            />
+
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: '10px', fontWeight: '700', color: badge.verdiend ? '#0f172a' : '#94a3b8', lineHeight: 1.3 }}>
+                                {isGeheim ? '???' : badge.naam}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
+
+              {/* Badge detail (inline, verschijnt onder de grid) */}
+              {geselecteerdeBadge && (() => {
+                const b = geselecteerdeBadge
+                const c = CAT[b.categorie]
+                return (
+                  <div style={{
+                    marginTop: '4px', marginBottom: '16px',
+                    background: 'white', border: `1.5px solid ${c.lbo}`,
+                    borderRadius: '16px', padding: '20px',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+                  }}>
+                    <BadgeHex emoji={b.emoji} categorie={b.categorie} size={80} verdiend />
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>{b.naam}</div>
+                      <p style={{ fontSize: '13px', color: '#64748b', margin: 0, lineHeight: 1.6 }}>{b.beschrijving}</p>
+                    </div>
+                    {dbBadgeIds.has(b.id) && (
+                      <div style={{
+                        width: '100%', background: '#faf5ff', border: '1px solid #ddd6fe',
+                        borderRadius: '10px', padding: '10px 12px',
+                        fontSize: '12px', color: '#7c3aed', fontWeight: '500',
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                      }}>
+                        <span>🎖️</span> Handmatig toegekend door een admin
+                      </div>
+                    )}
+                    <button
+                      onClick={() => setGeselecteerdeBadge(null)}
+                      style={{
+                        background: '#f1f5f9', border: 'none', borderRadius: '10px',
+                        padding: '8px 22px', fontSize: '13px', fontWeight: '600',
+                        color: '#475569', cursor: 'pointer',
+                      }}
+                    >Sluiten</button>
+                  </div>
+                )
+              })()}
+            </>
+          )}
         </div>
       )}
 
@@ -395,7 +510,6 @@ export default function PWAAccount() {
       {tab === 'instellingen' && (
         <div style={{ padding: '0 16px' }}>
 
-          {/* Sectie: Profiel */}
           <div style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '8px' }}>
             Profiel
           </div>
@@ -423,9 +537,13 @@ export default function PWAAccount() {
                 style={{ ...inputStijl(gebdatumDirty), colorScheme: 'light' }}
               />
             </FormRij>
+            {!speler && (
+              <div style={{ padding: '0 16px 12px', fontSize: '12px', color: '#94a3b8' }}>
+                Je bent nog niet gekoppeld aan een spelersfiche. Een admin doet dit.
+              </div>
+            )}
           </div>
 
-          {/* Sectie: Account */}
           <div style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '8px' }}>
             Account
           </div>
@@ -448,37 +566,20 @@ export default function PWAAccount() {
               >
                 {pwExpanded ? 'Sluiten' : 'Wijzigen'}
                 <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d={pwExpanded ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
+                  <path strokeLinecap="round" strokeLinejoin="round" d={pwExpanded ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} />
                 </svg>
               </button>
             </FormRij>
             {pwExpanded && (
               <div style={{ borderTop: '1px solid #f1f5f9', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <PwVeld
-                  label="Nieuw wachtwoord"
-                  value={nieuwPw}
-                  onChange={e => { setNieuwPw(e.target.value); setBericht(null) }}
-                  toon={toonPw}
-                  onToggle={() => setToonPw(v => !v)}
-                  placeholder="Minimum 6 tekens"
-                  dirty={pwDirty}
-                />
+                <PwVeld label="Nieuw wachtwoord" value={nieuwPw} onChange={e => { setNieuwPw(e.target.value); setBericht(null) }} toon={toonPw} onToggle={() => setToonPw(v => !v)} placeholder="Minimum 6 tekens" dirty={pwDirty} />
                 {nieuwPw.length > 0 && (
-                  <PwVeld
-                    label="Bevestig wachtwoord"
-                    value={bevestigPw}
-                    onChange={e => { setBevestigPw(e.target.value); setBericht(null) }}
-                    toon={toonPw}
-                    onToggle={() => setToonPw(v => !v)}
-                    placeholder="Herhaal wachtwoord"
-                    dirty={bevestigPw.length > 0}
-                  />
+                  <PwVeld label="Bevestig wachtwoord" value={bevestigPw} onChange={e => { setBevestigPw(e.target.value); setBericht(null) }} toon={toonPw} onToggle={() => setToonPw(v => !v)} placeholder="Herhaal wachtwoord" dirty={bevestigPw.length > 0} />
                 )}
               </div>
             )}
           </div>
 
-          {/* Afmelden */}
           <button
             onClick={signOut}
             style={{
@@ -489,7 +590,6 @@ export default function PWAAccount() {
           >
             Afmelden
           </button>
-
         </div>
       )}
 
@@ -498,8 +598,7 @@ export default function PWAAccount() {
         <div style={{
           position: 'fixed', bottom: '90px', left: '16px', right: '16px', zIndex: 100,
           background: '#0f172a', borderRadius: '16px',
-          padding: '12px 16px',
-          display: 'flex', alignItems: 'center', gap: '14px',
+          padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px',
           boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
         }}>
           <div style={{ flex: 1 }}>
@@ -512,8 +611,7 @@ export default function PWAAccount() {
             )}
           </div>
           <button
-            onClick={handleOpslaan}
-            disabled={bezig}
+            onClick={handleOpslaan} disabled={bezig}
             style={{
               background: '#3b82f6', color: 'white', border: 'none',
               borderRadius: '10px', padding: '0 18px', height: '36px',

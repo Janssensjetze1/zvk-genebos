@@ -52,6 +52,14 @@ export const BADGES = [
     conditie: (s) => s.aantalGoals >= 1,
   },
   {
+    id: 'vijf_goals',
+    emoji: '🖐️',
+    naam: '5 goals',
+    beschrijving: '5 doelpunten gescoord over alle seizoenen.',
+    categorie: 'brons',
+    conditie: (s) => s.aantalGoals >= 5,
+  },
+  {
     id: 'eerste_assist',
     emoji: '🤝',
     naam: 'Eerste assist',
@@ -311,6 +319,17 @@ export function berekenBadges(stats) {
 
 // Volgorde van categorieën (van laag naar hoog)
 export const CATEGORIE_VOLGORDE = ['brons', 'zilver', 'goud', 'legendary', 'geheim']
+
+// Kleuren voor hex-badge rendering
+// ro = outer ring, ri = inner hex, rc = circle fill
+// lb = card bg, lc = label text, lbo = label border
+export const CAT = {
+  brons:     { ro: '#e8a87c', ri: '#9a5c1a', rc: '#fff3e0', label: 'Brons',     lb: '#fff7ed', lc: '#c2410c', lbo: '#fed7aa' },
+  zilver:    { ro: '#cfd8dc', ri: '#546e7a', rc: '#eceff1', label: 'Zilver',    lb: '#f8fafc', lc: '#475569', lbo: '#cbd5e1' },
+  goud:      { ro: '#ffe082', ri: '#b06c00', rc: '#fff8e1', label: 'Goud',      lb: '#fefce8', lc: '#a16207', lbo: '#fde68a' },
+  legendary: { ro: '#a78bfa', ri: '#4c1d95', rc: '#ede9fe', label: 'Legendary', lb: '#faf5ff', lc: '#7c3aed', lbo: '#ddd6fe' },
+  geheim:    { ro: '#334155', ri: '#0f172a', rc: '#1e293b', label: '???',       lb: '#0f172a', lc: '#94a3b8', lbo: '#1e293b' },
+}
 
 // Stijl per categorie
 export const CATEGORIE_STIJL = {
