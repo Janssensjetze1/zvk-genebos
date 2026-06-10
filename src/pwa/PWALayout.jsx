@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
 import { useMatchdayCountdown } from '../hooks/useMatchdayCountdown'
@@ -90,12 +90,70 @@ function MatchdayBadge({ seizoenId }) {
   )
 }
 
+const PULL_THRESHOLD = 72
+
+function usePullToRefresh(mainRef) {
+  const touchStartY  = useRef(0)
+  const currentDist  = useRef(0)
+  const [pullDist,   setPullDist]   = useState(0)
+  const [refreshing, setRefreshing] = useState(false)
+
+  useEffect(() => {
+    const el = mainRef.current
+    if (!el) return
+
+    function onTouchStart(e) {
+      if (el.scrollTop === 0) touchStartY.current = e.touches[0].clientY
+    }
+
+    function onTouchMove(e) {
+      if (!touchStartY.current) return
+      const delta = e.touches[0].clientY - touchStartY.current
+      if (delta > 0 && el.scrollTop === 0) {
+        e.preventDefault()
+        const d = Math.min(delta * 0.45, PULL_THRESHOLD + 24)
+        currentDist.current = d
+        setPullDist(d)
+      }
+    }
+
+    function onTouchEnd() {
+      if (currentDist.current >= PULL_THRESHOLD) {
+        setRefreshing(true)
+        touchStartY.current  = 0
+        currentDist.current  = 0
+        setTimeout(() => window.location.reload(), 650)
+      } else {
+        setPullDist(0)
+        currentDist.current = 0
+        touchStartY.current = 0
+      }
+    }
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true })
+    el.addEventListener('touchmove',  onTouchMove,  { passive: false })
+    el.addEventListener('touchend',   onTouchEnd)
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchmove',  onTouchMove)
+      el.removeEventListener('touchend',   onTouchEnd)
+    }
+  }, [mainRef])
+
+  return { pullDist, refreshing }
+}
+
 export default function PWALayout({ children }) {
   const location = useLocation()
   const { isAdmin } = useAuth()
   const { actief: seizoen } = useSeason()
   const invullenActive = location.pathname.startsWith('/app/invullen')
   const [splashKlaar, setSplashKlaar] = useState(false)
+
+  const mainRef = useRef(null)
+  const { pullDist, refreshing } = usePullToRefresh(mainRef)
+  const pulling = pullDist > 0 || refreshing
+  const progress = Math.min(pullDist / PULL_THRESHOLD, 1)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f8fafc' }}>
@@ -138,8 +196,38 @@ export default function PWALayout({ children }) {
         )}
       </header>
 
+      {/* Pull-to-refresh indicator */}
+      {pulling && (
+        <div style={{
+          position: 'fixed',
+          top: `${62 + pullDist - 52}px`,
+          left: '50%', transform: 'translateX(-50%)',
+          zIndex: 49,
+          width: '40px', height: '40px',
+          background: 'rgba(15,23,42,0.92)',
+          backdropFilter: 'blur(8px)',
+          borderRadius: '50%',
+          border: '1px solid rgba(255,255,255,0.12)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          opacity: refreshing ? 1 : progress,
+          pointerEvents: 'none',
+          transition: refreshing ? 'top 0.25s cubic-bezier(0.34,1.4,0.64,1)' : 'none',
+        }}>
+          <img
+            src="/logo.png"
+            alt=""
+            style={{
+              width: '24px', height: '24px', objectFit: 'contain',
+              transform: !refreshing ? `rotate(${progress * 360}deg)` : undefined,
+              animation: refreshing ? 'spin 0.7s linear infinite' : 'none',
+            }}
+          />
+        </div>
+      )}
+
       {/* Page content */}
-      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: '110px' }}>
+      <main ref={mainRef} style={{ flex: 1, overflowY: 'auto', paddingBottom: '110px' }}>
         {children}
       </main>
 

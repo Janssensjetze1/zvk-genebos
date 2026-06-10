@@ -1,37 +1,11 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { BADGES, CAT } from '../data/badges'
 
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
 
-const CAT = {
-  brons:     { ro: '#e8a87c', ri: '#9a5c1a', rc: '#fff3e0', label: 'Brons',     lb: '#fff7ed', lc: '#c2410c', lbo: '#fed7aa' },
-  zilver:    { ro: '#cfd8dc', ri: '#546e7a', rc: '#eceff1', label: 'Zilver',    lb: '#f8fafc', lc: '#475569', lbo: '#cbd5e1' },
-  goud:      { ro: '#ffe082', ri: '#b06c00', rc: '#fff8e1', label: 'Goud',      lb: '#fefce8', lc: '#a16207', lbo: '#fde68a' },
-  legendary: { ro: '#a78bfa', ri: '#4c1d95', rc: '#ede9fe', label: 'Legendary', lb: '#faf5ff', lc: '#7c3aed', lbo: '#ddd6fe' },
-  geheim:    { ro: '#334155', ri: '#0f172a', rc: '#1e293b', label: '???',       lb: '#0f172a', lc: '#94a3b8', lbo: '#1e293b' },
-}
-
-const BADGES = [
-  {
-    id: 'welkom',
-    emoji: '🔐',
-    naam: 'Welkom',
-    beschrijving: 'Je hebt je voor het eerst aangemeld bij ZVK Genebos. Welkom in de club!',
-    categorie: 'brons',
-    conditieTekst: 'Verdiend bij je eerste aanmelding bij de app.',
-  },
-  {
-    id: 'test_badge',
-    emoji: '🧪',
-    naam: 'Test badge',
-    beschrijving: 'Een badge die nog wacht om verdiend te worden.',
-    categorie: 'zilver',
-    conditieTekst: null,
-  },
-]
-
 function BadgeHex({ emoji, categorie, size = 80, verdiend }) {
-  const cat = CAT[categorie] ?? CAT.zilver
+  const cat = CAT[categorie] ?? CAT.brons
   const H   = Math.round(size * 1.155)
   const iW  = Math.round(size * 0.8125)
   const iH  = Math.round(iW * 1.155)
@@ -54,8 +28,7 @@ function BadgeHex({ emoji, categorie, size = 80, verdiend }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         <div style={{
-          width: cD, height: cD, borderRadius: '50%',
-          background: cat.rc,
+          width: cD, height: cD, borderRadius: '50%', background: cat.rc,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: fs, lineHeight: 1,
         }}>
@@ -70,9 +43,32 @@ export default function Badges() {
   const { profile } = useAuth()
   const [geselecteerd, setGeselecteerd] = useState(null)
 
+  // Geen spelersfiche → geen badges
+  if (!profile?.player_id) {
+    return (
+      <div style={{ maxWidth: '480px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px' }}>Badges</h1>
+        <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '32px' }}>Jouw verdiende badges</p>
+        <div style={{
+          background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px',
+          padding: '40px 32px', textAlign: 'center',
+        }}>
+          <div style={{ fontSize: '40px', marginBottom: '14px' }}>🔗</div>
+          <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>
+            Geen spelersfiche gekoppeld
+          </div>
+          <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
+            Je account is nog niet gekoppeld aan een spelersfiche.
+            Een admin doet dit voor je. Pas dan worden jouw badges berekend.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   const badgesMetStatus = BADGES.map(b => ({
     ...b,
-    verdiend: b.id === 'welkom' ? !!profile : false,
+    verdiend: (() => { try { return b.conditie({}) } catch { return false } })(),
   }))
 
   const aantalVerdiend = badgesMetStatus.filter(b => b.verdiend).length
@@ -81,7 +77,6 @@ export default function Badges() {
 
   return (
     <div>
-      {/* Header */}
       <div style={{ marginBottom: '28px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px' }}>Badges</h1>
         <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>
@@ -89,7 +84,7 @@ export default function Badges() {
         </p>
       </div>
 
-      {/* Progress */}
+      {/* Voortgang */}
       <div style={{
         background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px',
         padding: '20px 24px', marginBottom: '28px',
@@ -127,8 +122,7 @@ export default function Badges() {
               style={{
                 background: 'white',
                 border: `1.5px solid ${badge.verdiend ? cat.lbo : '#e2e8f0'}`,
-                borderRadius: '20px',
-                padding: '28px 20px 20px',
+                borderRadius: '20px', padding: '28px 20px 20px',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px',
                 cursor: badge.verdiend ? 'pointer' : 'default',
                 position: 'relative', overflow: 'hidden',
@@ -145,7 +139,6 @@ export default function Badges() {
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
-              {/* Status indicator */}
               <div style={{
                 position: 'absolute', top: '12px', right: '12px',
                 width: '24px', height: '24px', borderRadius: '50%',
@@ -176,12 +169,6 @@ export default function Badges() {
                   {cat.label}
                 </span>
               </div>
-
-              {!badge.verdiend && (
-                <p style={{ fontSize: '12px', color: '#cbd5e1', margin: 0, textAlign: 'center', lineHeight: 1.4 }}>
-                  Nog te verdienen
-                </p>
-              )}
             </div>
           )
         })}
@@ -208,7 +195,6 @@ export default function Badges() {
             }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '18px' }}>
                 <BadgeHex emoji={geselecteerd.emoji} categorie={geselecteerd.categorie} size={108} verdiend />
-
                 <div style={{ textAlign: 'center' }}>
                   <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: '0 0 10px' }}>
                     {geselecteerd.naam}
@@ -221,11 +207,9 @@ export default function Badges() {
                     {cat.label}
                   </span>
                 </div>
-
                 <p style={{ fontSize: '14px', color: '#475569', textAlign: 'center', lineHeight: 1.65, margin: 0 }}>
                   {geselecteerd.beschrijving}
                 </p>
-
                 <div style={{
                   width: '100%', background: '#f0fdf4', border: '1px solid #bbf7d0',
                   borderRadius: '14px', padding: '14px 16px',
@@ -237,23 +221,14 @@ export default function Badges() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: '15px', flexShrink: 0,
                   }}>✓</div>
-                  <div>
-                    <div style={{ fontSize: '13px', fontWeight: '700', color: '#166534' }}>Verdiend!</div>
-                    {geselecteerd.conditieTekst && (
-                      <div style={{ fontSize: '12px', color: '#4ade80', marginTop: '2px' }}>
-                        {geselecteerd.conditieTekst}
-                      </div>
-                    )}
-                  </div>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#166534' }}>Verdiend!</div>
                 </div>
-
                 <button
                   onClick={() => setGeselecteerd(null)}
                   style={{
                     width: '100%', background: '#f1f5f9', border: 'none',
                     borderRadius: '12px', padding: '13px', fontSize: '14px',
                     fontWeight: '600', color: '#475569', cursor: 'pointer',
-                    transition: 'background 0.15s',
                   }}
                   onMouseEnter={e => (e.currentTarget.style.background = '#e2e8f0')}
                   onMouseLeave={e => (e.currentTarget.style.background = '#f1f5f9')}
