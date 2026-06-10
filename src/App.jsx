@@ -27,7 +27,9 @@ import PWAKlassement from './pwa/PWAKlassement'
 import PWAStats from './pwa/PWAStats'
 import PWASpelers from './pwa/PWASpelers'
 import PWAAccount from './pwa/PWAAccount'
+import PWABadges from './pwa/PWABadges'
 import Invullen from './pages/Invullen'
+import Badges from './pages/Badges'
 
 function AppRoutes() {
   const isMobile = useIsMobile()
@@ -78,6 +80,11 @@ function AppRoutes() {
             <PWALayout><PWAAccount /></PWALayout>
           </ProtectedRoute>
         } />
+        <Route path="/app/badges" element={
+          <ProtectedRoute>
+            <PWALayout><PWABadges /></PWALayout>
+          </ProtectedRoute>
+        } />
         <Route path="/app/invullen" element={
           <AdminRoute>
             <PWALayout><Invullen /></PWALayout>
@@ -117,6 +124,9 @@ function AppRoutes() {
       } />
       <Route path="/gouden-jaar" element={
         <ProtectedRoute><Layout><GoudenJaar /></Layout></ProtectedRoute>
+      } />
+      <Route path="/badges" element={
+        <ProtectedRoute><Layout><Badges /></Layout></ProtectedRoute>
       } />
       <Route path="/invullen" element={
         <AdminRoute><Invullen /></AdminRoute>
