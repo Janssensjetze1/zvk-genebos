@@ -100,8 +100,13 @@ function usePullToRefresh(mainRef) {
   const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
-    const el = mainRef.current
-    if (!el) return
+    // Controleer of de pagina werkelijk helemaal boven staat.
+    // Scroll kan op window (body groeit) óf op het <main> element zitten.
+    function isAtTop() {
+      const winScroll  = window.scrollY ?? window.pageYOffset ?? 0
+      const elScroll   = mainRef.current?.scrollTop ?? 0
+      return winScroll === 0 && elScroll === 0
+    }
 
     function resetGesture() {
       isTracking.current  = false
@@ -109,22 +114,15 @@ function usePullToRefresh(mainRef) {
       currentDist.current = 0
     }
 
-    function onScroll() {
-      // Annuleer een lopend gebaar zodra de gebruiker niet meer helemaal boven is
-      if (el.scrollTop > 0) resetGesture()
-    }
-
     function onTouchStart(e) {
-      // Alleen starten als pagina volledig naar boven gescrolled is
-      if (el.scrollTop === 0) {
+      if (isAtTop()) {
         touchStartY.current = e.touches[0].clientY
         isTracking.current  = true
       }
     }
 
     function onTouchMove(e) {
-      // Niet actief als el inmiddels omlaag gescrolled is of gebaar niet gestart
-      if (!isTracking.current || el.scrollTop > 0) {
+      if (!isTracking.current || !isAtTop()) {
         resetGesture()
         return
       }
@@ -152,15 +150,14 @@ function usePullToRefresh(mainRef) {
       }
     }
 
-    el.addEventListener('scroll',     onScroll,     { passive: true })
-    el.addEventListener('touchstart', onTouchStart, { passive: true })
-    el.addEventListener('touchmove',  onTouchMove,  { passive: false })
-    el.addEventListener('touchend',   onTouchEnd)
+    // Luister op window zodat we zowel window-scroll als element-scroll vangen
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchmove',  onTouchMove,  { passive: false })
+    window.addEventListener('touchend',   onTouchEnd)
     return () => {
-      el.removeEventListener('scroll',     onScroll)
-      el.removeEventListener('touchstart', onTouchStart)
-      el.removeEventListener('touchmove',  onTouchMove)
-      el.removeEventListener('touchend',   onTouchEnd)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove',  onTouchMove)
+      window.removeEventListener('touchend',   onTouchEnd)
     }
   }, [mainRef])
 
