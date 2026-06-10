@@ -122,7 +122,10 @@ function usePullToRefresh(mainRef) {
         setRefreshing(true)
         touchStartY.current  = 0
         currentDist.current  = 0
-        setTimeout(() => window.location.reload(), 650)
+        setTimeout(() => {
+          sessionStorage.setItem('ptr_reload', '1')
+          window.location.reload()
+        }, 650)
       } else {
         setPullDist(0)
         currentDist.current = 0

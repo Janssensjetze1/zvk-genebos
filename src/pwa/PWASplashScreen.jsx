@@ -26,6 +26,13 @@ function randomDuur() {
 }
 
 export default function PWASplashScreen({ onKlaar }) {
+  // Pull-to-refresh herlaadt de pagina — splash overslaan
+  if (sessionStorage.getItem('ptr_reload')) {
+    sessionStorage.removeItem('ptr_reload')
+    setTimeout(onKlaar, 0)
+    return null
+  }
+
   const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)])
   const [duur] = useState(() => randomDuur())
   const [voortgang, setVoortgang] = useState(0)
