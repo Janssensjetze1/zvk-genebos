@@ -180,7 +180,7 @@ export default function PWALayout({ children }) {
                   display: 'flex',
                   alignItems: 'center', justifyContent: 'center',
                   gap: '7px',
-                  padding: active ? '10px 18px' : '10px 0',
+                  padding: active ? '13px 20px' : '13px 0',
                   textDecoration: 'none',
                   borderRadius: '100px',
                   background: active ? 'white' : 'transparent',
