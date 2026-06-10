@@ -9,6 +9,10 @@ export default function PWAAccount() {
   const [speler, setSpeler] = useState(null)
   const [naam, setNaam] = useState('')
   const [origNaam, setOrigNaam] = useState('')
+  const [bijnaam, setBijnaam] = useState('')
+  const [origBijnaam, setOrigBijnaam] = useState('')
+  const [geboortedatum, setGeboortedatum] = useState('')
+  const [origGeboortedatum, setOrigGeboortedatum] = useState('')
   const [fotoBestand, setFotoBestand] = useState(null)
   const [fotoPreview, setFotoPreview] = useState(null)
 
@@ -26,12 +30,23 @@ export default function PWAAccount() {
   useEffect(() => {
     const n = profile?.display_name ?? ''
     setNaam(n); setOrigNaam(n)
+    const b = profile?.nickname ?? ''
+    setBijnaam(b); setOrigBijnaam(b)
+    const g = profile?.birth_date ?? ''
+    setGeboortedatum(g); setOrigGeboortedatum(g)
     if (profile?.player_id) fetchSpeler(profile.player_id)
   }, [profile?.player_id, profile?.display_name])
 
   async function fetchSpeler(id) {
     const { data } = await supabase.from('players').select('*').eq('id', id).single()
-    if (data) { setSpeler(data); setNaam(data.name); setOrigNaam(data.name) }
+    if (data) {
+      setSpeler(data)
+      setNaam(data.name); setOrigNaam(data.name)
+      const b = data.nickname ?? ''
+      setBijnaam(b); setOrigBijnaam(b)
+      const g = data.birth_date ?? ''
+      setGeboortedatum(g); setOrigGeboortedatum(g)
+    }
   }
 
   function handleFotoKiezen(e) {
@@ -44,9 +59,11 @@ export default function PWAAccount() {
   }
 
   const naamDirty = naam !== origNaam || !!fotoBestand
+  const bijnaamDirty = bijnaam !== origBijnaam
+  const geboortedatumDirty = geboortedatum !== origGeboortedatum
   const emailDirty = email !== origEmail
   const wachtwoordDirty = nieuwWachtwoord.length > 0
-  const isDirty = naamDirty || emailDirty || wachtwoordDirty
+  const isDirty = naamDirty || bijnaamDirty || geboortedatumDirty || emailDirty || wachtwoordDirty
 
   async function handleOpslaan() {
     setBericht(null)
@@ -64,10 +81,13 @@ export default function PWAAccount() {
           const { data: urlData } = supabase.storage.from('player-photos').getPublicUrl(`${Date.now()}.${ext}`)
           photo_url = urlData.publicUrl
         }
-        if (speler) await supabase.from('players').update({ name: naam, photo_url }).eq('id', speler.id)
-        await supabase.from('profiles').update({ display_name: naam, avatar_url: photo_url }).eq('id', user.id)
-        patchProfile({ display_name: naam, avatar_url: photo_url })
+        if (speler) await supabase.from('players').update({ name: naam, photo_url, nickname: bijnaam.trim() || null, birth_date: geboortedatum || null }).eq('id', speler.id)
+        const profileChanges = { display_name: naam, avatar_url: photo_url, nickname: bijnaam.trim() || null, birth_date: geboortedatum || null }
+        await supabase.from('profiles').update(profileChanges).eq('id', user.id)
+        patchProfile(profileChanges)
         setOrigNaam(naam)
+        setOrigBijnaam(bijnaam)
+        setOrigGeboortedatum(geboortedatum)
         setFotoBestand(null)
         setFotoPreview(null)
       }
@@ -160,6 +180,27 @@ export default function PWAAccount() {
             Je bent nog niet gekoppeld aan een spelersfiche. Een admin doet dit.
           </p>
         )}
+      </Kaart>
+
+      {/* Bijnaam */}
+      <Kaart titel="Bijnaam">
+        <input
+          type="text"
+          value={bijnaam}
+          onChange={e => { setBijnaam(e.target.value); setBericht(null) }}
+          placeholder="Bv. Den Bomber, Dretze, ..."
+          style={inputStijl(bijnaamDirty)}
+        />
+      </Kaart>
+
+      {/* Geboortedatum */}
+      <Kaart titel="Geboortedatum">
+        <input
+          type="date"
+          value={geboortedatum}
+          onChange={e => { setGeboortedatum(e.target.value); setBericht(null) }}
+          style={inputStijl(geboortedatumDirty)}
+        />
       </Kaart>
 
       {/* E-mail */}

@@ -8,6 +8,8 @@ export default function Account() {
   // Speler data (naam + foto)
   const [speler, setSpeler] = useState(null)
   const [naam, setNaam] = useState(profile?.display_name ?? '')
+  const [bijnaam, setBijnaam] = useState(profile?.nickname ?? '')
+  const [geboortedatum, setGeboortedatum] = useState(profile?.birth_date ?? '')
   const [fotoBestand, setFotoBestand] = useState(null)
   const [fotoPreview, setFotoPreview] = useState(null)
   const [naamOpslaan, setNaamOpslaan] = useState(false)
@@ -35,7 +37,12 @@ export default function Account() {
 
   async function fetchSpeler(playerId) {
     const { data } = await supabase.from('players').select('*').eq('id', playerId).single()
-    if (data) { setSpeler(data); setNaam(data.name) }
+    if (data) {
+      setSpeler(data)
+      setNaam(data.name)
+      if (data.nickname) setBijnaam(data.nickname)
+      if (data.birth_date) setGeboortedatum(data.birth_date)
+    }
   }
 
   function handleFotoKiezen(e) {
@@ -81,7 +88,7 @@ export default function Account() {
     if (speler) {
       const { error: spelerFout } = await supabase
         .from('players')
-        .update({ name: naam, photo_url })
+        .update({ name: naam, photo_url, nickname: bijnaam.trim() || null, birth_date: geboortedatum || null })
         .eq('id', speler.id)
       if (spelerFout) {
         setNaamBericht({ type: 'fout', tekst: 'Spelersfiche updaten mislukt: ' + spelerFout.message })
@@ -93,7 +100,7 @@ export default function Account() {
     }
 
     // Dan profiles updaten + lokale context bijwerken
-    const profileChanges = { display_name: naam, avatar_url: photo_url }
+    const profileChanges = { display_name: naam, avatar_url: photo_url, nickname: bijnaam.trim() || null, birth_date: geboortedatum || null }
     await supabase.from('profiles').update(profileChanges).eq('id', user.id)
     patchProfile(profileChanges)
 
@@ -223,6 +230,14 @@ export default function Account() {
 
           <Veld label="Naam">
             <input type="text" value={naam} onChange={e => setNaam(e.target.value)} style={inputStijl} placeholder="Voor- en achternaam" />
+          </Veld>
+
+          <Veld label="Bijnaam">
+            <input type="text" value={bijnaam} onChange={e => setBijnaam(e.target.value)} style={inputStijl} placeholder="Bv. Den Bomber, Dretze, ..." />
+          </Veld>
+
+          <Veld label="Geboortedatum">
+            <input type="date" value={geboortedatum} onChange={e => setGeboortedatum(e.target.value)} style={inputStijl} />
           </Veld>
 
           {!speler && (

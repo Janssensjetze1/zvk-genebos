@@ -134,12 +134,27 @@ export default function TabLeden() {
   )
 }
 
-// Initials avatar
-function Avatar({ naam, role, size = 40 }) {
+// Avatar met foto of initialen
+function Avatar({ naam, role, photoUrl, size = 40 }) {
   const isAdmin = role === 'admin'
   const initialen = naam
     ? naam.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
     : '?'
+
+  if (photoUrl) {
+    return (
+      <img
+        src={photoUrl}
+        alt={naam}
+        style={{
+          width: size, height: size, borderRadius: '50%', flexShrink: 0,
+          objectFit: 'cover',
+          border: `1.5px solid ${isAdmin ? '#e9d5ff' : '#bfdbfe'}`,
+        }}
+      />
+    )
+  }
+
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
@@ -182,7 +197,7 @@ function WachtendKaart({ profiel, spelers, onGoedkeuren, onWeigeren, onKoppelSpe
       background: '#fffbf5', border: '1px solid #fed7aa', borderRadius: '12px',
       padding: '16px 20px', display: 'flex', gap: '16px', alignItems: 'flex-start',
     }}>
-      <Avatar naam={profiel.display_name || profiel.email} role={profiel.role} size={42} />
+      <Avatar naam={profiel.display_name || profiel.email} role={profiel.role} photoUrl={profiel.avatar_url} size={42} />
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
@@ -248,7 +263,7 @@ function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
         onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
       >
-        <Avatar naam={profiel.display_name || profiel.email} role={profiel.role} size={38} />
+        <Avatar naam={profiel.display_name || profiel.email} role={profiel.role} photoUrl={profiel.avatar_url} size={38} />
 
         {/* Naam + email */}
         <div style={{ flex: 1, minWidth: 0 }}>
