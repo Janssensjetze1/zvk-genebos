@@ -16,6 +16,7 @@ const QUOTES = [
   { text: "Er werd weer verdedigd als janetten.", auteur: "De ZVK Supporters" },
   { text: "Dit jaar spelen we kampioen.", auteur: "Dretze" },
   { text: "Dieje he teveel deklatjuice gedronken", auteur: "Werres" },
+  { text: "Smakelijk Johan", auteur: "Chris Mulkers" },
 ]
 
 function randomDuur() {

@@ -68,10 +68,6 @@ export default function MobileGate() {
           </>
         )}
       </div>
-
-      <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '12px' }}>
-        De volledige beheerder-omgeving is beschikbaar op desktop.
-      </p>
     </div>
   )
 }

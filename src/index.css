@@ -155,3 +155,9 @@ button:active:not(:disabled) {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* Platina badge glitter sterretjes */
+@keyframes glitter {
+  0%, 100% { opacity: 0; transform: scale(0.2) rotate(0deg); }
+  50%       { opacity: 1; transform: scale(1)   rotate(72deg); }
+}

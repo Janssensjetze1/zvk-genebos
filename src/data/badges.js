@@ -9,7 +9,7 @@ export const BADGES = [
     emoji: '✅',
     naam: 'Welkom',
     beschrijving: 'Aangemeld op ZVK Genebos.',
-    categorie: 'brons',
+    categorie: 'platina',
     conditie: () => true,
   },
   {
@@ -44,7 +44,7 @@ export const BADGES = [
     emoji: '📌',
     naam: 'Onmisbaar',
     beschrijving: 'Geen enkele match gemist in een volledig seizoen.',
-    categorie: 'zilver',
+    categorie: 'goud',
     conditie: (s) => s.seizoenenVolledigAanwezig >= 1,
   },
   {

@@ -101,6 +101,26 @@ function BadgeHex({ emoji, categorie, size = 64, verdiend }) {
           {verdiend ? emoji : '❓'}
         </div>
       </div>
+      {/* Platina glitter sterretjes */}
+      {verdiend && categorie === 'platina' && [
+        { top: '-14%', left:  '8%',  s: 0.20, d: '0.0s', t: '1.8s' },
+        { top:  '-5%', left: '72%',  s: 0.16, d: '0.5s', t: '1.6s' },
+        { top:  '38%', left: '108%', s: 0.18, d: '1.1s', t: '2.0s' },
+        { top:  '90%', left: '68%',  s: 0.17, d: '0.3s', t: '1.7s' },
+        { top:  '85%', left: '-10%', s: 0.15, d: '0.8s', t: '1.9s' },
+        { top:  '22%', left: '-8%',  s: 0.14, d: '1.4s', t: '1.5s' },
+      ].map((sp, i) => (
+        <div key={i} style={{
+          position: 'absolute',
+          top: sp.top, left: sp.left,
+          fontSize: Math.max(5, Math.round(size * sp.s)),
+          color: 'white',
+          textShadow: '0 0 4px #bae6fd, 0 0 8px #7dd3fc',
+          animation: `glitter ${sp.t} ${sp.d} ease-in-out infinite`,
+          pointerEvents: 'none',
+          zIndex: 10, lineHeight: 1,
+        }}>✦</div>
+      ))}
     </div>
   )
 }

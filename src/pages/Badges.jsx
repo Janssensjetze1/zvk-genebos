@@ -1,6 +1,43 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useSeason } from '../context/SeasonContext'
+import { supabase } from '../lib/supabase'
 import { BADGES, CAT, SHINE, CATEGORIE_VOLGORDE } from '../data/badges'
+
+// Zelfde stats-berekening als PWAAccount
+function computeStats({ goalsArr, assistsArr, matchesArr, seizoenId, userCreatedAt }) {
+  const goalsByMatch   = {}
+  const assistsByMatch = {}
+  goalsArr.forEach(g => { if (g.match_id) goalsByMatch[g.match_id] = (goalsByMatch[g.match_id] || 0) + 1 })
+  assistsArr.forEach(a => { if (a.match_id) assistsByMatch[a.match_id] = (assistsByMatch[a.match_id] || 0) + 1 })
+  const hattrickMatchIds = Object.entries(goalsByMatch).filter(([, n]) => n >= 3).map(([id]) => id)
+  const goalMatchSet   = new Set(Object.keys(goalsByMatch))
+  const assistMatchSet = new Set(Object.keys(assistsByMatch))
+  return {
+    aantalGoals:       goalsArr.length,
+    aantalAssists:     assistsArr.length,
+    aantalWedstrijden: matchesArr.length,
+    seizoenGoals:      goalsArr.filter(g => g.match?.season_id === seizoenId).length,
+    hattricks:               hattrickMatchIds.length,
+    maxGoalsInWedstrijd:     Math.max(0, ...Object.values(goalsByMatch)),
+    maxAssistsInWedstrijd:   Math.max(0, ...Object.values(assistsByMatch)),
+    hattrickMetAssist:          hattrickMatchIds.filter(id => assistsByMatch[id] >= 1).length,
+    wedstrijdenMetGoalEnAssist: [...goalMatchSet].filter(id => assistMatchSet.has(id)).length,
+    seizoenenMetGoal:   new Set(goalsArr.map(g => g.match?.season_id).filter(Boolean)).size,
+    aantalSeizoenen:    new Set(matchesArr.map(m => m.match?.season_id).filter(Boolean)).size,
+    accountLeeftijdDagen: userCreatedAt ? Math.floor((Date.now() - new Date(userCreatedAt).getTime()) / 86400000) : 0,
+    nooitGespeeld: matchesArr.length === 0 && (userCreatedAt ? Math.floor((Date.now() - new Date(userCreatedAt).getTime()) / 86400000) : 0) >= 60,
+    cleanSheets: matchesArr.filter(m => {
+      const match = m.match; if (!match) return false
+      const zvkIsThuis = match.home_team?.is_zvk
+      const tegScore = zvkIsThuis ? match.away_score : match.home_score
+      return tegScore !== null && tegScore === 0
+    }).length,
+    aantalWedstrijdenRij: 0, maxWedstrijdenRij: 0,
+    seizoenenVolledigAanwezig: 0, topScorerSeizoenen: 0,
+    grootsteWinstMarge: 0, nachtbraker: false, gewonnenOpVerjaardag: false,
+  }
+}
 
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
 
@@ -43,13 +80,61 @@ function BadgeHex({ emoji, categorie, size = 80, verdiend }) {
           {verdiend ? emoji : '❓'}
         </div>
       </div>
+      {/* Platina glitter sterretjes */}
+      {verdiend && categorie === 'platina' && [
+        { top: '-14%', left:  '8%',  s: 0.20, d: '0.0s', t: '1.8s' },
+        { top:  '-5%', left: '72%',  s: 0.16, d: '0.5s', t: '1.6s' },
+        { top:  '38%', left: '108%', s: 0.18, d: '1.1s', t: '2.0s' },
+        { top:  '90%', left: '68%',  s: 0.17, d: '0.3s', t: '1.7s' },
+        { top:  '85%', left: '-10%', s: 0.15, d: '0.8s', t: '1.9s' },
+        { top:  '22%', left: '-8%',  s: 0.14, d: '1.4s', t: '1.5s' },
+      ].map((sp, i) => (
+        <div key={i} style={{
+          position: 'absolute',
+          top: sp.top, left: sp.left,
+          fontSize: Math.max(6, Math.round(size * sp.s)),
+          color: 'white',
+          textShadow: '0 0 5px #bae6fd, 0 0 10px #7dd3fc',
+          animation: `glitter ${sp.t} ${sp.d} ease-in-out infinite`,
+          pointerEvents: 'none',
+          zIndex: 10, lineHeight: 1,
+        }}>✦</div>
+      ))}
     </div>
   )
 }
 
 export default function Badges() {
-  const { profile } = useAuth()
-  const [geselecteerd, setGeselecteerd] = useState(null)
+  const { user, profile } = useAuth()
+  const { actief: seizoen } = useSeason()
+  const [geselecteerd,  setGeselecteerd]  = useState(null)
+  const [badgeStats,    setBadgeStats]    = useState(null)
+  const [dbBadgeIds,    setDbBadgeIds]    = useState(new Set())
+  const [loading,       setLoading]       = useState(false)
+
+  useEffect(() => {
+    if (!profile?.player_id) return
+    async function fetchBadgeData() {
+      setLoading(true)
+      const playerId = profile.player_id
+      const [goalsRes, assistsRes, matchesRes, dbRes] = await Promise.all([
+        supabase.from('goals').select('id, match_id, match:match_id(season_id)').eq('scorer_id', playerId),
+        supabase.from('goals').select('id, match_id, match:match_id(season_id)').eq('assist_id', playerId),
+        supabase.from('match_players').select('match_id, match:match_id(season_id, home_score, away_score, home_team:home_team_id(is_zvk), away_team:away_team_id(is_zvk))').eq('player_id', playerId),
+        supabase.from('player_badges').select('badge_id').eq('player_id', playerId),
+      ])
+      setBadgeStats(computeStats({
+        goalsArr:     goalsRes.data   ?? [],
+        assistsArr:   assistsRes.data  ?? [],
+        matchesArr:   matchesRes.data  ?? [],
+        seizoenId:    seizoen?.id,
+        userCreatedAt: user?.created_at,
+      }))
+      setDbBadgeIds(new Set((dbRes.data ?? []).map(r => r.badge_id)))
+      setLoading(false)
+    }
+    fetchBadgeData()
+  }, [profile?.player_id, seizoen?.id])
 
   // Geen spelersfiche → geen badges
   if (!profile?.player_id) {
@@ -74,10 +159,12 @@ export default function Badges() {
     )
   }
 
-  const badgesMetStatus = BADGES.map(b => ({
-    ...b,
-    verdiend: (() => { try { return b.conditie({}) } catch { return false } })(),
-  }))
+  const badgesMetStatus = badgeStats
+    ? BADGES.map(b => ({
+        ...b,
+        verdiend: dbBadgeIds.has(b.id) || (() => { try { return b.conditie(badgeStats) } catch { return false } })(),
+      }))
+    : BADGES.map(b => ({ ...b, verdiend: false }))
 
   const aantalVerdiend = badgesMetStatus.filter(b => b.verdiend).length
   const totaal = badgesMetStatus.length
@@ -85,11 +172,20 @@ export default function Badges() {
 
   return (
     <div>
-      <div style={{ marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px' }}>Badges</h1>
-        <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>
-          {aantalVerdiend} van {totaal} verdiend
-        </p>
+      <div style={{ marginBottom: '28px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div>
+          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px' }}>Badges</h1>
+          <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>
+            {loading ? 'Berekenen...' : `${aantalVerdiend} van ${totaal} verdiend`}
+          </p>
+        </div>
+        {loading && (
+          <div style={{
+            width: '18px', height: '18px', marginLeft: '4px',
+            border: '2.5px solid #e2e8f0', borderTopColor: '#3b82f6',
+            borderRadius: '50%', animation: 'spin 0.7s linear infinite',
+          }} />
+        )}
       </div>
 
       {/* Voortgang */}
