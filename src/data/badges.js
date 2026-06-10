@@ -112,43 +112,79 @@ export const BADGES = [
 
 ]
 
-// Metallic/shiny gradients voor verdiende badges
-// outerGrad = buitenste hexring, innerGrad = binnenste hex, circleGrad = emoji-cirkel, glow = drop-shadow kleur
+// Holografische aurora-gradients voor verdiende badges
+// Gestapelde radiale gradiënten creëren het zachte kleur-mesh effect (zie referentie-afbeelding)
+// Bovenste laag = gloss-highlight, daarna kleur-blobs, onderste laag = basiskleur
 export const SHINE = {
   brons: {
-    outerGrad:  'linear-gradient(145deg, #f5d0a0 0%, #e8a87c 30%, #c07020 65%, #f0c070 100%)',
-    innerGrad:  'linear-gradient(145deg, #d49050 0%, #7a3f0a 100%)',
-    circleGrad: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.85) 0%, #fff3e0 55%)',
-    glow:       'rgba(232,168,100,0.55)',
+    // Warm aurora: goud, koper, perzik, rose-gold
+    outerGrad: [
+      'linear-gradient(135deg, rgba(255,255,255,0.50) 0%, rgba(255,255,255,0.08) 28%, transparent 48%)',
+      'radial-gradient(ellipse at 18% 28%, #ffe8c0 0%, transparent 55%)',
+      'radial-gradient(ellipse at 82% 70%, #f4956a 0%, transparent 55%)',
+      'radial-gradient(ellipse at 52% 88%, #ffd080 0%, transparent 52%)',
+      'linear-gradient(145deg, #f5c078 0%, #c86820 100%)',
+    ].join(','),
+    innerGrad:  'linear-gradient(145deg, #c87228 0%, #7a3c06 100%)',
+    circleGrad: 'radial-gradient(circle at 35% 28%, rgba(255,255,255,0.95) 0%, #fff3e0 50%)',
+    glow:       'rgba(220,140,60,0.55)',
   },
   zilver: {
-    outerGrad:  'linear-gradient(145deg, #ffffff 0%, #ccd8e8 25%, #8aa4bc 55%, #dde8f5 100%)',
-    innerGrad:  'linear-gradient(145deg, #8aaabf 0%, #3a5068 100%)',
-    circleGrad: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95) 0%, #eceff1 55%)',
-    glow:       'rgba(100,140,180,0.45)',
+    // Koele aurora: zilver, ijsblauw, lila, wit
+    outerGrad: [
+      'linear-gradient(135deg, rgba(255,255,255,0.60) 0%, rgba(255,255,255,0.10) 30%, transparent 50%)',
+      'radial-gradient(ellipse at 18% 28%, #e8f4ff 0%, transparent 52%)',
+      'radial-gradient(ellipse at 80% 22%, #d0d8ff 0%, transparent 50%)',
+      'radial-gradient(ellipse at 65% 80%, #e4d8ff 0%, transparent 52%)',
+      'linear-gradient(145deg, #dce8f5 0%, #8aa8c8 100%)',
+    ].join(','),
+    innerGrad:  'linear-gradient(145deg, #80a0bc 0%, #384e64 100%)',
+    circleGrad: 'radial-gradient(circle at 35% 28%, rgba(255,255,255,0.98) 0%, #eceff1 50%)',
+    glow:       'rgba(100,148,196,0.45)',
   },
   goud: {
-    outerGrad:  'linear-gradient(145deg, #fff8b0 0%, #ffe082 30%, #b06c00 65%, #ffd54f 100%)',
-    innerGrad:  'linear-gradient(145deg, #d4a020 0%, #7a4a00 100%)',
-    circleGrad: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.88) 0%, #fff8e1 55%)',
-    glow:       'rgba(255,200,0,0.55)',
+    // Rijke goud aurora: geel, amber, champagne, warm groen-goud
+    outerGrad: [
+      'linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.08) 28%, transparent 48%)',
+      'radial-gradient(ellipse at 18% 28%, #fffde0 0%, transparent 52%)',
+      'radial-gradient(ellipse at 82% 65%, #ffa820 0%, transparent 55%)',
+      'radial-gradient(ellipse at 48% 85%, #f0e060 0%, transparent 52%)',
+      'linear-gradient(145deg, #ffe860 0%, #c88000 100%)',
+    ].join(','),
+    innerGrad:  'linear-gradient(145deg, #c08808 0%, #7a4600 100%)',
+    circleGrad: 'radial-gradient(circle at 35% 28%, rgba(255,255,255,0.95) 0%, #fff8e1 50%)',
+    glow:       'rgba(210,160,0,0.58)',
   },
   platina: {
-    outerGrad:  'linear-gradient(145deg, #e8f6ff 0%, #bae6fd 28%, #0c5080 65%, #90d0f8 100%)',
-    innerGrad:  'linear-gradient(145deg, #4090c0 0%, #062840 100%)',
-    circleGrad: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.92) 0%, #f0f9ff 55%)',
-    glow:       'rgba(56,189,248,0.5)',
+    // Ijzige aurora — exact als de referentie-afbeelding: ijsblauw, mint, lila
+    outerGrad: [
+      'linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.08) 28%, transparent 48%)',
+      'radial-gradient(ellipse at 15% 35%, #c8e8ff 0%, transparent 52%)',
+      'radial-gradient(ellipse at 82% 58%, #d8c8ff 0%, transparent 55%)',
+      'radial-gradient(ellipse at 50% 88%, #b8f0e0 0%, transparent 52%)',
+      'linear-gradient(145deg, #d8f0ff 0%, #78b8e0 100%)',
+    ].join(','),
+    innerGrad:  'linear-gradient(145deg, #3880b8 0%, #063858 100%)',
+    circleGrad: 'radial-gradient(circle at 35% 28%, rgba(255,255,255,0.98) 0%, #e8f8ff 50%)',
+    glow:       'rgba(56,184,248,0.50)',
   },
   legendary: {
-    outerGrad:  'linear-gradient(145deg, #ede9fe 0%, #a78bfa 28%, #4c1d95 65%, #c4b5fd 100%)',
-    innerGrad:  'linear-gradient(145deg, #8060d0 0%, #2a0870 100%)',
-    circleGrad: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.88) 0%, #ede9fe 55%)',
-    glow:       'rgba(167,139,250,0.6)',
+    // Magische aurora: violet, roze, magenta, diep paars
+    outerGrad: [
+      'linear-gradient(135deg, rgba(255,255,255,0.50) 0%, rgba(255,255,255,0.08) 28%, transparent 48%)',
+      'radial-gradient(ellipse at 18% 28%, #f8e0ff 0%, transparent 52%)',
+      'radial-gradient(ellipse at 82% 70%, #c898ff 0%, transparent 55%)',
+      'radial-gradient(ellipse at 50% 85%, #ffb8e8 0%, transparent 52%)',
+      'linear-gradient(145deg, #e8d0ff 0%, #8030d0 100%)',
+    ].join(','),
+    innerGrad:  'linear-gradient(145deg, #7838c0 0%, #280868 100%)',
+    circleGrad: 'radial-gradient(circle at 35% 28%, rgba(255,255,255,0.95) 0%, #ede9fe 50%)',
+    glow:       'rgba(160,100,255,0.60)',
   },
   geheim: {
     outerGrad:  'linear-gradient(145deg, #475569 0%, #334155 50%, #0f172a 100%)',
     innerGrad:  'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
-    circleGrad: 'radial-gradient(circle at 35% 30%, #2d3f55 0%, #1e293b 55%)',
+    circleGrad: 'radial-gradient(circle at 35% 28%, #2d3f55 0%, #1e293b 55%)',
     glow:       'rgba(0,0,0,0)',
   },
 }

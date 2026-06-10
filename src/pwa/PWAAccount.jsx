@@ -82,21 +82,24 @@ function BadgeHex({ emoji, categorie, size = 72, verdiend }) {
     <div style={{
       position: 'relative', width: size, height: H, flexShrink: 0,
       filter: verdiend
-        ? `drop-shadow(0 2px 6px ${sh.glow}) drop-shadow(0 0 12px ${sh.glow})`
+        ? `drop-shadow(0 2px 8px ${sh.glow}) drop-shadow(0 0 18px ${sh.glow})`
         : 'grayscale(1)',
       opacity: verdiend ? 1 : 0.35,
       transition: 'opacity 0.2s, filter 0.2s',
     }}>
+      {/* Outer hex — holografische aurora */}
       <div style={{
         position: 'absolute', inset: 0, clipPath: HEX,
         background: verdiend ? sh.outerGrad : cat.ro,
       }} />
+      {/* Inner hex */}
       <div style={{
         position: 'absolute', left: iL, top: iT, width: iW, height: iH,
         clipPath: HEX,
         background: verdiend ? sh.innerGrad : cat.ri,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
+        {/* Emoji cirkel met radiale glans */}
         <div style={{
           width: cD, height: cD, borderRadius: '50%',
           background: verdiend ? sh.circleGrad : cat.rc,
