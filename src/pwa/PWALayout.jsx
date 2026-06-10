@@ -94,6 +94,7 @@ const PULL_THRESHOLD = 72
 
 function usePullToRefresh(mainRef) {
   const touchStartY  = useRef(0)
+  const isTracking   = useRef(false)
   const currentDist  = useRef(0)
   const [pullDist,   setPullDist]   = useState(0)
   const [refreshing, setRefreshing] = useState(false)
@@ -102,14 +103,33 @@ function usePullToRefresh(mainRef) {
     const el = mainRef.current
     if (!el) return
 
+    function resetGesture() {
+      isTracking.current  = false
+      touchStartY.current = 0
+      currentDist.current = 0
+    }
+
+    function onScroll() {
+      // Annuleer een lopend gebaar zodra de gebruiker niet meer helemaal boven is
+      if (el.scrollTop > 0) resetGesture()
+    }
+
     function onTouchStart(e) {
-      if (el.scrollTop === 0) touchStartY.current = e.touches[0].clientY
+      // Alleen starten als pagina volledig naar boven gescrolled is
+      if (el.scrollTop === 0) {
+        touchStartY.current = e.touches[0].clientY
+        isTracking.current  = true
+      }
     }
 
     function onTouchMove(e) {
-      if (!touchStartY.current) return
+      // Niet actief als el inmiddels omlaag gescrolled is of gebaar niet gestart
+      if (!isTracking.current || el.scrollTop > 0) {
+        resetGesture()
+        return
+      }
       const delta = e.touches[0].clientY - touchStartY.current
-      if (delta > 0 && el.scrollTop === 0) {
+      if (delta > 0) {
         e.preventDefault()
         const d = Math.min(delta * 0.45, PULL_THRESHOLD + 24)
         currentDist.current = d
@@ -118,25 +138,26 @@ function usePullToRefresh(mainRef) {
     }
 
     function onTouchEnd() {
+      if (!isTracking.current) return
       if (currentDist.current >= PULL_THRESHOLD) {
         setRefreshing(true)
-        touchStartY.current  = 0
-        currentDist.current  = 0
+        resetGesture()
         setTimeout(() => {
           sessionStorage.setItem('ptr_reload', '1')
           window.location.reload()
         }, 650)
       } else {
         setPullDist(0)
-        currentDist.current = 0
-        touchStartY.current = 0
+        resetGesture()
       }
     }
 
+    el.addEventListener('scroll',     onScroll,     { passive: true })
     el.addEventListener('touchstart', onTouchStart, { passive: true })
     el.addEventListener('touchmove',  onTouchMove,  { passive: false })
     el.addEventListener('touchend',   onTouchEnd)
     return () => {
+      el.removeEventListener('scroll',     onScroll)
       el.removeEventListener('touchstart', onTouchStart)
       el.removeEventListener('touchmove',  onTouchMove)
       el.removeEventListener('touchend',   onTouchEnd)

@@ -459,43 +459,7 @@ export default function PWAAccount() {
                 )
               })}
 
-              {/* Badge detail (inline, verschijnt onder de grid) */}
-              {geselecteerdeBadge && (() => {
-                const b = geselecteerdeBadge
-                const c = CAT[b.categorie]
-                return (
-                  <div style={{
-                    marginTop: '4px', marginBottom: '16px',
-                    background: 'white', border: `1.5px solid ${c.lbo}`,
-                    borderRadius: '16px', padding: '20px',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-                  }}>
-                    <BadgeHex emoji={b.emoji} categorie={b.categorie} size={80} verdiend />
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>{b.naam}</div>
-                      <p style={{ fontSize: '13px', color: '#64748b', margin: 0, lineHeight: 1.6 }}>{b.beschrijving}</p>
-                    </div>
-                    {dbBadgeIds.has(b.id) && (
-                      <div style={{
-                        width: '100%', background: '#faf5ff', border: '1px solid #ddd6fe',
-                        borderRadius: '10px', padding: '10px 12px',
-                        fontSize: '12px', color: '#7c3aed', fontWeight: '500',
-                        display: 'flex', alignItems: 'center', gap: '8px',
-                      }}>
-                        <span>🎖️</span> Handmatig toegekend door een admin
-                      </div>
-                    )}
-                    <button
-                      onClick={() => setGeselecteerdeBadge(null)}
-                      style={{
-                        background: '#f1f5f9', border: 'none', borderRadius: '10px',
-                        padding: '8px 22px', fontSize: '13px', fontWeight: '600',
-                        color: '#475569', cursor: 'pointer',
-                      }}
-                    >Sluiten</button>
-                  </div>
-                )
-              })()}
+              {/* Badge modal — wordt apart gerenderd buiten de scroll context */}
             </>
           )}
         </div>
@@ -587,6 +551,93 @@ export default function PWAAccount() {
           </button>
         </div>
       )}
+
+      {/* ── Badge modal overlay ── */}
+      {geselecteerdeBadge && (() => {
+        const b = geselecteerdeBadge
+        const c = CAT[b.categorie]
+        return (
+          <>
+            {/* Backdrop */}
+            <div
+              onClick={() => setGeselecteerdeBadge(null)}
+              style={{
+                position: 'fixed', inset: 0, zIndex: 300,
+                background: 'rgba(0,0,0,0.55)',
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
+              }}
+            />
+            {/* Kaart */}
+            <div style={{
+              position: 'fixed', top: '50%', left: '50%', zIndex: 301,
+              transform: 'translate(-50%, -50%)',
+              background: 'white', borderRadius: '28px',
+              padding: '36px 28px 28px',
+              width: 'min(340px, calc(100vw - 32px))',
+              boxShadow: '0 32px 80px rgba(0,0,0,0.3)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px',
+            }}>
+              {/* Sluitknop */}
+              <button
+                onClick={() => setGeselecteerdeBadge(null)}
+                style={{
+                  position: 'absolute', top: '16px', right: '16px',
+                  width: '32px', height: '32px', borderRadius: '50%',
+                  background: '#f1f5f9', border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '16px', color: '#64748b',
+                }}
+              >×</button>
+
+              <BadgeHex emoji={b.emoji} categorie={b.categorie} size={96} verdiend />
+
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>{b.naam}</div>
+                <span style={{
+                  fontSize: '12px', fontWeight: '600',
+                  padding: '4px 12px', borderRadius: '99px',
+                  background: c.lb, color: c.lc, border: `1px solid ${c.lbo}`,
+                }}>
+                  {c.label}
+                </span>
+              </div>
+
+              <p style={{ fontSize: '14px', color: '#475569', textAlign: 'center', lineHeight: 1.65, margin: 0 }}>
+                {b.beschrijving}
+              </p>
+
+              <div style={{
+                width: '100%', background: '#f0fdf4', border: '1px solid #bbf7d0',
+                borderRadius: '14px', padding: '12px 14px',
+                display: 'flex', alignItems: 'center', gap: '10px',
+              }}>
+                <div style={{
+                  width: '30px', height: '30px', borderRadius: '50%', flexShrink: 0,
+                  background: '#dcfce7', border: '1.5px solid #86efac',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '13px', color: '#16a34a', fontWeight: '700',
+                }}>✓</div>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#166534' }}>Verdiend!</div>
+                  {dbBadgeIds.has(b.id) && (
+                    <div style={{ fontSize: '11px', color: '#7c3aed', marginTop: '2px' }}>🎖️ Handmatig toegekend door een admin</div>
+                  )}
+                </div>
+              </div>
+
+              <button
+                onClick={() => setGeselecteerdeBadge(null)}
+                style={{
+                  width: '100%', background: '#f1f5f9', border: 'none',
+                  borderRadius: '14px', padding: '14px', fontSize: '14px',
+                  fontWeight: '600', color: '#475569', cursor: 'pointer',
+                }}
+              >Sluiten</button>
+            </div>
+          </>
+        )
+      })()}
 
       {/* ── Sticky save bar ── */}
       {tab === 'instellingen' && isDirty && (
