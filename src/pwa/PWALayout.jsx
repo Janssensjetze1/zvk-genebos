@@ -5,7 +5,6 @@ import { useSeason } from '../context/SeasonContext'
 import { useMatchdayCountdown } from '../hooks/useMatchdayCountdown'
 import { AnnouncementPopup } from '../components/AnnouncementPopup'
 import PWASplashScreen from './PWASplashScreen'
-import ShakeEasterEgg from './ShakeEasterEgg'
 
 const ICON_SIZE = 20
 
@@ -145,7 +144,6 @@ export default function PWALayout({ children }) {
       </main>
 
       <AnnouncementPopup />
-      <ShakeEasterEgg />
 
       {/* Bottom nav */}
       <nav style={{

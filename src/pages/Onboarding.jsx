@@ -9,6 +9,8 @@ export default function Onboarding() {
 
   const [stap, setStap] = useState(1)
   const [naam, setNaam] = useState(profile?.display_name ?? '')
+  const [bijnaam, setBijnaam] = useState(profile?.nickname ?? '')
+  const [geboortedatum, setGeboortedatum] = useState(profile?.birth_date ?? '')
   const [fotoBestand, setFotoBestand] = useState(null)
   const [fotoPreview, setFotoPreview] = useState(null)
   const [opslaan, setOpslaan] = useState(false)
@@ -52,6 +54,8 @@ export default function Onboarding() {
     // Lokaal profiel meteen updaten zodat ProtectedRoute niet meer naar /onboarding stuurt
     const profileUpdate = { onboarding_done: true }
     if (naam.trim()) profileUpdate.display_name = naam.trim()
+    if (bijnaam.trim()) profileUpdate.nickname = bijnaam.trim()
+    if (geboortedatum) profileUpdate.birth_date = geboortedatum
     if (photo_url) profileUpdate.avatar_url = photo_url
     patchProfile(profileUpdate)
 
@@ -66,6 +70,8 @@ export default function Onboarding() {
     if (heeftSpeler && naam.trim()) {
       const updateData = { name: naam.trim() }
       if (photo_url) updateData.photo_url = photo_url
+      if (bijnaam.trim()) updateData.nickname = bijnaam.trim()
+      if (geboortedatum) updateData.birth_date = geboortedatum
       supabase.from('players').update(updateData).eq('id', profile.player_id).then()
     }
   }
@@ -178,20 +184,41 @@ export default function Onboarding() {
 
               {/* Naam */}
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '6px' }}>
-                  Jouw naam *
-                </label>
+                <label style={labelStijl}>Jouw naam *</label>
                 <input
                   type="text"
                   value={naam}
                   onChange={e => setNaam(e.target.value)}
                   placeholder="Voor- en achternaam"
                   autoFocus
-                  style={{
-                    width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px',
-                    padding: '10px 14px', fontSize: '14px', color: '#0f172a',
-                    outline: 'none', background: 'white', boxSizing: 'border-box',
-                  }}
+                  style={inputStijl}
+                />
+              </div>
+
+              {/* Bijnaam */}
+              <div>
+                <label style={labelStijl}>
+                  Bijnaam <span style={{ color: '#94a3b8', fontWeight: '400' }}>(optioneel)</span>
+                </label>
+                <input
+                  type="text"
+                  value={bijnaam}
+                  onChange={e => setBijnaam(e.target.value)}
+                  placeholder="Bv. Den Bomber, Dretze, ..."
+                  style={inputStijl}
+                />
+              </div>
+
+              {/* Geboortedatum */}
+              <div>
+                <label style={labelStijl}>
+                  Geboortedatum <span style={{ color: '#94a3b8', fontWeight: '400' }}>(optioneel)</span>
+                </label>
+                <input
+                  type="date"
+                  value={geboortedatum}
+                  onChange={e => setGeboortedatum(e.target.value)}
+                  style={inputStijl}
                 />
               </div>
 
@@ -224,4 +251,14 @@ const knopStijl = {
   width: '100%', background: '#0f172a', color: 'white', border: 'none',
   borderRadius: '8px', padding: '12px', fontSize: '14px', fontWeight: '600',
   cursor: 'pointer',
+}
+
+const labelStijl = {
+  display: 'block', fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '6px',
+}
+
+const inputStijl = {
+  width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px',
+  padding: '10px 14px', fontSize: '14px', color: '#0f172a',
+  outline: 'none', background: 'white', boxSizing: 'border-box',
 }
