@@ -33,8 +33,19 @@
 export const BADGES = [
 
   // ── BRONS ─────────────────────────────────────────────────────────────────
-  // Bereikbaar voor iedereen — eerste stappen
 
+  {
+    id: 'ingelogd',
+    emoji: '✅',
+    naam: 'Ingelogd',
+    beschrijving: 'Aangemeld op ZVK Genebos.',
+    categorie: 'brons',
+    conditie: () => true,
+  },
+
+  // ── UITGECOMMENTARIEERD — nog niet actief ──────────────────────────────────
+
+  /*
   {
     id: 'debuut',
     emoji: '🎽',
@@ -307,6 +318,8 @@ export const BADGES = [
     categorie: 'geheim',
     conditie: (s) => s.gewonnenOpVerjaardag === true,
   },
+  */
+
 ]
 
 // Hulpfunctie: geef alle vrijgespeelde badges terug voor een stats-object
