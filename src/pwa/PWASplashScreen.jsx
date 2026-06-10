@@ -2,19 +2,20 @@ import { useEffect, useState, useRef } from 'react'
 
 const QUOTES = [
   { text: "Voetbal is simpel, maar het moeilijkste da er is, is simpel voetballen.", auteur: "Johan Cruijff" },
-  { text: "Ge kunt beter ne keer verliezen dan altijd tweede staan.", auteur: "Johan Cruijff" },
-  { text: "In het voetbal wint altijd de beste ploeg. Soms is da de tegenstander.", auteur: "Johan Cruijff" },
-  { text: "Amai, da was ne schone goal!", auteur: "Elke supporter ooit" },
-  { text: "De bal is rond en de wedstrijd duurt negentig minuten.", auteur: "Sepp Herberger" },
-  { text: "Ze emme verloren met 10-0 maar ze emme gevochten tot het einde.", auteur: "Elke trainer ooit" },
-  { text: "Ge moet altijd geloven, zelfs as het ni meer kan.", auteur: "Marc Wilmots" },
+  { text: "Kampioen , we pakken de beker ok nog!", auteur: "Dretze" },
+  { text: "Burgemeester de Bie,beter wordt het nie.", auteur: "Nicole" },
+  { text: "zoals ZVK’ers tegenwoordig doen won ik die wedstrijd ", auteur: "Lander Engelen" },
+  { text: "Ik mut een wijf hemme om te daanse.", auteur: "Frank Den voorzitter" },
+  { text: "Nog een kleine fun fact: al die lichte maaltijden hebben me niet geholpen, heb quasi heel de namiddag op het kleinste kamertje gezeten", auteur: "Lander Engelen" },
+  { text: "Match gedaan, beker de lucht in, bubbels van de voorzitter opdrinken en een goei lange nabespreking in de Kantin. Gelukkig is het nog ni gedaan voor dit jaar, den DUBBEL is nog een optie. Den Antwaaarp deed het ons vorig seizoen voor. Zeer benieuwd of de gouden generatie zich hiervoor nog opgeladen krijgt.. Iedereen is bang van Genebos, nu ook tijdens de match", auteur: "Dretze" },
   { text: "Voetbal is ne godsdienst en het stadion is onze kerk.", auteur: "Pep Guardiola" },
-  { text: "Da's zijn tiende van het seizoen! Den kerel is ne machine!", auteur: "ZVK commentator" },
-  { text: "Ik train om te winnen. Wie ni wil winnen, moet ni trainen.", auteur: "Zlatan Ibrahimović" },
-  { text: "Some people think football is a matter of life and death. It's much more important than that.", auteur: "Bill Shankly" },
+  { text: "Mijne zondag begon zoals elke zondag bij mij, goed uitslapen zoals het hoort en een beetje bekomen van de lange nacht die ik tegenmoed was gegaan", auteur: "Jean" },
+  { text: "Had ik nog zoveel moeten eten veu zowe een match.. Das nie het slimste idee dak had", auteur: "Luyte" },
+  { text: "Ik heb wel op de deklat gesjot eh", auteur: "Dretze" },
   { text: "J'ai soif.", auteur: "Dretze" },
   { text: "Er werd weer verdedigd als janetten.", auteur: "De ZVK Supporters" },
   { text: "Dit jaar spelen we kampioen.", auteur: "Dretze" },
+  { text: "Dieje he teveel deklatjuice gedronken", auteur: "Werres" },
 ]
 
 function randomDuur() {
