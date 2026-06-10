@@ -144,7 +144,7 @@ export default function PWALayout({ children }) {
       {/* Bottom nav */}
       <nav style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
-        paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom) + 36px)',
         paddingTop: '8px',
         paddingLeft: '16px', paddingRight: '16px',
         background: 'linear-gradient(to top, rgba(10,10,20,0.98) 60%, transparent)',

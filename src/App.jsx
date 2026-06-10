@@ -125,7 +125,7 @@ function AppRoutes() {
         <AdminRoute skipOnboarding={true}><Layout><Admin /></Layout></AdminRoute>
       } />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+<Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
