@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { BADGES, berekenBadges, CATEGORIE_VOLGORDE, CAT } from '../data/badges'
+import { BADGES, berekenBadges, CATEGORIE_VOLGORDE, CAT, SHINE } from '../data/badges'
 
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
 
@@ -64,7 +64,8 @@ function computeStats({ goalsArr, assistsArr, matchesArr, seizoenId, userCreated
 
 // ── Hex badge ───────────────────────────────────────────────────────────────
 function BadgeHex({ emoji, categorie, size = 64, verdiend }) {
-  const cat = CAT[categorie] ?? CAT.zilver
+  const cat = CAT[categorie]   ?? CAT.zilver
+  const sh  = SHINE[categorie] ?? SHINE.zilver
   const H  = Math.round(size * 1.155)
   const iW = Math.round(size * 0.8125)
   const iH = Math.round(iW * 1.155)
@@ -75,18 +76,25 @@ function BadgeHex({ emoji, categorie, size = 64, verdiend }) {
   return (
     <div style={{
       position: 'relative', width: size, height: H, flexShrink: 0,
-      filter: verdiend ? 'none' : 'grayscale(1)',
+      filter: verdiend
+        ? `drop-shadow(0 2px 6px ${sh.glow}) drop-shadow(0 0 12px ${sh.glow})`
+        : 'grayscale(1)',
       opacity: verdiend ? 1 : 0.35,
       transition: 'opacity 0.2s, filter 0.2s',
     }}>
-      <div style={{ position: 'absolute', inset: 0, clipPath: HEX, background: cat.ro }} />
+      <div style={{
+        position: 'absolute', inset: 0, clipPath: HEX,
+        background: verdiend ? sh.outerGrad : cat.ro,
+      }} />
       <div style={{
         position: 'absolute', left: iL, top: iT, width: iW, height: iH,
-        clipPath: HEX, background: cat.ri,
+        clipPath: HEX,
+        background: verdiend ? sh.innerGrad : cat.ri,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         <div style={{
-          width: cD, height: cD, borderRadius: '50%', background: cat.rc,
+          width: cD, height: cD, borderRadius: '50%',
+          background: verdiend ? sh.circleGrad : cat.rc,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: fs, lineHeight: 1,
         }}>

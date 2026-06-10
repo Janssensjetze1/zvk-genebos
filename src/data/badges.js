@@ -112,6 +112,47 @@ export const BADGES = [
 
 ]
 
+// Metallic/shiny gradients voor verdiende badges
+// outerGrad = buitenste hexring, innerGrad = binnenste hex, circleGrad = emoji-cirkel, glow = drop-shadow kleur
+export const SHINE = {
+  brons: {
+    outerGrad:  'linear-gradient(145deg, #f5d0a0 0%, #e8a87c 30%, #c07020 65%, #f0c070 100%)',
+    innerGrad:  'linear-gradient(145deg, #d49050 0%, #7a3f0a 100%)',
+    circleGrad: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.85) 0%, #fff3e0 55%)',
+    glow:       'rgba(232,168,100,0.55)',
+  },
+  zilver: {
+    outerGrad:  'linear-gradient(145deg, #ffffff 0%, #ccd8e8 25%, #8aa4bc 55%, #dde8f5 100%)',
+    innerGrad:  'linear-gradient(145deg, #8aaabf 0%, #3a5068 100%)',
+    circleGrad: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95) 0%, #eceff1 55%)',
+    glow:       'rgba(100,140,180,0.45)',
+  },
+  goud: {
+    outerGrad:  'linear-gradient(145deg, #fff8b0 0%, #ffe082 30%, #b06c00 65%, #ffd54f 100%)',
+    innerGrad:  'linear-gradient(145deg, #d4a020 0%, #7a4a00 100%)',
+    circleGrad: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.88) 0%, #fff8e1 55%)',
+    glow:       'rgba(255,200,0,0.55)',
+  },
+  platina: {
+    outerGrad:  'linear-gradient(145deg, #e8f6ff 0%, #bae6fd 28%, #0c5080 65%, #90d0f8 100%)',
+    innerGrad:  'linear-gradient(145deg, #4090c0 0%, #062840 100%)',
+    circleGrad: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.92) 0%, #f0f9ff 55%)',
+    glow:       'rgba(56,189,248,0.5)',
+  },
+  legendary: {
+    outerGrad:  'linear-gradient(145deg, #ede9fe 0%, #a78bfa 28%, #4c1d95 65%, #c4b5fd 100%)',
+    innerGrad:  'linear-gradient(145deg, #8060d0 0%, #2a0870 100%)',
+    circleGrad: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.88) 0%, #ede9fe 55%)',
+    glow:       'rgba(167,139,250,0.6)',
+  },
+  geheim: {
+    outerGrad:  'linear-gradient(145deg, #475569 0%, #334155 50%, #0f172a 100%)',
+    innerGrad:  'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
+    circleGrad: 'radial-gradient(circle at 35% 30%, #2d3f55 0%, #1e293b 55%)',
+    glow:       'rgba(0,0,0,0)',
+  },
+}
+
 // Hulpfunctie: geef alle vrijgespeelde badges terug voor een stats-object
 export function berekenBadges(stats) {
   return BADGES.filter(b => {
