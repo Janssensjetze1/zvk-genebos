@@ -108,7 +108,7 @@ export default function PWAAccount() {
   const { actief: seizoen } = useSeason()
   const fotoInputRef = useRef(null)
 
-  const [tab, setTab] = useState('badges')
+  const [tab, setTab] = useState(profile?.player_id ? 'badges' : 'instellingen')
 
   // Settings state
   const [speler, setSpeler]           = useState(null)
@@ -316,56 +316,43 @@ export default function PWAAccount() {
         )}
       </div>
 
-      {/* ── Tab bar ── */}
-      <div style={{ padding: '0 16px' }}>
-        <div style={{
-          display: 'flex', gap: '4px',
-          background: '#f1f5f9', borderRadius: '14px', padding: '4px',
-          margin: '16px 0',
-        }}>
-          {[
-            { id: 'badges',       label: '🏅 Badges' },
-            { id: 'instellingen', label: '⚙️ Instellingen' },
-          ].map(t => (
-            <button
-              key={t.id}
-              onClick={() => { setTab(t.id); setGeselecteerdeBadge(null) }}
-              style={{
-                flex: 1, padding: '10px', borderRadius: '10px', border: 'none',
-                background: tab === t.id ? 'white' : 'transparent',
-                color: tab === t.id ? '#0f172a' : '#64748b',
-                fontSize: '13px', fontWeight: tab === t.id ? '700' : '500',
-                cursor: 'pointer',
-                boxShadow: tab === t.id ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.15s',
-              }}
-            >
-              {t.label}
-            </button>
-          ))}
+      {/* ── Tab bar — enkel tonen als speler gekoppeld is ── */}
+      {profile?.player_id && (
+        <div style={{ padding: '0 16px' }}>
+          <div style={{
+            display: 'flex', gap: '4px',
+            background: '#f1f5f9', borderRadius: '14px', padding: '4px',
+            margin: '16px 0',
+          }}>
+            {[
+              { id: 'badges',       label: '🏅 Badges' },
+              { id: 'instellingen', label: '⚙️ Instellingen' },
+            ].map(t => (
+              <button
+                key={t.id}
+                onClick={() => { setTab(t.id); setGeselecteerdeBadge(null) }}
+                style={{
+                  flex: 1, padding: '10px', borderRadius: '10px', border: 'none',
+                  background: tab === t.id ? 'white' : 'transparent',
+                  color: tab === t.id ? '#0f172a' : '#64748b',
+                  fontSize: '13px', fontWeight: tab === t.id ? '700' : '500',
+                  cursor: 'pointer',
+                  boxShadow: tab === t.id ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* ── Tab: Badges ── */}
-      {tab === 'badges' && (
+      {/* ── Tab: Badges — enkel bereikbaar voor accounts met player_id ── */}
+      {tab === 'badges' && profile?.player_id && (
         <div style={{ padding: '0 16px' }}>
 
-          {/* Geen spelersfiche gekoppeld */}
-          {!profile?.player_id ? (
-            <div style={{
-              background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px',
-              padding: '32px 24px', textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '40px', marginBottom: '14px' }}>🔗</div>
-              <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>
-                Geen spelersfiche gekoppeld
-              </div>
-              <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
-                Je account is nog niet gekoppeld aan een spelersfiche. Een admin doet dit.
-                Pas dan worden jouw badges berekend.
-              </p>
-            </div>
-          ) : badgesLoading ? (
+          {badgesLoading ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 0', gap: '12px' }}>
               <div style={{ width: '22px', height: '22px', border: '2.5px solid #e2e8f0', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
               <span style={{ fontSize: '13px', color: '#94a3b8' }}>Badges berekenen...</span>
