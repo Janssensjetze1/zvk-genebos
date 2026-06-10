@@ -48,8 +48,16 @@ function computeStats({ goalsArr, assistsArr, matchesArr, seizoenId, userCreated
         ? Math.floor((Date.now() - new Date(userCreatedAt).getTime()) / 86400000)
         : 0) >= 60,
 
+    cleanSheets: matchesArr.filter(m => {
+      const match = m.match
+      if (!match) return false
+      const zvkIsThuis = match.home_team?.is_zvk
+      const tegScore = zvkIsThuis ? match.away_score : match.home_score
+      return tegScore !== null && tegScore === 0
+    }).length,
+
     aantalWedstrijdenRij: 0, maxWedstrijdenRij: 0,
-    seizonenVolledigAanwezig: 0, topScorerSeizoenen: 0,
+    seizoenenVolledigAanwezig: 0, topScorerSeizoenen: 0,
     grootsteWinstMarge: 0, nachtbraker: false, gewonnenOpVerjaardag: false,
   }
 }
@@ -294,7 +302,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
         .select('id, match_id, match:match_id(season_id)')
         .eq('assist_id', speler.id),
       supabase.from('match_players')
-        .select('match_id, match:match_id(season_id)')
+        .select('match_id, match:match_id(season_id, home_score, away_score, home_team:home_team_id(is_zvk), away_team:away_team_id(is_zvk))')
         .eq('player_id', speler.id),
     ])
 
