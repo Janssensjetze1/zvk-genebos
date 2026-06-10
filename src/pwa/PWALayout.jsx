@@ -135,7 +135,7 @@ export default function PWALayout({ children }) {
       </header>
 
       {/* Page content */}
-      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: '100px' }}>
+      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: '110px' }}>
         {children}
       </main>
 
@@ -144,62 +144,67 @@ export default function PWALayout({ children }) {
       {/* Bottom nav */}
       <nav style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
-        background: 'rgba(10,10,20,0.97)',
-        borderTop: '1px solid rgba(255,255,255,0.07)',
-        display: 'flex',
-        paddingBottom: 'env(safe-area-inset-bottom)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)',
+        paddingTop: '8px',
+        paddingLeft: '16px', paddingRight: '16px',
+        background: 'linear-gradient(to top, rgba(10,10,20,0.98) 60%, transparent)',
+        pointerEvents: 'none',
       }}>
-        <span style={{
-          position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom) + 2px)', right: '8px',
-          fontSize: '9px', color: 'rgba(255,255,255,0.12)', pointerEvents: 'none',
-        }}>v0.1</span>
+        <div style={{
+          background: 'rgba(22,22,38,0.97)',
+          borderRadius: '100px',
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '6px',
+          gap: '2px',
+          pointerEvents: 'all',
+          backdropFilter: 'blur(20px)',
+        }}>
+          <span style={{
+            position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom) + 4px)', right: '24px',
+            fontSize: '9px', color: 'rgba(255,255,255,0.1)', pointerEvents: 'none',
+          }}>v0.1</span>
 
-        {tabs.map(tab => {
-          const active = tab.path === '/app'
-            ? location.pathname === '/app'
-            : location.pathname.startsWith(tab.path)
-          return (
-            <Link
-              key={tab.path}
-              to={tab.path}
-              style={{
-                flex: 1, display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center',
-                padding: '16px 2px 14px',
-                textDecoration: 'none',
-                color: active ? '#93c5fd' : 'rgba(255,255,255,0.35)',
-                gap: '2px',
-                transition: 'color 0.2s',
-                minWidth: 0, position: 'relative',
-              }}
-            >
-              {/* Actieve indicator streepje */}
-              <div style={{
-                position: 'absolute', top: 0, left: '50%',
-                transform: 'translateX(-50%)',
-                width: active ? '20px' : '0px', height: '2px',
-                background: '#93c5fd', borderRadius: '0 0 4px 4px',
-                transition: 'width 0.25s cubic-bezier(0.34,1.56,0.64,1)',
-              }} />
-
-              <div
-                className={active ? 'tab-bounce' : ''}
-                key={active ? 'active' : 'inactive'}
-                style={{ opacity: active ? 1 : 0.5, flexShrink: 0, transition: 'opacity 0.2s' }}
+          {tabs.map(tab => {
+            const active = tab.path === '/app'
+              ? location.pathname === '/app'
+              : location.pathname.startsWith(tab.path)
+            return (
+              <Link
+                key={tab.path}
+                to={tab.path}
+                style={{
+                  flex: active ? '0 0 auto' : 1,
+                  display: 'flex',
+                  alignItems: 'center', justifyContent: 'center',
+                  gap: '7px',
+                  padding: active ? '10px 18px' : '10px 0',
+                  textDecoration: 'none',
+                  borderRadius: '100px',
+                  background: active ? 'white' : 'transparent',
+                  color: active ? '#0f172a' : 'rgba(255,255,255,0.35)',
+                  transition: 'all 0.25s cubic-bezier(0.34,1.2,0.64,1)',
+                  whiteSpace: 'nowrap',
+                  minWidth: active ? 'auto' : 0,
+                }}
               >
-                {tab.icon}
-              </div>
-              <span style={{
-                fontSize: '9px', fontWeight: active ? '700' : '500',
-                letterSpacing: '0.01em', whiteSpace: 'nowrap',
-                overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
-                transition: 'font-weight 0.15s',
-              }}>
-                {tab.label}
-              </span>
-            </Link>
-          )
-        })}
+                <div style={{ flexShrink: 0, display: 'flex' }}>
+                  {tab.icon}
+                </div>
+                {active && (
+                  <span style={{
+                    fontSize: '13px', fontWeight: '700',
+                    letterSpacing: '-0.01em',
+                  }}>
+                    {tab.label}
+                  </span>
+                )}
+              </Link>
+            )
+          })}
+        </div>
       </nav>
     </div>
   )
