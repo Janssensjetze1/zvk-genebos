@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import { ArchiefKiezer } from '../components/ArchiefKiezer'
+import SpelerDetail from '../components/SpelerDetail'
 
 export default function Spelers() {
   const { actief: seizoen, seizoenen, switchSeizoen } = useSeason()
@@ -9,6 +10,7 @@ export default function Spelers() {
   const [stats, setStats] = useState({})
   const [loading, setLoading] = useState(true)
   const [zoek, setZoek] = useState('')
+  const [geselecteerdeSpeler, setGeselecteerdeSpeler] = useState(null)
 
   useEffect(() => { fetchSpelers() }, [])
   useEffect(() => { if (spelers.length > 0 && seizoen) fetchStats() }, [spelers, seizoen])
@@ -101,21 +103,40 @@ export default function Spelers() {
           {gesorteerd.map((speler, i) => {
             const s = stats[speler.id] ?? { goals: 0, assists: 0, matches: 0 }
             const isTopscorer = i === 0 && s.goals > 0
-            return <SpelerKaart key={speler.id} speler={speler} stats={s} isTopscorer={isTopscorer} />
+            return (
+              <SpelerKaart
+                key={speler.id}
+                speler={speler}
+                stats={s}
+                isTopscorer={isTopscorer}
+                onClick={() => setGeselecteerdeSpeler(speler)}
+              />
+            )
           })}
         </div>
+      )}
+
+      {/* Speler detail modal */}
+      {geselecteerdeSpeler && (
+        <SpelerDetail
+          speler={geselecteerdeSpeler}
+          seizoenId={seizoen?.id}
+          onClose={() => setGeselecteerdeSpeler(null)}
+          variant="modal"
+        />
       )}
     </div>
   )
 }
 
-function SpelerKaart({ speler, stats, isTopscorer }) {
+function SpelerKaart({ speler, stats, isTopscorer, onClick }) {
   const [hover, setHover] = useState(false)
 
   return (
     <div
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      onClick={onClick}
       style={{
         background: 'white',
         border: `1px solid ${hover ? '#bfdbfe' : '#e2e8f0'}`,
@@ -123,7 +144,7 @@ function SpelerKaart({ speler, stats, isTopscorer }) {
         overflow: 'hidden',
         transition: 'all 0.2s',
         boxShadow: hover ? '0 4px 20px rgba(59,130,246,0.1)' : '0 1px 3px rgba(0,0,0,0.04)',
-        cursor: 'default',
+        cursor: 'pointer',
       }}
     >
       {/* Foto sectie */}

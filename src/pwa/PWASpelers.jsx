@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
+import SpelerDetail from '../components/SpelerDetail'
 
 export default function PWASpelers() {
   const { actief: seizoen } = useSeason()
@@ -8,6 +9,7 @@ export default function PWASpelers() {
   const [goals, setGoals] = useState([])
   const [loading, setLoading] = useState(true)
   const [zoek, setZoek] = useState('')
+  const [geselecteerdeSpeler, setGeselecteerdeSpeler] = useState(null)
 
   useEffect(() => { if (seizoen) fetchData() }, [seizoen])
 
@@ -59,10 +61,27 @@ export default function PWASpelers() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {gefilterd.map((speler, i) => (
-            <div key={speler.id} style={{
-              background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px',
-              padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '14px',
-            }}>
+            <div
+              key={speler.id}
+              onClick={() => setGeselecteerdeSpeler(speler)}
+              style={{
+                background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px',
+                padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '14px',
+                cursor: 'pointer', transition: 'border-color 0.15s, box-shadow 0.15s',
+              }}
+              onPointerDown={e => {
+                e.currentTarget.style.boxShadow = '0 2px 12px rgba(59,130,246,0.12)'
+                e.currentTarget.style.borderColor = '#bfdbfe'
+              }}
+              onPointerUp={e => {
+                e.currentTarget.style.boxShadow = 'none'
+                e.currentTarget.style.borderColor = '#e2e8f0'
+              }}
+              onPointerLeave={e => {
+                e.currentTarget.style.boxShadow = 'none'
+                e.currentTarget.style.borderColor = '#e2e8f0'
+              }}
+            >
               {/* Positie */}
               <span style={{ fontSize: '12px', color: '#cbd5e1', width: '20px', textAlign: 'center', flexShrink: 0 }}>
                 {i + 1}
@@ -97,9 +116,24 @@ export default function PWASpelers() {
                   <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600' }}>doelpunten</div>
                 </div>
               )}
+
+              {/* Pijltje */}
+              <svg style={{ flexShrink: 0, color: '#cbd5e1' }} width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
             </div>
           ))}
         </div>
+      )}
+
+      {/* Speler detail bottom sheet */}
+      {geselecteerdeSpeler && (
+        <SpelerDetail
+          speler={geselecteerdeSpeler}
+          seizoenId={seizoen?.id}
+          onClose={() => setGeselecteerdeSpeler(null)}
+          variant="sheet"
+        />
       )}
     </div>
   )

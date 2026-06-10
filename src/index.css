@@ -150,3 +150,8 @@ button:active:not(:disabled) {
 .pulse-soft {
   animation: pulse-soft 1.5s ease-in-out infinite;
 }
+
+/* Loading spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
