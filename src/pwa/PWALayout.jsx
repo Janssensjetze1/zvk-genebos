@@ -1,8 +1,10 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
 import { useMatchdayCountdown } from '../hooks/useMatchdayCountdown'
 import { AnnouncementPopup } from '../components/AnnouncementPopup'
+import PWASplashScreen from './PWASplashScreen'
 
 const ICON_SIZE = 20
 
@@ -93,9 +95,11 @@ export default function PWALayout({ children }) {
   const { isAdmin } = useAuth()
   const { actief: seizoen } = useSeason()
   const invullenActive = location.pathname.startsWith('/app/invullen')
+  const [splashKlaar, setSplashKlaar] = useState(false)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f8fafc' }}>
+      {!splashKlaar && <PWASplashScreen onKlaar={() => setSplashKlaar(true)} />}
 
       {/* Top header */}
       <header style={{
