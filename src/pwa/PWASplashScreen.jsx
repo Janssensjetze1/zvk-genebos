@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 
-const QUOTES = [
+export const QUOTES = [
   { text: "Voetbal is simpel, maar het moeilijkste da er is, is simpel voetballen.", auteur: "Johan Cruijff" },
   { text: "Kampioen , we pakken de beker ok nog!", auteur: "Dretze" },
   { text: "Burgemeester de Bie,beter wordt het nie.", auteur: "Nicole" },
@@ -20,10 +20,7 @@ const QUOTES = [
 ]
 
 function randomDuur() {
-  const kans = Math.random()
-  if (kans < 0.15) return 6000 + Math.random() * 2000  // 15%: express lang (6-8s)
-  if (kans < 0.35) return 3500 + Math.random() * 1500  // 20%: iets langer (3.5-5s)
-  return 1500 + Math.random() * 1500                   // 65%: normaal (1.5-3s)
+  return 5000
 }
 
 export default function PWASplashScreen({ onKlaar }) {
