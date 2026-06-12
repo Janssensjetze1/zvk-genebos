@@ -27,6 +27,7 @@ export default function PWASplashScreen({ onKlaar }) {
   // Pull-to-refresh herlaadt de pagina — splash overslaan
   if (sessionStorage.getItem('ptr_reload')) {
     sessionStorage.removeItem('ptr_reload')
+    sessionStorage.setItem('splash_done', '1')
     setTimeout(onKlaar, 0)
     return null
   }
@@ -80,6 +81,12 @@ export default function PWASplashScreen({ onKlaar }) {
 
       {/* Quote */}
       <div style={{ textAlign: 'center', marginBottom: '48px', maxWidth: '300px' }}>
+        <p style={{
+          fontSize: '10px', fontWeight: '700', color: 'rgba(255,255,255,0.25)',
+          textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: '14px',
+        }}>
+          Quote of the day
+        </p>
         <p style={{
           fontSize: '15px', fontStyle: 'italic', color: 'rgba(255,255,255,0.85)',
           lineHeight: 1.65, marginBottom: '12px', fontWeight: '400',

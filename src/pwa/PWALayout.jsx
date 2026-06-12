@@ -169,7 +169,8 @@ export default function PWALayout({ children }) {
   const { isAdmin } = useAuth()
   const { actief: seizoen } = useSeason()
   const invullenActive = location.pathname.startsWith('/app/invullen')
-  const [splashKlaar, setSplashKlaar] = useState(false)
+  // Splash enkel tonen bij eerste load van de sessie, niet bij navigatie tussen pagina's
+  const [splashKlaar, setSplashKlaar] = useState(() => !!sessionStorage.getItem('splash_done'))
 
   const mainRef = useRef(null)
   const { pullDist, refreshing } = usePullToRefresh(mainRef)
@@ -178,7 +179,7 @@ export default function PWALayout({ children }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f8fafc' }}>
-      {!splashKlaar && <PWASplashScreen onKlaar={() => setSplashKlaar(true)} />}
+      {!splashKlaar && <PWASplashScreen onKlaar={() => { sessionStorage.setItem('splash_done', '1'); setSplashKlaar(true) }} />}
 
       {/* Top header */}
       <header style={{
