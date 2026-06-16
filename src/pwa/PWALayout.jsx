@@ -220,14 +220,14 @@ function ProfielPopover({ open, onClose }) {
       {/* Popover kaartje */}
       <div style={{
         position: 'fixed', top: '72px', left: '16px', zIndex: 99,
-        background: 'rgba(255,255,255,0.08)',
-        border: '1px solid rgba(255,255,255,0.18)',
-        borderRadius: '20px',
+        background: 'rgba(18,18,32,0.97)',
+        border: '1px solid rgba(255,255,255,0.12)',
+        borderRadius: '16px',
         overflow: 'hidden',
-        boxShadow: '0 16px 48px rgba(0,0,0,0.4), inset 0 1.5px 0 rgba(255,255,255,0.22), inset 0 0 0 0.5px rgba(255,255,255,0.1)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
         minWidth: '170px',
-        backdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
-        WebkitBackdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
       }}>
         <button
           onClick={() => ga('/app/badges')}
@@ -286,11 +286,9 @@ function MeerMenu({ open, onClose, isAdmin }) {
       <div style={{
         position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 201,
         width: '280px',
-        background: 'rgba(255,255,255,0.07)',
-        backdropFilter: 'blur(56px) saturate(200%) brightness(1.05)',
-        WebkitBackdropFilter: 'blur(56px) saturate(200%) brightness(1.05)',
-        borderLeft: '1px solid rgba(255,255,255,0.15)',
-        boxShadow: '-16px 0 64px rgba(0,0,0,0.4), inset 1px 0 0 rgba(255,255,255,0.12)',
+        background: 'rgba(12,12,24,0.98)',
+        borderLeft: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: '-16px 0 48px rgba(0,0,0,0.5)',
         display: 'flex', flexDirection: 'column',
         paddingTop: 'calc(env(safe-area-inset-top) + 20px)',
         paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)',
@@ -382,11 +380,7 @@ export default function PWALayout({ children }) {
       {/* Top header */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 50,
-        background: 'rgba(255,255,255,0.06)',
-        backdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
-        WebkitBackdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
-        borderBottom: '1px solid rgba(255,255,255,0.12)',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18), 0 4px 24px rgba(0,0,0,0.2)',
+        background: 'rgba(10,10,20,0.97)',
         padding: '0 20px',
         height: '62px', display: 'flex', alignItems: 'center',
         justifyContent: 'space-between',
@@ -404,20 +398,31 @@ export default function PWALayout({ children }) {
           <Avatar src={avatarSrc} naam={avatarNaam} size={38} />
         </button>
 
-        {/* Midden: logo in cirkel, uitstekend onder de header */}
+        {/* Midden: logo in cirkel — animeert mee bij PTR */}
         <div style={{
           position: 'absolute', left: '50%',
           bottom: '-14px',
-          transform: 'translateX(-50%)',
+          transform: `translateX(-50%) scale(${pulling ? 1 + progress * 0.55 : 1})`,
+          transition: refreshing ? 'transform 0.3s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.3s' : 'transform 0.2s ease',
           width: '58px', height: '58px',
           borderRadius: '50%',
           background: 'rgba(10,10,20,0.97)',
           border: '2.5px solid rgba(255,255,255,0.18)',
-          boxShadow: '0 0 0 1px rgba(99,102,241,0.3), 0 4px 20px rgba(0,0,0,0.6), 0 0 24px rgba(99,102,241,0.18)',
+          boxShadow: pulling
+            ? `0 0 0 ${progress * 4}px rgba(99,102,241,${progress * 0.3}), 0 0 ${8 + progress * 28}px rgba(99,102,241,${0.15 + progress * 0.4}), 0 4px 20px rgba(0,0,0,0.6)`
+            : '0 0 0 1px rgba(99,102,241,0.3), 0 4px 20px rgba(0,0,0,0.6), 0 0 24px rgba(99,102,241,0.18)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 2,
         }}>
-          <img src="/logo.png" alt="ZVK" style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
+          <img
+            src="/logo.png"
+            alt="ZVK"
+            style={{
+              width: '38px', height: '38px', objectFit: 'contain',
+              transform: pulling && !refreshing ? `rotate(${progress * 360}deg)` : undefined,
+              animation: refreshing ? 'spin 0.75s linear infinite' : 'none',
+            }}
+          />
         </div>
 
         {/* Rechts: placeholder zodat logo exact gecentreerd blijft */}
@@ -429,56 +434,6 @@ export default function PWALayout({ children }) {
 
       {/* Meer menu */}
       <MeerMenu open={meerOpen} onClose={() => setMeerOpen(false)} isAdmin={isAdmin} />
-
-      {/* Pull-to-refresh indicator */}
-      {pulling && (() => {
-        // Logo groeit van 28px → 56px, cirkel van 48px → 80px
-        const logoSize  = refreshing ? 52 : 28 + progress * 28
-        const circleSize = refreshing ? 76 : 48 + progress * 32
-        // Begint recht onder de header (62px) en daalt mee met de vinger
-        const topPos    = refreshing
-          ? 62 + 16
-          : 62 + 8 + pullDist * 0.5
-        const degrees   = progress * 360
-        const glow      = refreshing
-          ? '0 0 0 3px rgba(99,102,241,0.35), 0 8px 32px rgba(99,102,241,0.3)'
-          : `0 0 0 ${progress * 3}px rgba(99,102,241,${progress * 0.35}), 0 4px 16px rgba(0,0,0,0.3)`
-
-        return (
-          <div style={{
-            position: 'fixed',
-            top: `${topPos}px`,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 49,
-            width: `${circleSize}px`,
-            height: `${circleSize}px`,
-            background: 'rgba(12,12,22,0.72)',
-            backdropFilter: 'blur(16px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-            borderRadius: '50%',
-            border: '1px solid rgba(255,255,255,0.14)',
-            boxShadow: glow,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            opacity: refreshing ? 1 : 0.3 + progress * 0.7,
-            pointerEvents: 'none',
-            transition: refreshing ? 'top 0.3s cubic-bezier(0.34,1.4,0.64,1), width 0.3s, height 0.3s, box-shadow 0.3s' : 'none',
-          }}>
-            <img
-              src="/logo.png"
-              alt=""
-              style={{
-                width: `${logoSize}px`,
-                height: `${logoSize}px`,
-                objectFit: 'contain',
-                transform: !refreshing ? `rotate(${degrees}deg)` : undefined,
-                animation: refreshing ? 'spin 0.75s linear infinite' : 'none',
-                transition: refreshing ? 'width 0.3s, height 0.3s' : 'none',
-              }}
-            />
-          </div>
-        )
-      })()}
 
       {/* Page content */}
       <main ref={mainRef} style={{ flex: 1, overflowY: 'auto', paddingBottom: '110px' }}>
@@ -496,26 +451,17 @@ export default function PWALayout({ children }) {
         pointerEvents: 'none',
       }}>
         <div style={{
-          /* Liquid glass pill */
-          background: 'rgba(255,255,255,0.07)',
+          background: 'rgba(22,22,38,0.97)',
           borderRadius: '100px',
-          border: '1px solid rgba(255,255,255,0.18)',
-          /* Gelaagde schaduwen: diepte + lichte rim glow + lens-achtige inner highlight */
-          boxShadow: [
-            '0 12px 40px rgba(0,0,0,0.35)',
-            '0 2px 8px rgba(0,0,0,0.2)',
-            'inset 0 1.5px 0 rgba(255,255,255,0.22)',
-            'inset 0 -1px 0 rgba(255,255,255,0.05)',
-            'inset 0 0 0 0.5px rgba(255,255,255,0.1)',
-          ].join(', '),
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
           display: 'flex',
           alignItems: 'center',
           padding: '6px',
           gap: '2px',
           pointerEvents: 'all',
-          /* Sterke blur + hoge saturatie = het liquid-glass lenseffect */
-          backdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
-          WebkitBackdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
         }}>
           <span style={{
             position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom) + 4px)', right: '24px',

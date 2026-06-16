@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useConfirm } from '../../../components/ConfirmDialog'
 import { supabase } from '../../../lib/supabase'
 import { useSeason } from '../../../context/SeasonContext'
 
 export default function TabSeizoen() {
+  const { bevestig, ConfirmUI } = useConfirm()
   const { seizoenen, actief, switchSeizoen, loading } = useSeason()
   const [toonFormulier, setToonFormulier] = useState(false)
   const [naam, setNaam] = useState('')
@@ -59,7 +61,7 @@ export default function TabSeizoen() {
   }
 
   async function handleVerwijder(seizoen) {
-    if (!confirm(`Seizoen "${seizoen.name}" verwijderen? Alle wedstrijden van dit seizoen worden ook verwijderd!`)) return
+    if (!await bevestig(`Seizoen "${seizoen.name}" verwijderen? Alle wedstrijden van dit seizoen worden ook verwijderd!`, { gevaar: true, bevestigLabel: 'Verwijderen' })) return
     await supabase.from('seasons').delete().eq('id', seizoen.id)
     window.location.reload()
   }
@@ -67,6 +69,8 @@ export default function TabSeizoen() {
   if (loading) return <p style={{ fontSize: '14px', color: '#94a3b8' }}>Laden...</p>
 
   return (
+    <>
+    {ConfirmUI}
     <div>
       {/* Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
@@ -224,6 +228,7 @@ export default function TabSeizoen() {
         </div>
       )}
     </div>
+    </>
   )
 }
 

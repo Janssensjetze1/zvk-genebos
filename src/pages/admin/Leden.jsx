@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useConfirm } from '../../components/ConfirmDialog'
 import { supabase } from '../../lib/supabase'
 
 export default function AdminLeden() {
+  const { bevestig, ConfirmUI } = useConfirm()
   const [profielen, setProfielen] = useState([])
   const [spelers, setSpelers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -40,7 +42,7 @@ export default function AdminLeden() {
   }
 
   async function weiger(profiel) {
-    if (!confirm('Weet je zeker dat je dit account wil weigeren en verwijderen?')) return
+    if (!await bevestig('Weet je zeker dat je dit account wil weigeren en verwijderen?', { gevaar: true, bevestigLabel: 'Verwijderen' })) return
     const { data: { session } } = await supabase.auth.getSession()
     const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`, {
       method: 'POST',
@@ -78,6 +80,8 @@ export default function AdminLeden() {
   if (loading) return <div className="text-gray-400 text-sm">Laden...</div>
 
   return (
+    <>
+    {ConfirmUI}
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Ledenbeheer</h1>
       <p className="text-gray-500 text-sm mb-8">Beheer registraties en koppel accounts aan spelers.</p>
@@ -132,6 +136,7 @@ export default function AdminLeden() {
         )}
       </section>
     </div>
+    </>
   )
 }
 

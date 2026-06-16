@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useConfirm } from '../../../components/ConfirmDialog'
 import { supabase } from '../../../lib/supabase'
 import { useSeason } from '../../../context/SeasonContext'
 import { useAuth } from '../../../context/AuthContext'
@@ -12,6 +13,7 @@ const TYPE_COLORS = {
 }
 
 export default function TabWedstrijden() {
+  const { bevestig, ConfirmUI } = useConfirm()
   const { actief: seizoen } = useSeason()
   const { user } = useAuth()
   const [wedstrijden, setWedstrijden] = useState([])
@@ -62,6 +64,8 @@ export default function TabWedstrijden() {
   if (loading) return <p style={{ fontSize: '14px', color: '#94a3b8' }}>Laden...</p>
 
   return (
+    <>
+    {ConfirmUI}
     <div>
       {/* Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
@@ -150,7 +154,7 @@ export default function TabWedstrijden() {
                 onBewerken={() => { setBewerkWedstrijd(w); setWedstrijdblad(null); setToonFormulier(false); setToonAndere(false); setBewerkAndere(null) }}
                 onWedstrijdblad={() => { setWedstrijdblad(w); setBewerkWedstrijd(null); setToonFormulier(false); setToonAndere(false); setBewerkAndere(null) }}
                 onVerwijderen={async () => {
-                  if (!confirm('Wedstrijd verwijderen?')) return
+                  if (!await bevestig('Wedstrijd verwijderen?', { gevaar: true, bevestigLabel: 'Verwijderen' })) return
                   await supabase.from('matches').delete().eq('id', w.id)
                   fetchAlles()
                 }}
@@ -181,7 +185,7 @@ export default function TabWedstrijden() {
                 actief={bewerkAndere?.id === w.id}
                 onBewerken={() => { setBewerkAndere(w); setToonAndere(false); setToonFormulier(false); setBewerkWedstrijd(null); setWedstrijdblad(null) }}
                 onVerwijderen={async () => {
-                  if (!confirm('Wedstrijd verwijderen?')) return
+                  if (!await bevestig('Wedstrijd verwijderen?', { gevaar: true, bevestigLabel: 'Verwijderen' })) return
                   await supabase.from('matches').delete().eq('id', w.id)
                   fetchAlles()
                 }}
@@ -191,6 +195,7 @@ export default function TabWedstrijden() {
         )}
       </div>
     </div>
+    </>
   )
 }
 

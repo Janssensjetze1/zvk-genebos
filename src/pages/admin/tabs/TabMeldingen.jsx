@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
+import { useConfirm } from '../../../components/ConfirmDialog'
 import { supabase } from '../../../lib/supabase'
 
 const EMOJIS = ['📢', '🎉', '⚽', '🏆', '🔥', '💪', '📅', '❗', '✅', '🆕']
 
 export default function TabMeldingen() {
+  const { bevestig, ConfirmUI } = useConfirm()
   const [meldingen, setMeldingen] = useState([])
   const [loading, setLoading] = useState(true)
   const [formulier, setFormulier] = useState(false)
@@ -80,12 +82,14 @@ export default function TabMeldingen() {
   }
 
   async function verwijder(id) {
-    if (!confirm('Melding verwijderen?')) return
+    if (!await bevestig('Melding verwijderen?', { gevaar: true, bevestigLabel: 'Verwijderen' })) return
     await supabase.from('announcements').delete().eq('id', id).then()
     laad()
   }
 
   return (
+    <>
+    {ConfirmUI}
     <div style={{ maxWidth: '640px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div>
@@ -236,6 +240,7 @@ export default function TabMeldingen() {
         </div>
       )}
     </div>
+    </>
   )
 }
 

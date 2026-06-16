@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useConfirm } from '../../../components/ConfirmDialog'
 import { supabase } from '../../../lib/supabase'
 
 export default function TabSpelers() {
+  const { bevestig, ConfirmUI } = useConfirm()
   const [spelers, setSpelers] = useState([])
   const [loading, setLoading] = useState(true)
   const [toonFormulier, setToonFormulier] = useState(false)
@@ -87,7 +89,7 @@ export default function TabSpelers() {
   }
 
   async function handleVerwijder(speler) {
-    if (!confirm(`Weet je zeker dat je ${speler.name} wil verwijderen?`)) return
+    if (!await bevestig(`Weet je zeker dat je ${speler.name} wil verwijderen?`, { gevaar: true, bevestigLabel: 'Verwijderen' })) return
     await supabase.from('players').delete().eq('id', speler.id)
     fetchSpelers()
   }
@@ -95,6 +97,8 @@ export default function TabSpelers() {
   if (loading) return <p style={{ fontSize: '14px', color: '#94a3b8' }}>Laden...</p>
 
   return (
+    <>
+    {ConfirmUI}
     <div>
       {/* Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
@@ -220,5 +224,6 @@ export default function TabSpelers() {
         </div>
       )}
     </div>
+    </>
   )
 }

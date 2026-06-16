@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
+import { useConfirm } from '../../../components/ConfirmDialog'
 
 function tijdGeleden(isoString) {
   if (!isoString) return null
@@ -22,6 +23,7 @@ export default function TabLeden() {
   const [profielen, setProfielen] = useState([])
   const [spelers, setSpelers] = useState([])
   const [loading, setLoading] = useState(true)
+  const { bevestig, ConfirmUI } = useConfirm()
 
   useEffect(() => { fetchData() }, [])
 
@@ -53,7 +55,7 @@ export default function TabLeden() {
   }
 
   async function weiger(profiel) {
-    if (!confirm(`Weet je zeker dat je het account van ${profiel.display_name || profiel.email} wil weigeren en verwijderen?`)) return
+    if (!await bevestig(`Weet je zeker dat je het account van ${profiel.display_name || profiel.email} wil weigeren en verwijderen?`, { gevaar: true, bevestigLabel: 'Verwijderen' })) return
     const { data: { session } } = await supabase.auth.getSession()
     const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`, {
       method: 'POST',
@@ -85,6 +87,8 @@ export default function TabLeden() {
   )
 
   return (
+    <>
+    {ConfirmUI}
     <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
 
       {/* Wachtend op goedkeuring */}
@@ -131,6 +135,7 @@ export default function TabLeden() {
         )}
       </section>
     </div>
+    </>
   )
 }
 

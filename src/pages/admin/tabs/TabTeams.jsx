@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useConfirm } from '../../../components/ConfirmDialog'
 import { supabase } from '../../../lib/supabase'
 
 export default function TabTeams() {
+  const { bevestig, ConfirmUI } = useConfirm()
   const [teams, setTeams] = useState([])
   const [loading, setLoading] = useState(true)
   const [toonFormulier, setToonFormulier] = useState(false)
@@ -61,7 +63,7 @@ export default function TabTeams() {
   }
 
   async function handleVerwijder(team) {
-    if (!confirm(`Weet je zeker dat je "${team.name}" wil verwijderen?`)) return
+    if (!await bevestig(`Weet je zeker dat je "${team.name}" wil verwijderen?`, { gevaar: true, bevestigLabel: 'Verwijderen' })) return
     const { error } = await supabase.from('teams').delete().eq('id', team.id)
     if (error) alert('Verwijderen mislukt: ' + error.message)
     else fetchTeams()
@@ -73,6 +75,8 @@ export default function TabTeams() {
   if (loading) return <p style={{ fontSize: '14px', color: '#94a3b8' }}>Laden...</p>
 
   return (
+    <>
+    {ConfirmUI}
     <div>
       {/* ZVK team — naam bewerkbaar, niet verwijderbaar */}
       {zvkTeam && (
@@ -262,6 +266,7 @@ export default function TabTeams() {
         )}
       </div>
     </div>
+    </>
   )
 }
 
