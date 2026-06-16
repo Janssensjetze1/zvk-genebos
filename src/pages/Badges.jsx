@@ -176,7 +176,7 @@ export default function Badges() {
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px' }}>Badges</h1>
           <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>
-            {loading ? 'Berekenen...' : `${aantalVerdiend} van ${totaal} verdiend`}
+            {loading ? 'Berekenen...' : totaal === 0 ? 'Binnenkort beschikbaar' : `${aantalVerdiend} van ${totaal} verdiend`}
           </p>
         </div>
         {loading && (
@@ -188,32 +188,51 @@ export default function Badges() {
         )}
       </div>
 
-      {/* Voortgang */}
-      <div style={{
-        background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px',
-        padding: '20px 24px', marginBottom: '28px',
-        display: 'flex', alignItems: 'center', gap: '20px',
-      }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>Voortgang</span>
-            <span style={{ fontSize: '13px', color: '#64748b' }}>{aantalVerdiend}/{totaal}</span>
+      {/* Voortgang — enkel tonen als er badges zijn */}
+      {totaal > 0 && (
+        <div style={{
+          background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px',
+          padding: '20px 24px', marginBottom: '28px',
+          display: 'flex', alignItems: 'center', gap: '20px',
+        }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>Voortgang</span>
+              <span style={{ fontSize: '13px', color: '#64748b' }}>{aantalVerdiend}/{totaal}</span>
+            </div>
+            <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '99px', overflow: 'hidden' }}>
+              <div style={{
+                height: '100%', width: `${progPct}%`,
+                background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
+                borderRadius: '99px', transition: 'width 0.6s ease',
+              }} />
+            </div>
           </div>
-          <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '99px', overflow: 'hidden' }}>
-            <div style={{
-              height: '100%', width: `${progPct}%`,
-              background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
-              borderRadius: '99px', transition: 'width 0.6s ease',
-            }} />
+          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+            <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: 1 }}>
+              {Math.round(progPct)}%
+            </div>
+            <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>voltooid</div>
           </div>
         </div>
-        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: 1 }}>
-            {Math.round(progPct)}%
-          </div>
-          <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>voltooid</div>
+      )}
+
+      {/* Lege staat */}
+      {totaal === 0 && (
+        <div className="badge-card" style={{
+          padding: '64px 32px',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px',
+          textAlign: 'center', maxWidth: '480px',
+        }}>
+          <span style={{ fontSize: '48px', position: 'relative', zIndex: 1 }}>🏅</span>
+          <p style={{ fontSize: '16px', fontWeight: '700', color: 'rgba(255,255,255,0.85)', margin: 0, position: 'relative', zIndex: 1 }}>
+            Binnenkort beschikbaar
+          </p>
+          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.35)', margin: 0, lineHeight: 1.6, maxWidth: '280px', position: 'relative', zIndex: 1 }}>
+            Er zijn op dit moment nog geen badges. Kom later terug!
+          </p>
         </div>
-      </div>
+      )}
 
       {/* Badges per categorie */}
       {CATEGORIE_VOLGORDE.map(cat => {

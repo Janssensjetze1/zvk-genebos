@@ -220,13 +220,14 @@ function ProfielPopover({ open, onClose }) {
       {/* Popover kaartje */}
       <div style={{
         position: 'fixed', top: '72px', left: '16px', zIndex: 99,
-        background: 'rgba(18,18,32,0.97)',
-        border: '1px solid rgba(255,255,255,0.12)',
-        borderRadius: '16px',
+        background: 'rgba(255,255,255,0.08)',
+        border: '1px solid rgba(255,255,255,0.18)',
+        borderRadius: '20px',
         overflow: 'hidden',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+        boxShadow: '0 16px 48px rgba(0,0,0,0.4), inset 0 1.5px 0 rgba(255,255,255,0.22), inset 0 0 0 0.5px rgba(255,255,255,0.1)',
         minWidth: '170px',
-        backdropFilter: 'blur(16px)',
+        backdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
+        WebkitBackdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
       }}>
         <button
           onClick={() => ga('/app/badges')}
@@ -285,9 +286,11 @@ function MeerMenu({ open, onClose, isAdmin }) {
       <div style={{
         position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 201,
         width: '280px',
-        background: 'rgba(12,12,24,0.98)',
-        borderLeft: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: '-16px 0 48px rgba(0,0,0,0.5)',
+        background: 'rgba(255,255,255,0.07)',
+        backdropFilter: 'blur(56px) saturate(200%) brightness(1.05)',
+        WebkitBackdropFilter: 'blur(56px) saturate(200%) brightness(1.05)',
+        borderLeft: '1px solid rgba(255,255,255,0.15)',
+        boxShadow: '-16px 0 64px rgba(0,0,0,0.4), inset 1px 0 0 rgba(255,255,255,0.12)',
         display: 'flex', flexDirection: 'column',
         paddingTop: 'calc(env(safe-area-inset-top) + 20px)',
         paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)',
@@ -379,7 +382,11 @@ export default function PWALayout({ children }) {
       {/* Top header */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 50,
-        background: 'rgba(10,10,20,0.97)',
+        background: 'rgba(255,255,255,0.06)',
+        backdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
+        WebkitBackdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
+        borderBottom: '1px solid rgba(255,255,255,0.12)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18), 0 4px 24px rgba(0,0,0,0.2)',
         padding: '0 20px',
         height: '62px', display: 'flex', alignItems: 'center',
         justifyContent: 'space-between',
@@ -424,34 +431,54 @@ export default function PWALayout({ children }) {
       <MeerMenu open={meerOpen} onClose={() => setMeerOpen(false)} isAdmin={isAdmin} />
 
       {/* Pull-to-refresh indicator */}
-      {pulling && (
-        <div style={{
-          position: 'fixed',
-          top: `${62 + pullDist - 52}px`,
-          left: '50%', transform: 'translateX(-50%)',
-          zIndex: 49,
-          width: '40px', height: '40px',
-          background: 'rgba(15,23,42,0.92)',
-          backdropFilter: 'blur(8px)',
-          borderRadius: '50%',
-          border: '1px solid rgba(255,255,255,0.12)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          opacity: refreshing ? 1 : progress,
-          pointerEvents: 'none',
-          transition: refreshing ? 'top 0.25s cubic-bezier(0.34,1.4,0.64,1)' : 'none',
-        }}>
-          <img
-            src="/logo.png"
-            alt=""
-            style={{
-              width: '24px', height: '24px', objectFit: 'contain',
-              transform: !refreshing ? `rotate(${progress * 360}deg)` : undefined,
-              animation: refreshing ? 'spin 0.7s linear infinite' : 'none',
-            }}
-          />
-        </div>
-      )}
+      {pulling && (() => {
+        // Logo groeit van 28px → 56px, cirkel van 48px → 80px
+        const logoSize  = refreshing ? 52 : 28 + progress * 28
+        const circleSize = refreshing ? 76 : 48 + progress * 32
+        // Begint recht onder de header (62px) en daalt mee met de vinger
+        const topPos    = refreshing
+          ? 62 + 16
+          : 62 + 8 + pullDist * 0.5
+        const degrees   = progress * 360
+        const glow      = refreshing
+          ? '0 0 0 3px rgba(99,102,241,0.35), 0 8px 32px rgba(99,102,241,0.3)'
+          : `0 0 0 ${progress * 3}px rgba(99,102,241,${progress * 0.35}), 0 4px 16px rgba(0,0,0,0.3)`
+
+        return (
+          <div style={{
+            position: 'fixed',
+            top: `${topPos}px`,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 49,
+            width: `${circleSize}px`,
+            height: `${circleSize}px`,
+            background: 'rgba(12,12,22,0.72)',
+            backdropFilter: 'blur(16px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+            borderRadius: '50%',
+            border: '1px solid rgba(255,255,255,0.14)',
+            boxShadow: glow,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            opacity: refreshing ? 1 : 0.3 + progress * 0.7,
+            pointerEvents: 'none',
+            transition: refreshing ? 'top 0.3s cubic-bezier(0.34,1.4,0.64,1), width 0.3s, height 0.3s, box-shadow 0.3s' : 'none',
+          }}>
+            <img
+              src="/logo.png"
+              alt=""
+              style={{
+                width: `${logoSize}px`,
+                height: `${logoSize}px`,
+                objectFit: 'contain',
+                transform: !refreshing ? `rotate(${degrees}deg)` : undefined,
+                animation: refreshing ? 'spin 0.75s linear infinite' : 'none',
+                transition: refreshing ? 'width 0.3s, height 0.3s' : 'none',
+              }}
+            />
+          </div>
+        )
+      })()}
 
       {/* Page content */}
       <main ref={mainRef} style={{ flex: 1, overflowY: 'auto', paddingBottom: '110px' }}>
@@ -469,17 +496,26 @@ export default function PWALayout({ children }) {
         pointerEvents: 'none',
       }}>
         <div style={{
-          background: 'rgba(18, 18, 28, 0.55)',
+          /* Liquid glass pill */
+          background: 'rgba(255,255,255,0.07)',
           borderRadius: '100px',
-          border: '1px solid rgba(255,255,255,0.13)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08)',
+          border: '1px solid rgba(255,255,255,0.18)',
+          /* Gelaagde schaduwen: diepte + lichte rim glow + lens-achtige inner highlight */
+          boxShadow: [
+            '0 12px 40px rgba(0,0,0,0.35)',
+            '0 2px 8px rgba(0,0,0,0.2)',
+            'inset 0 1.5px 0 rgba(255,255,255,0.22)',
+            'inset 0 -1px 0 rgba(255,255,255,0.05)',
+            'inset 0 0 0 0.5px rgba(255,255,255,0.1)',
+          ].join(', '),
           display: 'flex',
           alignItems: 'center',
           padding: '6px',
           gap: '2px',
           pointerEvents: 'all',
-          backdropFilter: 'blur(40px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+          /* Sterke blur + hoge saturatie = het liquid-glass lenseffect */
+          backdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
+          WebkitBackdropFilter: 'blur(48px) saturate(200%) brightness(1.05)',
         }}>
           <span style={{
             position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom) + 4px)', right: '24px',
