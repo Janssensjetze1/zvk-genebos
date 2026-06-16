@@ -12,6 +12,7 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.js',
       registerType: 'autoUpdate',
+      devOptions: { enabled: true },
       includeAssets: ['logo.png'],
       manifest: {
         name: 'ZVK Genebos',

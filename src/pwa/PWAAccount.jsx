@@ -15,7 +15,7 @@ const inputStijl = (dirty) => ({
 // ── Hoofd component ─────────────────────────────────────────────────────────
 export default function PWAAccount() {
   const { user, profile, patchProfile, signOut } = useAuth()
-  const { status: pushStatus, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePush()
+  const { status: pushStatus, fout: pushFout, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePush()
   const fotoInputRef = useRef(null)
 
   // Settings state
@@ -82,8 +82,9 @@ export default function PWAAccount() {
         let photo_url = speler?.photo_url ?? profile?.avatar_url ?? null
         if (fotoBestand) {
           const ext = fotoBestand.name.split('.').pop()
-          await supabase.storage.from('player-photos').upload(`${Date.now()}.${ext}`, fotoBestand, { upsert: true })
-          const { data: urlData } = supabase.storage.from('player-photos').getPublicUrl(`${Date.now()}.${ext}`)
+          const fileName = `${Date.now()}.${ext}`
+          await supabase.storage.from('player-photos').upload(fileName, fotoBestand, { upsert: true })
+          const { data: urlData } = supabase.storage.from('player-photos').getPublicUrl(fileName)
           photo_url = urlData.publicUrl
         }
         if (speler) await supabase.from('players').update({ name: naam, photo_url, nickname: bijnaam.trim() || null, birth_date: gebdatum || null }).eq('id', speler.id)
@@ -252,7 +253,7 @@ export default function PWAAccount() {
                   <div style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a' }}>Push notificaties</div>
                   <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
                     {pushStatus === 'subscribed' && 'Je ontvangt meldingen van ZVK Genebos.'}
-                    {pushStatus === 'idle'       && 'Ontvang meldingen over wedstrijden en nieuws.'}
+                    {pushStatus === 'idle'       && (pushFout ? <span style={{ color: '#ef4444' }}>{pushFout}</span> : 'Ontvang meldingen over wedstrijden en nieuws.')}
                     {pushStatus === 'denied'     && 'Geblokkeerd in je browserinstellingen.'}
                     {pushStatus === 'loading'    && 'Even geduld...'}
                   </div>
