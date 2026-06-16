@@ -154,12 +154,12 @@ export default function Dashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
 
         <div>
-          <SectieLabel>Topscorers ⚽</SectieLabel>
+          <SectieLabel>🐂 De Gouden Stier</SectieLabel>
           <Podium spelers={topscorers} sleutel="goals" label="goal" loading={loading} />
         </div>
 
         <div>
-          <SectieLabel>Meeste assists 🎯</SectieLabel>
+          <SectieLabel>👑 Assistenkoning</SectieLabel>
           <Podium spelers={topassists} sleutel="assists" label="assist" loading={loading} />
         </div>
       </div>
