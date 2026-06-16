@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useConfirm } from '../../../components/ConfirmDialog'
 import { supabase } from '../../../lib/supabase'
-
 const EMOJIS = ['📢', '🎉', '⚽', '🏆', '🔥', '💪', '📅', '❗', '✅', '🆕']
 
 export default function TabMeldingen() {
@@ -16,6 +15,12 @@ export default function TabMeldingen() {
   const [fotoPreview, setFotoPreview] = useState(null)
   const [opslaan, setOpslaan] = useState(false)
   const fotoRef = useRef(null)
+
+  // Push notificatie state
+  const [pushTitel, setPushTitel]   = useState('')
+  const [pushBericht, setPushBericht] = useState('')
+  const [pushBezig, setPushBezig]   = useState(false)
+  const [pushResultaat, setPushResultaat] = useState(null)   // { sent, failed, total } | { error }
 
   useEffect(() => { laad() }, [])
 
@@ -87,10 +92,97 @@ export default function TabMeldingen() {
     laad()
   }
 
+  async function stuurPush() {
+    if (!pushTitel.trim() || !pushBericht.trim()) return
+    setPushBezig(true)
+    setPushResultaat(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-push`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ title: pushTitel.trim(), body: pushBericht.trim(), url: '/app' }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Onbekende fout')
+      setPushResultaat(data)
+      setPushTitel('')
+      setPushBericht('')
+    } catch (e) {
+      setPushResultaat({ error: e.message })
+    }
+    setPushBezig(false)
+  }
+
   return (
     <>
     {ConfirmUI}
     <div style={{ maxWidth: '640px' }}>
+
+      {/* ── Push notificaties ── */}
+      <div style={{ marginBottom: '36px' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a' }}>📲 Push notificatie</h2>
+          <p style={{ fontSize: '13px', color: '#94a3b8', marginTop: '2px' }}>Stuur een directe melding naar alle abonnees op hun toestel.</p>
+        </div>
+
+        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
+          <div style={{ marginBottom: '12px' }}>
+            <label style={labelStijl}>Titel</label>
+            <input
+              value={pushTitel}
+              onChange={e => { setPushTitel(e.target.value); setPushResultaat(null) }}
+              placeholder="Bv. Wedstrijd vanavond om 20u!"
+              style={inputStijl}
+            />
+          </div>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={labelStijl}>Bericht</label>
+            <textarea
+              value={pushBericht}
+              onChange={e => { setPushBericht(e.target.value); setPushResultaat(null) }}
+              placeholder="Korte tekst die op het toestel verschijnt..."
+              rows={3}
+              style={{ ...inputStijl, resize: 'vertical', fontFamily: 'inherit' }}
+            />
+          </div>
+
+          {/* Resultaat */}
+          {pushResultaat && (
+            <div style={{
+              padding: '10px 14px', borderRadius: '8px', marginBottom: '12px', fontSize: '13px',
+              background: pushResultaat.error ? '#fef2f2' : '#f0fdf4',
+              color:      pushResultaat.error ? '#dc2626'  : '#16a34a',
+              border:     `1px solid ${pushResultaat.error ? '#fecaca' : '#bbf7d0'}`,
+            }}>
+              {pushResultaat.error
+                ? `❌ Fout: ${pushResultaat.error}`
+                : `✓ Verzonden naar ${pushResultaat.sent} van ${pushResultaat.total} abonnee${pushResultaat.total !== 1 ? 's' : ''}${pushResultaat.failed > 0 ? ` (${pushResultaat.failed} mislukt)` : ''}`
+              }
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button
+              onClick={stuurPush}
+              disabled={pushBezig || !pushTitel.trim() || !pushBericht.trim()}
+              style={{
+                background: '#0f172a', color: 'white', border: 'none',
+                borderRadius: '8px', padding: '9px 20px',
+                fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                opacity: (pushBezig || !pushTitel.trim() || !pushBericht.trim()) ? 0.5 : 1,
+              }}
+            >
+              {pushBezig ? 'Versturen...' : '📤 Verstuur push'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Pop-up meldingen ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div>
           <h2 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a' }}>Pop-up meldingen</h2>

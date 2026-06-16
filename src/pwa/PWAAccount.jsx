@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
+import { usePush } from '../hooks/usePush'
 
 // ── Input stijl ─────────────────────────────────────────────────────────────
 const inputStijl = (dirty) => ({
@@ -14,6 +15,7 @@ const inputStijl = (dirty) => ({
 // ── Hoofd component ─────────────────────────────────────────────────────────
 export default function PWAAccount() {
   const { user, profile, patchProfile, signOut } = useAuth()
+  const { status: pushStatus, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePush()
   const fotoInputRef = useRef(null)
 
   // Settings state
@@ -238,6 +240,48 @@ export default function PWAAccount() {
               </div>
             )}
           </div>
+
+          {/* ── Push notificaties ── */}
+          {pushStatus !== 'unsupported' && (
+            <>
+              <div style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '8px' }}>
+                Meldingen
+              </div>
+              <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '14px 16px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a' }}>Push notificaties</div>
+                  <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
+                    {pushStatus === 'subscribed' && 'Je ontvangt meldingen van ZVK Genebos.'}
+                    {pushStatus === 'idle'       && 'Ontvang meldingen over wedstrijden en nieuws.'}
+                    {pushStatus === 'denied'     && 'Geblokkeerd in je browserinstellingen.'}
+                    {pushStatus === 'loading'    && 'Even geduld...'}
+                  </div>
+                </div>
+                {pushStatus === 'subscribed' && (
+                  <button
+                    onClick={pushUnsubscribe}
+                    style={{ background: '#f1f5f9', border: 'none', borderRadius: '10px', padding: '8px 14px', fontSize: '13px', fontWeight: '600', color: '#64748b', cursor: 'pointer', flexShrink: 0 }}
+                  >
+                    Uitschakelen
+                  </button>
+                )}
+                {pushStatus === 'idle' && (
+                  <button
+                    onClick={pushSubscribe}
+                    style={{ background: '#0f172a', border: 'none', borderRadius: '10px', padding: '8px 14px', fontSize: '13px', fontWeight: '600', color: 'white', cursor: 'pointer', flexShrink: 0 }}
+                  >
+                    Inschakelen
+                  </button>
+                )}
+                {pushStatus === 'denied' && (
+                  <span style={{ fontSize: '12px', color: '#f59e0b', fontWeight: '600', flexShrink: 0 }}>🔒 Geblokkeerd</span>
+                )}
+                {pushStatus === 'loading' && (
+                  <div style={{ width: '18px', height: '18px', border: '2px solid #e2e8f0', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
+                )}
+              </div>
+            </>
+          )}
 
           <button
             onClick={signOut}
