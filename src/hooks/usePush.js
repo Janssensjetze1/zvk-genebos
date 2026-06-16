@@ -85,6 +85,9 @@ export function usePush() {
       }
 
       // 3. Maak push subscription aan in browser
+      if (!VAPID_PUBLIC_KEY) {
+        throw new Error('VAPID sleutel niet geconfigureerd. Herstart de dev server na het toevoegen van VITE_VAPID_PUBLIC_KEY in .env.local')
+      }
       let sub
       try {
         sub = await reg.pushManager.subscribe({
@@ -92,7 +95,7 @@ export function usePush() {
           applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
         })
       } catch (e) {
-        throw new Error(`Browser push fout: ${e.message}`)
+        throw new Error(`Browser push fout: ${e.message ?? String(e)}`)
       }
 
       // 4. Sla op in Supabase — controleer fout expliciet
