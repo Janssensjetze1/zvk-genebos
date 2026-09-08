@@ -388,8 +388,9 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
     return () => { levend = false }
   }, [w.id])
 
-  const opgaveMap = Object.fromEntries(opgaves.map(o => [o.player_id, o.status]))
-  const meeIds = opgaves.filter(o => o.status === 'mee').map(o => o.player_id)
+  // Kijkers zonder spelersfiche hebben geen player_id — die horen hier niet thuis
+  const opgaveMap = Object.fromEntries(opgaves.filter(o => o.player_id).map(o => [o.player_id, o.status]))
+  const meeIds = opgaves.filter(o => o.status === 'mee' && o.player_id).map(o => o.player_id)
 
   const aanwezigeLijst = spelers.filter(s => aanwezig.has(s.id))
 

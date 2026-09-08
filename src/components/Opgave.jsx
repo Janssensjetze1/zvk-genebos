@@ -3,7 +3,7 @@ import { MAX_MEE, OPGAVE_STATUSSEN, opgaveIsOpen, useOpgave } from '../hooks/use
 // Opgave voor een aankomende wedstrijd: elke speler duidt zelf aan of hij meedoet.
 // variant: 'pwa' (compacter) of 'desktop'
 export default function Opgave({ wedstrijd, variant = 'pwa' }) {
-  const { perStatus, mijnStatus, zetStatus, loading, bezig, spelerId, aantalMee, vol, fout } = useOpgave(wedstrijd.id)
+  const { perStatus, mijnStatus, zetStatus, loading, bezig, gebruikerId, magMeedoen, aantalMee, vol, fout } = useOpgave(wedstrijd.id)
   const compact = variant === 'pwa'
 
   // De ouder verbergt dit blok al, dit is enkel een vangnet
@@ -52,10 +52,10 @@ export default function Opgave({ wedstrijd, variant = 'pwa' }) {
         }} />
       </div>
 
-      {/* Keuzeknoppen */}
-      {spelerId ? (
+      {/* Keuzeknoppen — zonder spelersfiche enkel "Ik kom zien" */}
+      {gebruikerId ? (
         <div style={{ display: 'flex', flexDirection: compact ? 'column' : 'row', gap: '6px' }}>
-          {OPGAVE_STATUSSEN.map(s => {
+          {OPGAVE_STATUSSEN.filter(s => magMeedoen || s.id === 'kijken').map(s => {
             const actief = mijnStatus === s.id
             const geblokkeerd = s.id === 'mee' && vol
             const uit = bezig || geblokkeerd
@@ -99,12 +99,14 @@ export default function Opgave({ wedstrijd, variant = 'pwa' }) {
             )
           })}
         </div>
-      ) : (
+      ) : null}
+
+      {gebruikerId && !magMeedoen && (
         <div style={{
           fontSize: '12px', color: '#94a3b8', background: '#f8fafc',
           border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 12px',
         }}>
-          Je account is nog niet aan een spelersfiche gekoppeld — vraag een admin om dit te doen, dan kan je je opgeven.
+          Je account hangt nog niet aan een spelersfiche, dus meespelen kan nog niet. Vraag een admin om je te koppelen.
         </div>
       )}
 
@@ -131,13 +133,13 @@ export default function Opgave({ wedstrijd, variant = 'pwa' }) {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                 {lijst
                   .slice()
-                  .sort((a, b) => (a.player?.name ?? '').localeCompare(b.player?.name ?? ''))
+                  .sort((a, b) => (a.naam ?? '').localeCompare(b.naam ?? ''))
                   .map(o => (
-                    <span key={o.player_id} style={{
+                    <span key={o.user_id} style={{
                       fontSize: '12px', color: '#475569', background: s.bg,
                       border: `1px solid ${s.rand}`, borderRadius: '20px', padding: '3px 10px',
                     }}>
-                      {o.player?.name ?? 'Onbekend'}
+                      {o.naam ?? 'Onbekend'}
                     </span>
                   ))}
               </div>

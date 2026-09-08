@@ -50,15 +50,18 @@ export const OPGAVE_MAP = Object.fromEntries(OPGAVE_STATUSSEN.map(s => [s.id, s]
 async function haalOpgaves(matchId) {
   const { data } = await supabase
     .from('match_availability')
-    .select('player_id, status, player:player_id(name)')
+    .select('user_id, player_id, status, naam')
     .eq('match_id', matchId)
   return data ?? []
 }
 
 // ─── Hook: opgave van één wedstrijd ──────────────────────────────────────────
 export function useOpgave(matchId) {
-  const { profile } = useAuth()
+  const { user, profile } = useAuth()
+  const gebruikerId = user?.id ?? null
   const spelerId = profile?.player_id ?? null
+  // Zonder gekoppelde spelersfiche kan je enkel komen kijken
+  const magMeedoen = !!spelerId
 
   const [opgaves, setOpgaves] = useState([])
   const [loading, setLoading] = useState(true)
@@ -75,14 +78,15 @@ export function useOpgave(matchId) {
     return () => { levend = false }
   }, [matchId])
 
-  const mijnStatus = opgaves.find(o => o.player_id === spelerId)?.status ?? null
+  const mijnStatus = opgaves.find(o => o.user_id === gebruikerId)?.status ?? null
   const aantalMee = opgaves.filter(o => o.status === 'mee').length
 
   // Volzet, en jij staat er zelf niet bij
   const vol = aantalMee >= MAX_MEE && mijnStatus !== 'mee'
 
   async function zetStatus(status) {
-    if (!spelerId || bezig) return
+    if (!gebruikerId || bezig) return
+    if (!magMeedoen && status !== 'kijken') return
     if (status === 'mee' && vol) {
       setFout(`Volzet — er kunnen maar ${MAX_MEE} spelers meedoen.`)
       return
@@ -94,21 +98,21 @@ export function useOpgave(matchId) {
     // Nogmaals op dezelfde knop duwen wist je antwoord
     const nieuw = mijnStatus === status ? null : status
     const vorige = opgaves
-    const eigenNaam = opgaves.find(o => o.player_id === spelerId)?.player?.name ?? null
+    const eigenNaam = opgaves.find(o => o.user_id === gebruikerId)?.naam ?? null
 
     // Optimistisch bijwerken zodat de knop meteen reageert
     setOpgaves(prev => {
-      const zonder = prev.filter(o => o.player_id !== spelerId)
+      const zonder = prev.filter(o => o.user_id !== gebruikerId)
       if (!nieuw) return zonder
-      return [...zonder, { player_id: spelerId, status: nieuw, player: { name: eigenNaam } }]
+      return [...zonder, { user_id: gebruikerId, player_id: spelerId, status: nieuw, naam: eigenNaam }]
     })
 
     const { error } = !nieuw
       ? await supabase.from('match_availability').delete()
-          .eq('match_id', matchId).eq('player_id', spelerId)
+          .eq('match_id', matchId).eq('user_id', gebruikerId)
       : await supabase.from('match_availability').upsert(
-          { match_id: matchId, player_id: spelerId, status: nieuw },
-          { onConflict: 'match_id,player_id' }
+          { match_id: matchId, user_id: gebruikerId, player_id: spelerId, status: nieuw },
+          { onConflict: 'match_id,user_id' }
         )
 
     if (error) {
@@ -132,5 +136,5 @@ export function useOpgave(matchId) {
     OPGAVE_STATUSSEN.map(s => [s.id, opgaves.filter(o => o.status === s.id)])
   )
 
-  return { opgaves, perStatus, mijnStatus, zetStatus, loading, bezig, spelerId, aantalMee, vol, fout }
+  return { opgaves, perStatus, mijnStatus, zetStatus, loading, bezig, spelerId, gebruikerId, magMeedoen, aantalMee, vol, fout }
 }
