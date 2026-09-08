@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import { useAuth } from '../context/AuthContext'
+import Opgave from '../components/Opgave'
+import { opgaveIsOpen } from '../hooks/useOpgave'
 
 const REACTIE_EMOJIS = ['💪', '❤️', '🎯', '😭']
 
@@ -260,6 +262,16 @@ function WedstrijdKaart({ wedstrijd: w }) {
               </button>
             )
           })}
+        </div>
+      )}
+
+      {/* Opgave — enkel bij aankomende wedstrijden */}
+      {!isPast && opgaveIsOpen(w) && (
+        <div
+          style={{ padding: '14px 16px', borderTop: '1px solid #f1f5f9', background: '#fafafa' }}
+          onClick={e => e.stopPropagation()}
+        >
+          <Opgave wedstrijd={w} variant="pwa" />
         </div>
       )}
 

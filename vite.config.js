@@ -16,7 +16,7 @@ export default defineConfig({
       includeAssets: ['logo.png'],
       manifest: {
         name: 'ZVK Genebos',
-        short_name: 'ZVK',
+        short_name: 'ZVK Genebos',
         description: 'ZVK Genebos wedstrijden invullen',
         theme_color: '#3b82f6',
         background_color: '#f8fafc',

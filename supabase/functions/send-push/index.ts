@@ -5,50 +5,31 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// ── VAPID signing via Web Crypto (Deno native, geen npm nodig) ────────────────
-async function importVapidPrivateKey(base64urlKey: string): Promise<CryptoKey> {
-  const padding = '='.repeat((4 - (base64urlKey.length % 4)) % 4)
-  const base64 = (base64urlKey + padding).replace(/-/g, '+').replace(/_/g, '/')
-  const raw = Uint8Array.from(atob(base64), c => c.charCodeAt(0))
-  return crypto.subtle.importKey(
-    'raw', raw,
-    { name: 'ECDH', namedCurve: 'P-256' },
-    true, ['deriveKey', 'deriveBits']
-  ).catch(() =>
-    // Fallback: probeer als pkcs8
-    crypto.subtle.importKey(
-      'pkcs8', raw,
-      { name: 'ECDSA', namedCurve: 'P-256' },
-      true, ['sign']
-    )
-  ) as Promise<CryptoKey>
+// ── Hulpfuncties voor base64url ───────────────────────────────────────────────
+function b64urlToBytes(s: string): Uint8Array {
+  const pad = '='.repeat((4 - (s.length % 4)) % 4)
+  return Uint8Array.from(atob((s + pad).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))
+}
+function bytesToB64url(bytes: Uint8Array): string {
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 }
 
-async function signVapidJwt(audience: string, subject: string, publicKey: string, privateKeyB64: string): Promise<string> {
+// ── VAPID JWT signing via JWK import (betrouwbaarder dan handmatige PKCS8) ────
+async function signVapidJwt(audience: string, subject: string, vapidPublicB64: string, vapidPrivateB64: string): Promise<string> {
   const now = Math.floor(Date.now() / 1000)
   const header  = btoa(JSON.stringify({ typ: 'JWT', alg: 'ES256' })).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
   const payload = btoa(JSON.stringify({ aud: audience, exp: now + 12 * 3600, sub: subject })).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
   const unsigned = `${header}.${payload}`
 
-  // Importeer private key als PKCS8 (DER formaat)
-  const padding = '='.repeat((4 - (privateKeyB64.length % 4)) % 4)
-  const b64 = (privateKeyB64 + padding).replace(/-/g, '+').replace(/_/g, '/')
-  const rawBytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0))
-
-  // Web Crypto verwacht PKCS8 voor ES256 signing
-  // Bouw PKCS8 wrapper rond de raw private key (32 bytes P-256)
-  const pkcs8Header = new Uint8Array([
-    0x30, 0x41, 0x02, 0x01, 0x00, 0x30, 0x13,
-    0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01,
-    0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07,
-    0x04, 0x27, 0x30, 0x25, 0x02, 0x01, 0x01, 0x04, 0x20,
-  ])
-  const pkcs8 = new Uint8Array(pkcs8Header.length + rawBytes.length)
-  pkcs8.set(pkcs8Header)
-  pkcs8.set(rawBytes, pkcs8Header.length)
+  // Importeer als JWK: haal x en y uit de publieke key (eerste byte = 0x04, skip)
+  const pubBytes = b64urlToBytes(vapidPublicB64)
+  const x = pubBytes.slice(1, 33)
+  const y = pubBytes.slice(33, 65)
+  const d = b64urlToBytes(vapidPrivateB64)
 
   const key = await crypto.subtle.importKey(
-    'pkcs8', pkcs8,
+    'jwk',
+    { kty: 'EC', crv: 'P-256', d: bytesToB64url(d), x: bytesToB64url(x), y: bytesToB64url(y) },
     { name: 'ECDSA', namedCurve: 'P-256' },
     false, ['sign']
   )
@@ -93,15 +74,8 @@ async function sendPushMessage(subscription: { endpoint: string; keys: { p256dh:
 
 // ── AES128GCM payload encryptie (RFC 8291) ────────────────────────────────────
 async function encryptPayload(plaintext: string, p256dhB64: string, authB64: string) {
-  const decoder = new TextDecoder()
-
-  function b64decode(s: string) {
-    const pad = '='.repeat((4 - (s.length % 4)) % 4)
-    return Uint8Array.from(atob((s + pad).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))
-  }
-
-  const receiverPublicKeyBytes = b64decode(p256dhB64)
-  const authSecret = b64decode(authB64)
+  const receiverPublicKeyBytes = b64urlToBytes(p256dhB64)
+  const authSecret = b64urlToBytes(authB64)
 
   // Genereer ephemeral key pair
   const senderKeyPair = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits'])
@@ -244,9 +218,11 @@ Deno.serve(async (req) => {
     }
 
     const sent   = results.filter(r => r.status === 'fulfilled').length
-    const failed = results.filter(r => r.status === 'rejected' && !r.reason?.message?.includes('410')).length
+    const failedResults = results.filter(r => r.status === 'rejected' && !r.reason?.message?.includes('410'))
+    const failed = failedResults.length
+    const errors = failedResults.map(r => (r as PromiseRejectedResult).reason?.message ?? 'Onbekende fout')
 
-    return new Response(JSON.stringify({ sent, failed, total: subs.length }), {
+    return new Response(JSON.stringify({ sent, failed, total: subs.length, errors }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
 

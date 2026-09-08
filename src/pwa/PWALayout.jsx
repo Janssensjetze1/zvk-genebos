@@ -263,8 +263,8 @@ function ProfielPopover({ open, onClose }) {
 
 // ─── Secundaire nav (drie puntjes) ────────────────────────────────────────────
 const MEER_ITEMS = [
-  { label: 'Pagina 1', icon: '📄' },
-  { label: 'Pagina 2', icon: '📋' },
+  { label: 'Info', icon: 'ℹ️', path: '/app/info' },
+  { label: 'Feedback', icon: '💬', path: '/app/feedback' },
 ]
 
 function MeerMenu({ open, onClose, isAdmin }) {
@@ -316,7 +316,7 @@ function MeerMenu({ open, onClose, isAdmin }) {
           {MEER_ITEMS.map(item => (
             <button
               key={item.label}
-              onClick={onClose}
+              onClick={() => { onClose(); if (item.path) navigate(item.path) }}
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px',
                 padding: '14px 16px', borderRadius: '12px',

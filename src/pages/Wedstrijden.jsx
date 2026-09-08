@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import { useAuth } from '../context/AuthContext'
+import Opgave from '../components/Opgave'
+import { opgaveIsOpen } from '../hooks/useOpgave'
 
 const REACTIE_EMOJIS = ['💪', '❤️', '🎯', '😭']
 
@@ -120,11 +122,14 @@ function AankomendeKaart({ wedstrijd: w }) {
       background: 'white',
       border: '1px solid #e2e8f0',
       borderRadius: '14px',
-      padding: '20px 24px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '20px',
+      overflow: 'hidden',
     }}>
+      <div style={{
+        padding: '20px 24px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '20px',
+      }}>
       {/* Datum blok */}
       <div style={{
         flexShrink: 0, textAlign: 'center', width: '52px',
@@ -169,6 +174,14 @@ function AankomendeKaart({ wedstrijd: w }) {
       }}>
         {countdownLabel.tekst}
       </div>
+      </div>
+
+      {/* Opgave */}
+      {opgaveIsOpen(w) && (
+        <div style={{ borderTop: '1px solid #f1f5f9', background: '#fafafa', padding: '16px 24px' }}>
+          <Opgave wedstrijd={w} variant="desktop" />
+        </div>
+      )}
     </div>
   )
 }

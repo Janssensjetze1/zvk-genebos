@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from '../../lib/supabase'
 import TabLeden from './tabs/TabLeden'
 import TabSpelers from './tabs/TabSpelers'
 import TabTeams from './tabs/TabTeams'
 import TabWedstrijden from './tabs/TabWedstrijden'
 import TabSeizoen from './tabs/TabSeizoen'
 import TabMeldingen from './tabs/TabMeldingen'
+import TabFeedback from './tabs/TabFeedback'
 
 const tabs = [
   { id: 'leden', label: 'Ledenbeheer' },
@@ -13,10 +15,21 @@ const tabs = [
   { id: 'wedstrijden', label: 'Wedstrijden' },
   { id: 'seizoen', label: 'Seizoenen' },
   { id: 'meldingen', label: 'Meldingen' },
+  { id: 'feedback', label: 'Feedback' },
 ]
 
 export default function Admin() {
   const [actieveTab, setActieveTab] = useState('leden')
+  const [ongelezen, setOngelezen] = useState(0)
+
+  // Aantal nog niet bekeken feedbackberichten — teller op het tabblad
+  useEffect(() => {
+    supabase
+      .from('feedback')
+      .select('id', { count: 'exact', head: true })
+      .is('read_at', null)
+      .then(({ count }) => setOngelezen(count ?? 0))
+  }, [])
 
   return (
     <div>
@@ -51,6 +64,16 @@ export default function Admin() {
               }}
             >
               {tab.label}
+              {tab.id === 'feedback' && ongelezen > 0 && (
+                <span style={{
+                  marginLeft: '7px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  minWidth: '18px', height: '18px', padding: '0 5px', borderRadius: '9px',
+                  background: '#ef4444', color: 'white', fontSize: '11px', fontWeight: '700',
+                  verticalAlign: 'middle',
+                }}>
+                  {ongelezen}
+                </span>
+              )}
             </button>
           )
         })}
@@ -63,6 +86,7 @@ export default function Admin() {
       {actieveTab === 'wedstrijden' && <TabWedstrijden />}
       {actieveTab === 'seizoen' && <TabSeizoen />}
       {actieveTab === 'meldingen' && <TabMeldingen />}
+      {actieveTab === 'feedback' && <TabFeedback onGelezen={() => setOngelezen(0)} />}
     </div>
   )
 }

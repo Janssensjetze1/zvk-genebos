@@ -3,6 +3,7 @@ import { useConfirm } from '../../../components/ConfirmDialog'
 import { supabase } from '../../../lib/supabase'
 import { useSeason } from '../../../context/SeasonContext'
 import { useAuth } from '../../../context/AuthContext'
+import { opgaveNatuurlijkOpen, opgaveOpentOp } from '../../../hooks/useOpgave'
 
 const TYPES = ['competitie', 'beker', 'vriendschappelijk']
 const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
@@ -11,6 +12,10 @@ const TYPE_COLORS = {
   beker: { bg: '#fdf4ff', color: '#9333ea' },
   vriendschappelijk: { bg: '#f0fdf4', color: '#16a34a' },
 }
+
+// Opgave vooraf door de spelers zelf (tabel match_availability)
+const OPGAVE_EMOJI = { mee: '✅', niet: '❌', kijken: '👀' }
+const OPGAVE_TITEL = { mee: 'Gaf zich op: doet mee', niet: 'Gaf zich op: doet niet mee', kijken: 'Gaf zich op: komt kijken' }
 
 export default function TabWedstrijden() {
   const { bevestig, ConfirmUI } = useConfirm()
@@ -362,6 +367,30 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
     w.goals.map(g => ({ id: g.id, scorerId: g.scorer_id, assistId: g.assist_id ?? '', minuut: g.minute ?? '' }))
   )
 
+  const [opgaves, setOpgaves] = useState([])
+
+  useEffect(() => {
+    let levend = true
+    supabase
+      .from('match_availability')
+      .select('player_id, status')
+      .eq('match_id', w.id)
+      .then(({ data }) => {
+        if (!levend) return
+        const rijen = data ?? []
+        setOpgaves(rijen)
+        // Voorvullen als suggestie — enkel zolang er nog niks geregistreerd is
+        if (w.match_players.length === 0) {
+          const mee = rijen.filter(o => o.status === 'mee').map(o => o.player_id)
+          if (mee.length > 0) setAanwezig(new Set(mee))
+        }
+      })
+    return () => { levend = false }
+  }, [w.id])
+
+  const opgaveMap = Object.fromEntries(opgaves.map(o => [o.player_id, o.status]))
+  const meeIds = opgaves.filter(o => o.status === 'mee').map(o => o.player_id)
+
   const aanwezigeLijst = spelers.filter(s => aanwezig.has(s.id))
 
   function toggleAanwezig(id) {
@@ -487,6 +516,27 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
               <label style={{ ...labelStijl, marginBottom: '10px' }}>
                 Wie speelde mee? <span style={{ color: '#94a3b8', fontWeight: '400' }}>({aanwezig.size} geselecteerd)</span>
               </label>
+              {meeIds.length > 0 && (
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+                  background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px',
+                  padding: '10px 14px', marginBottom: '12px',
+                }}>
+                  <span style={{ fontSize: '12px', color: '#15803d' }}>
+                    ✋ {meeIds.length} {meeIds.length === 1 ? 'speler gaf' : 'spelers gaven'} zich vooraf op als "doet mee".
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setAanwezig(new Set(meeIds))}
+                    style={{
+                      flexShrink: 0, background: 'white', border: '1px solid #bbf7d0', color: '#15803d',
+                      borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
+                    }}
+                  >
+                    Opgave overnemen
+                  </button>
+                </div>
+              )}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {spelers.map(s => {
                   const ok = aanwezig.has(s.id)
@@ -501,6 +551,11 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
                     }}>
                       {ok && <span style={{ fontSize: '10px' }}>✓</span>}
                       {s.name}
+                      {opgaveMap[s.id] && (
+                        <span title={OPGAVE_TITEL[opgaveMap[s.id]]} style={{ fontSize: '11px', opacity: 0.9 }}>
+                          {OPGAVE_EMOJI[opgaveMap[s.id]]}
+                        </span>
+                      )}
                     </button>
                   )
                 })}
@@ -591,6 +646,8 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
 
 function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerken, onWedstrijdblad, onVerwijderen }) {
   const [open, setOpen] = useState(false)
+  const [opgaveOverride, setOpgaveOverride] = useState(w.availability_opens_at ?? null)
+  const [opgaveBezig, setOpgaveBezig] = useState(false)
   const [genereert, setGenereert] = useState(false)
   const [verslag, setVerslag] = useState(w.report ?? null)
   const isThuis = w.home_team?.is_zvk
@@ -599,6 +656,20 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
   const tegenstander = isThuis ? w.away_team : w.home_team
   const isPast = new Date(w.date) <= new Date()
   const heeftData = w.match_players?.length > 0 || w.goals?.length > 0
+
+  // Opgave gaat standaard open op woensdag van de matchweek; admin kan vervroegen
+  const natuurlijkOpen = opgaveNatuurlijkOpen(w)
+  const standaardOpening = opgaveOpentOp({ date: w.date })
+  const openingLabel = standaardOpening?.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })
+
+  async function toggleOpgave() {
+    if (opgaveBezig) return
+    setOpgaveBezig(true)
+    const nieuw = opgaveOverride ? null : new Date().toISOString()
+    setOpgaveOverride(nieuw)
+    await supabase.from('matches').update({ availability_opens_at: nieuw }).eq('id', w.id)
+    setOpgaveBezig(false)
+  }
   const gewonnen = zvkScore > tegScore
   const verloren = zvkScore < tegScore
   const resultaatKleur = gewonnen ? '#16a34a' : verloren ? '#ef4444' : '#64748b'
@@ -684,6 +755,37 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
 
         {/* Acties */}
         <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+          {/* Opgave — enkel zinvol bij aankomende wedstrijden */}
+          {!isPast && (natuurlijkOpen ? (
+            <span
+              title="De opgave staat open volgens de vaste regel: woensdag van de matchweek"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '5px',
+                background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0',
+                borderRadius: '7px', padding: '5px 11px', fontSize: '12px', fontWeight: '600',
+              }}
+            >✋ Opgave open</span>
+          ) : (
+            <button
+              onClick={toggleOpgave}
+              disabled={opgaveBezig}
+              title={opgaveOverride
+                ? `Terug naar de vaste regel — opent dan op ${openingLabel}`
+                : `Opgave nu al openzetten — gaat anders open op ${openingLabel}`}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '5px',
+                background: opgaveOverride ? '#f0fdf4' : 'white',
+                color: opgaveOverride ? '#16a34a' : '#64748b',
+                border: `1px solid ${opgaveOverride ? '#bbf7d0' : '#e2e8f0'}`,
+                borderRadius: '7px', padding: '5px 11px',
+                fontSize: '12px', fontWeight: '600',
+                cursor: opgaveBezig ? 'not-allowed' : 'pointer',
+                opacity: opgaveBezig ? 0.6 : 1,
+              }}
+            >
+              {opgaveOverride ? '✋ Vervroegd open' : '🔒 Opgave openen'}
+            </button>
+          ))}
           {/* Wedstrijdblad knop — prominent als nog niet ingevuld */}
           <button
             onClick={onWedstrijdblad}

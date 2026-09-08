@@ -28,6 +28,8 @@ import PWAStats from './pwa/PWAStats'
 import PWASpelers from './pwa/PWASpelers'
 import PWAAccount from './pwa/PWAAccount'
 import PWABadges from './pwa/PWABadges'
+import PWAInfo from './pwa/PWAInfo'
+import PWAFeedback from './pwa/PWAFeedback'
 import Invullen from './pages/Invullen'
 import Badges from './pages/Badges'
 
@@ -83,6 +85,16 @@ function AppRoutes() {
         <Route path="/app/badges" element={
           <ProtectedRoute>
             <PWALayout><PWABadges /></PWALayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/app/info" element={
+          <ProtectedRoute>
+            <PWALayout><PWAInfo /></PWALayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/app/feedback" element={
+          <ProtectedRoute>
+            <PWALayout><PWAFeedback /></PWALayout>
           </ProtectedRoute>
         } />
         <Route path="/app/invullen" element={

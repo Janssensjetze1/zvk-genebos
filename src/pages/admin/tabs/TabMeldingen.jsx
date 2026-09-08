@@ -154,14 +154,19 @@ export default function TabMeldingen() {
           {pushResultaat && (
             <div style={{
               padding: '10px 14px', borderRadius: '8px', marginBottom: '12px', fontSize: '13px',
-              background: pushResultaat.error ? '#fef2f2' : '#f0fdf4',
-              color:      pushResultaat.error ? '#dc2626'  : '#16a34a',
-              border:     `1px solid ${pushResultaat.error ? '#fecaca' : '#bbf7d0'}`,
+              background: pushResultaat.error || pushResultaat.failed > 0 ? '#fef2f2' : '#f0fdf4',
+              color:      pushResultaat.error || pushResultaat.failed > 0 ? '#dc2626'  : '#16a34a',
+              border:     `1px solid ${pushResultaat.error || pushResultaat.failed > 0 ? '#fecaca' : '#bbf7d0'}`,
             }}>
               {pushResultaat.error
                 ? `❌ Fout: ${pushResultaat.error}`
-                : `✓ Verzonden naar ${pushResultaat.sent} van ${pushResultaat.total} abonnee${pushResultaat.total !== 1 ? 's' : ''}${pushResultaat.failed > 0 ? ` (${pushResultaat.failed} mislukt)` : ''}`
+                : `${pushResultaat.failed > 0 ? '⚠️' : '✓'} Verzonden naar ${pushResultaat.sent} van ${pushResultaat.total} abonnee${pushResultaat.total !== 1 ? 's' : ''}${pushResultaat.failed > 0 ? ` (${pushResultaat.failed} mislukt)` : ''}`
               }
+              {pushResultaat.errors?.length > 0 && (
+                <div style={{ marginTop: '6px', fontSize: '12px', opacity: 0.8 }}>
+                  {pushResultaat.errors.map((e, i) => <div key={i}>↳ {e}</div>)}
+                </div>
+              )}
             </div>
           )}
 
