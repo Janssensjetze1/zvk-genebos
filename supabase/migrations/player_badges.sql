@@ -31,6 +31,7 @@ create index if not exists idx_player_badges_player_id on public.player_badges(p
 -- RLS: iedereen mag zijn eigen badges lezen; alleen admins mogen schrijven
 alter table public.player_badges enable row level security;
 
+drop policy if exists "Spelers kunnen eigen badges zien" on public.player_badges;
 create policy "Spelers kunnen eigen badges zien"
   on public.player_badges for select
   using (
@@ -39,6 +40,7 @@ create policy "Spelers kunnen eigen badges zien"
     )
   );
 
+drop policy if exists "Admins kunnen badges toekennen" on public.player_badges;
 create policy "Admins kunnen badges toekennen"
   on public.player_badges for insert
   with check (
@@ -48,6 +50,7 @@ create policy "Admins kunnen badges toekennen"
     )
   );
 
+drop policy if exists "Admins kunnen badges verwijderen" on public.player_badges;
 create policy "Admins kunnen badges verwijderen"
   on public.player_badges for delete
   using (

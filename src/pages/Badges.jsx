@@ -3,41 +3,8 @@ import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
 import { supabase } from '../lib/supabase'
 import { BADGES, CAT, SHINE, CATEGORIE_VOLGORDE } from '../data/badges'
+import { computeStats } from '../lib/badgeStats'
 
-// Zelfde stats-berekening als PWAAccount
-function computeStats({ goalsArr, assistsArr, matchesArr, seizoenId, userCreatedAt }) {
-  const goalsByMatch   = {}
-  const assistsByMatch = {}
-  goalsArr.forEach(g => { if (g.match_id) goalsByMatch[g.match_id] = (goalsByMatch[g.match_id] || 0) + 1 })
-  assistsArr.forEach(a => { if (a.match_id) assistsByMatch[a.match_id] = (assistsByMatch[a.match_id] || 0) + 1 })
-  const hattrickMatchIds = Object.entries(goalsByMatch).filter(([, n]) => n >= 3).map(([id]) => id)
-  const goalMatchSet   = new Set(Object.keys(goalsByMatch))
-  const assistMatchSet = new Set(Object.keys(assistsByMatch))
-  return {
-    aantalGoals:       goalsArr.length,
-    aantalAssists:     assistsArr.length,
-    aantalWedstrijden: matchesArr.length,
-    seizoenGoals:      goalsArr.filter(g => g.match?.season_id === seizoenId).length,
-    hattricks:               hattrickMatchIds.length,
-    maxGoalsInWedstrijd:     Math.max(0, ...Object.values(goalsByMatch)),
-    maxAssistsInWedstrijd:   Math.max(0, ...Object.values(assistsByMatch)),
-    hattrickMetAssist:          hattrickMatchIds.filter(id => assistsByMatch[id] >= 1).length,
-    wedstrijdenMetGoalEnAssist: [...goalMatchSet].filter(id => assistMatchSet.has(id)).length,
-    seizoenenMetGoal:   new Set(goalsArr.map(g => g.match?.season_id).filter(Boolean)).size,
-    aantalSeizoenen:    new Set(matchesArr.map(m => m.match?.season_id).filter(Boolean)).size,
-    accountLeeftijdDagen: userCreatedAt ? Math.floor((Date.now() - new Date(userCreatedAt).getTime()) / 86400000) : 0,
-    nooitGespeeld: matchesArr.length === 0 && (userCreatedAt ? Math.floor((Date.now() - new Date(userCreatedAt).getTime()) / 86400000) : 0) >= 60,
-    cleanSheets: matchesArr.filter(m => {
-      const match = m.match; if (!match) return false
-      const zvkIsThuis = match.home_team?.is_zvk
-      const tegScore = zvkIsThuis ? match.away_score : match.home_score
-      return tegScore !== null && tegScore === 0
-    }).length,
-    aantalWedstrijdenRij: 0, maxWedstrijdenRij: 0,
-    seizoenenVolledigAanwezig: 0, topScorerSeizoenen: 0,
-    grootsteWinstMarge: 0, nachtbraker: false, gewonnenOpVerjaardag: false,
-  }
-}
 
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
 
@@ -267,13 +234,13 @@ export default function Badges() {
                 return (
                   <div
                     key={badge.id}
-                    onClick={() => badge.verdiend && setGeselecteerd(badge)}
+                    onClick={() => setGeselecteerd(badge)}
                     style={{
                       background: badge.verdiend ? c.lb : 'white',
                       border: `1.5px solid ${badge.verdiend ? c.lbo : '#e2e8f0'}`,
                       borderRadius: '20px', padding: '24px 16px 18px',
                       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-                      cursor: badge.verdiend ? 'pointer' : 'default',
+                      cursor: 'pointer',
                       position: 'relative',
                       transition: 'transform 0.12s, box-shadow 0.12s',
                     }}
@@ -343,7 +310,7 @@ export default function Badges() {
               boxShadow: '0 24px 64px rgba(0,0,0,0.2)',
             }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '18px' }}>
-                <BadgeHex emoji={geselecteerd.emoji} categorie={geselecteerd.categorie} size={108} verdiend />
+                <BadgeHex emoji={geselecteerd.emoji} categorie={geselecteerd.categorie} size={108} verdiend={geselecteerd.verdiend} />
                 <div style={{ textAlign: 'center' }}>
                   <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: '0 0 10px' }}>
                     {geselecteerd.naam}
@@ -357,21 +324,8 @@ export default function Badges() {
                   </span>
                 </div>
                 <p style={{ fontSize: '14px', color: '#475569', textAlign: 'center', lineHeight: 1.65, margin: 0 }}>
-                  {geselecteerd.beschrijving}
+                  {geselecteerd.beschrijving || 'Deze badge is nog geheim.'}
                 </p>
-                <div style={{
-                  width: '100%', background: '#f0fdf4', border: '1px solid #bbf7d0',
-                  borderRadius: '14px', padding: '14px 16px',
-                  display: 'flex', alignItems: 'center', gap: '12px',
-                }}>
-                  <div style={{
-                    width: '34px', height: '34px', borderRadius: '50%',
-                    background: '#dcfce7', border: '1.5px solid #86efac',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '15px', flexShrink: 0,
-                  }}>✓</div>
-                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#166534' }}>Verdiend!</div>
-                </div>
                 <button
                   onClick={() => setGeselecteerd(null)}
                   style={{

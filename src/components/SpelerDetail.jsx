@@ -1,66 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { BADGES, berekenBadges, CATEGORIE_VOLGORDE, CAT, SHINE } from '../data/badges'
+import { BADGES, CATEGORIE_VOLGORDE, CAT, SHINE } from '../data/badges'
+import { computeStats } from '../lib/badgeStats'
 
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
 
-// ── Stats berekenen ─────────────────────────────────────────────────────────
-function computeStats({ goalsArr, assistsArr, matchesArr, seizoenId, userCreatedAt }) {
-  const goalsByMatch   = {}
-  const assistsByMatch = {}
-
-  goalsArr.forEach(g => {
-    if (g.match_id) goalsByMatch[g.match_id] = (goalsByMatch[g.match_id] || 0) + 1
-  })
-  assistsArr.forEach(a => {
-    if (a.match_id) assistsByMatch[a.match_id] = (assistsByMatch[a.match_id] || 0) + 1
-  })
-
-  const hattrickMatchIds = Object.entries(goalsByMatch)
-    .filter(([, n]) => n >= 3).map(([id]) => id)
-
-  const goalMatchSet   = new Set(Object.keys(goalsByMatch))
-  const assistMatchSet = new Set(Object.keys(assistsByMatch))
-
-  return {
-    aantalGoals:       goalsArr.length,
-    aantalAssists:     assistsArr.length,
-    aantalWedstrijden: matchesArr.length,
-
-    seizoenGoals: goalsArr.filter(g => g.match?.season_id === seizoenId).length,
-
-    hattricks:             hattrickMatchIds.length,
-    maxGoalsInWedstrijd:   Math.max(0, ...Object.values(goalsByMatch)),
-    maxAssistsInWedstrijd: Math.max(0, ...Object.values(assistsByMatch)),
-
-    hattrickMetAssist:          hattrickMatchIds.filter(id => assistsByMatch[id] >= 1).length,
-    wedstrijdenMetGoalEnAssist: [...goalMatchSet].filter(id => assistMatchSet.has(id)).length,
-
-    seizoenenMetGoal: new Set(goalsArr.map(g => g.match?.season_id).filter(Boolean)).size,
-    aantalSeizoenen:  new Set(matchesArr.map(m => m.match?.season_id).filter(Boolean)).size,
-
-    accountLeeftijdDagen: userCreatedAt
-      ? Math.floor((Date.now() - new Date(userCreatedAt).getTime()) / 86400000)
-      : 0,
-
-    nooitGespeeld: matchesArr.length === 0 &&
-      (userCreatedAt
-        ? Math.floor((Date.now() - new Date(userCreatedAt).getTime()) / 86400000)
-        : 0) >= 60,
-
-    cleanSheets: matchesArr.filter(m => {
-      const match = m.match
-      if (!match) return false
-      const zvkIsThuis = match.home_team?.is_zvk
-      const tegScore = zvkIsThuis ? match.away_score : match.home_score
-      return tegScore !== null && tegScore === 0
-    }).length,
-
-    aantalWedstrijdenRij: 0, maxWedstrijdenRij: 0,
-    seizoenenVolledigAanwezig: 0, topScorerSeizoenen: 0,
-    grootsteWinstMarge: 0, nachtbraker: false, gewonnenOpVerjaardag: false,
-  }
-}
 
 // ── Hex badge ───────────────────────────────────────────────────────────────
 function BadgeHex({ emoji, categorie, size = 64, verdiend }) {
@@ -227,16 +171,16 @@ function BadgesTab({ badgesMetStatus, geselecteerdeBadge, setGeselecteerdeBadge 
                 return (
                   <div
                     key={badge.id}
-                    onClick={() => badge.verdiend && setGeselecteerdeBadge(isSelected ? null : badge)}
+                    onClick={() => setGeselecteerdeBadge(isSelected ? null : badge)}
                     style={{
                       background: 'white',
                       border: `1.5px solid ${isSelected ? c.lc : badge.verdiend ? c.lbo : '#e2e8f0'}`,
                       borderRadius: '11px', padding: '9px 5px 7px',
                       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-                      cursor: badge.verdiend ? 'pointer' : 'default',
+                      cursor: 'pointer',
                       position: 'relative', transition: 'transform 0.1s',
                     }}
-                    onPointerDown={e => badge.verdiend && (e.currentTarget.style.transform = 'scale(0.95)')}
+                    onPointerDown={e => (e.currentTarget.style.transform = 'scale(0.95)')}
                     onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
                     onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
                   >
@@ -274,6 +218,7 @@ function BadgesTab({ badgesMetStatus, geselecteerdeBadge, setGeselecteerdeBadge 
 export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sheet' }) {
   const [tab, setTab] = useState('stats')
   const [rawStats, setRawStats]     = useState(null)
+  const [dbBadgeIds, setDbBadgeIds] = useState(new Set())
   const [loading, setLoading]       = useState(true)
   const [geselecteerdeBadge, setGeselecteerdeBadge] = useState(null)
 
@@ -283,7 +228,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
 
   async function fetchStats() {
     setLoading(true)
-    const [goalsRes, assistsRes, matchesRes] = await Promise.all([
+    const [goalsRes, assistsRes, matchesRes, dbRes] = await Promise.all([
       supabase.from('goals')
         .select('id, match_id, match:match_id(season_id)')
         .eq('scorer_id', speler.id),
@@ -293,7 +238,11 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
       supabase.from('match_players')
         .select('match_id, match:match_id(season_id, home_score, away_score, home_team:home_team_id(is_zvk), away_team:away_team_id(is_zvk))')
         .eq('player_id', speler.id),
+      // Handmatig toegekende badges (bv. de Gouden Schoen)
+      supabase.from('player_badges').select('badge_id').eq('player_id', speler.id),
     ])
+
+    setDbBadgeIds(new Set((dbRes.data ?? []).map(r => r.badge_id)))
 
     const goalsArr   = goalsRes.data   ?? []
     const assistsArr = assistsRes.data  ?? []
@@ -310,12 +259,11 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
     setLoading(false)
   }
 
-  const badgesMetStatus = rawStats
-    ? BADGES.map(b => ({
-        ...b,
-        verdiend: (() => { try { return b.conditie(rawStats) } catch { return false } })(),
-      }))
-    : BADGES.map(b => ({ ...b, verdiend: false }))
+  const badgesMetStatus = BADGES.map(b => ({
+    ...b,
+    verdiend: dbBadgeIds.has(b.id) ||
+      (rawStats ? (() => { try { return b.conditie(rawStats) } catch { return false } })() : false),
+  }))
 
   // ── Gedeelde blokken ────────────────────────────────────────────────────
   const spelerHeader = (
@@ -425,7 +373,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
             }}
           >×</button>
 
-          <BadgeHex emoji={b.emoji} categorie={b.categorie} size={96} verdiend />
+          <BadgeHex emoji={b.emoji} categorie={b.categorie} size={96} verdiend={b.verdiend} />
 
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>{b.naam}</div>
@@ -439,22 +387,8 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
           </div>
 
           <p style={{ fontSize: '14px', color: '#475569', textAlign: 'center', lineHeight: 1.65, margin: 0 }}>
-            {b.beschrijving}
+            {b.beschrijving || 'Deze badge is nog geheim.'}
           </p>
-
-          <div style={{
-            width: '100%', background: '#f0fdf4', border: '1px solid #bbf7d0',
-            borderRadius: '14px', padding: '12px 14px',
-            display: 'flex', alignItems: 'center', gap: '10px',
-          }}>
-            <div style={{
-              width: '30px', height: '30px', borderRadius: '50%', flexShrink: 0,
-              background: '#dcfce7', border: '1.5px solid #86efac',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '13px', color: '#16a34a', fontWeight: '700',
-            }}>✓</div>
-            <div style={{ fontSize: '13px', fontWeight: '700', color: '#166534' }}>Verdiend!</div>
-          </div>
 
           <button
             onClick={() => setGeselecteerdeBadge(null)}

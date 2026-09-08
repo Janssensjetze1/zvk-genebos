@@ -178,12 +178,16 @@ button:active:not(:disabled) {
 .badge-card {
   position: relative;
   overflow: hidden;
+  /* De drie tinten worden per badge meegegeven via inline custom properties,
+     zodat de kaart de kleur van zijn categorie aanneemt. Zonder die variabelen
+     valt hij terug op het originele paars-blauw. */
   background:
-    radial-gradient(ellipse at 15% 85%, rgba(236,72,153,0.18) 0%, transparent 55%),
-    radial-gradient(ellipse at 85% 15%, rgba(99,102,241,0.22) 0%, transparent 55%),
-    radial-gradient(ellipse at 50% 110%, rgba(139,92,246,0.15) 0%, transparent 50%),
+    linear-gradient(160deg, rgba(255,255,255,0.11) 0%, rgba(255,255,255,0.03) 22%, transparent 42%),
+    radial-gradient(ellipse at 15% 85%, var(--badge-tint-a, rgba(236,72,153,0.18)) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 15%, var(--badge-tint-b, rgba(99,102,241,0.22)) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 110%, var(--badge-tint-c, rgba(139,92,246,0.15)) 0%, transparent 50%),
     linear-gradient(140deg, #09091a 0%, #0e0a20 45%, #0a1228 100%);
-  background-size: 200% 200%, 200% 200%, 200% 200%, 100% 100%;
+  background-size: 100% 100%, 200% 200%, 200% 200%, 200% 200%, 100% 100%;
   animation: badge-aurora 7s ease infinite;
   border: none !important;
   border-radius: 20px;
@@ -211,9 +215,11 @@ button:active:not(:disabled) {
   inset: 0;
   background: linear-gradient(
     105deg,
-    transparent 40%,
-    rgba(255,255,255,0.06) 50%,
-    transparent 60%
+    transparent 32%,
+    rgba(255,255,255,0.05) 44%,
+    rgba(255,255,255,0.16) 50%,
+    rgba(255,255,255,0.05) 56%,
+    transparent 68%
   );
   animation: badge-shimmer 4s ease-in-out infinite;
   pointer-events: none;
@@ -226,11 +232,33 @@ button:active:not(:disabled) {
 
 .badge-card-locked {
   animation: badge-aurora 12s ease infinite;
-  filter: brightness(0.55) saturate(0.4);
+  /* Iets gedimd, maar de categoriekleuren blijven zichtbaar */
+  filter: brightness(0.82);
 }
 
 /* Platina badge glitter sterretjes */
 @keyframes glitter {
   0%, 100% { opacity: 0; transform: scale(0.2) rotate(0deg); }
   50%       { opacity: 1; transform: scale(1)   rotate(72deg); }
+}
+
+/* ── Badge hex: glans die schuin over de badge glijdt ── */
+@keyframes badge-hex-shine {
+  0%        { transform: translateX(-160%) rotate(20deg); }
+  55%, 100% { transform: translateX(200%)  rotate(20deg); }
+}
+
+.badge-hex-shine {
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  width: 45%;
+  pointer-events: none;
+  animation: badge-hex-shine 3.4s ease-in-out infinite;
+}
+
+/* Zachte pulserende gloed in de kleur van de categorie */
+@keyframes badge-hex-glow {
+  0%, 100% { opacity: 0.75; }
+  50%      { opacity: 1; }
 }

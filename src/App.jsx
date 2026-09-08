@@ -83,9 +83,9 @@ function AppRoutes() {
           </ProtectedRoute>
         } />
         <Route path="/app/badges" element={
-          <ProtectedRoute>
+          <AdminRoute>
             <PWALayout><PWABadges /></PWALayout>
-          </ProtectedRoute>
+          </AdminRoute>
         } />
         <Route path="/app/info" element={
           <ProtectedRoute>
@@ -138,7 +138,7 @@ function AppRoutes() {
         <ProtectedRoute><Layout><GoudenJaar /></Layout></ProtectedRoute>
       } />
       <Route path="/badges" element={
-        <ProtectedRoute><Layout><Badges /></Layout></ProtectedRoute>
+        <AdminRoute><Layout><Badges /></Layout></AdminRoute>
       } />
       <Route path="/invullen" element={
         <AdminRoute><Invullen /></AdminRoute>

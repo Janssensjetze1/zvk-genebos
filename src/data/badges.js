@@ -1,7 +1,71 @@
 // ─── ZVK Genebos — Badge definities ──────────────────────────────────────────
 
-// Badges worden later ingevuld
-export const BADGES = []
+// Een badge is verdiend als (1) conditie(stats) true geeft, OF (2) een admin ze
+// handmatig toekende via de tabel player_badges.
+//
+// Velden:
+//   id             — verwijst naar player_badges.badge_id, nooit wijzigen na gebruik
+//   naam           — '???' bij een badge die nog geheim moet blijven
+//   emoji          — enkel zichtbaar zodra de badge verdiend is
+//   categorie      — brons | zilver | goud | platina | legendary | geheim
+//   beschrijving   — leeg laten bij een geheime badge
+//   conditieTekst  — korte samenvatting, getoond bij een verdiende badge
+//   handmatig      — true = enkel toe te kennen door een admin
+//   placeholder    — true = naam en beschrijving blijven verborgen
+//   conditie(stats) — stats komen uit src/lib/badgeStats.js
+
+const geheim = (id, categorie) => ({
+  id,
+  naam: '???',
+  emoji: '❓',
+  categorie,
+  beschrijving: '',
+  conditieTekst: '',
+  placeholder: true,
+  conditie: () => false,
+})
+
+export const BADGES = [
+  // ─── Brons ─────────────────────────────────────────────────────────────────
+  {
+    id: 'vijf-wedstrijden',
+    naam: 'Vaste Waarde',
+    emoji: '⚽',
+    categorie: 'brons',
+    beschrijving: 'Je speelde vijf wedstrijden mee voor ZVK Genebos.',
+    conditieTekst: '5 wedstrijden gespeeld',
+    conditie: s => (s.aantalWedstrijden ?? 0) >= 5,
+  },
+
+  // ─── Zilver ────────────────────────────────────────────────────────────────
+  geheim('zilver-1', 'zilver'),
+  geheim('zilver-2', 'zilver'),
+  geheim('zilver-3', 'zilver'),
+
+  // ─── Goud ──────────────────────────────────────────────────────────────────
+  geheim('goud-1', 'goud'),
+  geheim('goud-2', 'goud'),
+
+  // ─── Platina ───────────────────────────────────────────────────────────────
+  geheim('platina-1', 'platina'),
+  geheim('platina-2', 'platina'),
+  geheim('platina-3', 'platina'),
+
+  // ─── Legendary ─────────────────────────────────────────────────────────────
+  {
+    id: 'gouden-schoen',
+    naam: 'Gouden Schoen',
+    emoji: '👟',
+    categorie: 'legendary',
+    beschrijving: 'Beste speler van het seizoen.',
+    conditieTekst: '',
+    handmatig: true,
+    conditie: () => false,
+  },
+]
+
+// Badges die enkel een admin kan toekennen (beheerscherm)
+export const HANDMATIGE_BADGES = BADGES.filter(b => b.handmatig)
 
 // Holografische aurora-gradients voor verdiende badges
 // Gestapelde radiale gradiënten creëren het zachte kleur-mesh effect (zie referentie-afbeelding)

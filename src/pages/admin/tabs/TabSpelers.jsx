@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useConfirm } from '../../../components/ConfirmDialog'
 import { supabase } from '../../../lib/supabase'
+import { useAuth } from '../../../context/AuthContext'
+import { HANDMATIGE_BADGES, CAT } from '../../../data/badges'
 
 export default function TabSpelers() {
   const { bevestig, ConfirmUI } = useConfirm()
+  const { user } = useAuth()
   const [spelers, setSpelers] = useState([])
   const [loading, setLoading] = useState(true)
   const [toonFormulier, setToonFormulier] = useState(false)
   const [bewerkId, setBewerkId] = useState(null)
+  const [badgePaneel, setBadgePaneel] = useState(null)   // player_id waarvan het badgepaneel open staat
+  const [toegekend, setToegekend] = useState({})          // { player_id: Set(badge_id) }
+  const [badgeBezig, setBadgeBezig] = useState(null)      // `${player_id}:${badge_id}` tijdens opslaan
 
   // Nieuw speler form state
   const [naam, setNaam] = useState('')
@@ -21,7 +27,39 @@ export default function TabSpelers() {
   const [bewerkOpslaan, setBewerkOpslaan] = useState(false)
   const [bewerkFout, setBewerkFout] = useState('')
 
-  useEffect(() => { fetchSpelers() }, [])
+  useEffect(() => { fetchSpelers(); fetchBadges() }, [])
+
+  async function fetchBadges() {
+    const { data } = await supabase.from('player_badges').select('player_id, badge_id')
+    const map = {}
+    for (const rij of data ?? []) {
+      if (!map[rij.player_id]) map[rij.player_id] = new Set()
+      map[rij.player_id].add(rij.badge_id)
+    }
+    setToegekend(map)
+  }
+
+  async function toggleBadge(speler, badge) {
+    const sleutel = `${speler.id}:${badge.id}`
+    if (badgeBezig) return
+    setBadgeBezig(sleutel)
+
+    const heeftAl = toegekend[speler.id]?.has(badge.id)
+
+    if (heeftAl) {
+      await supabase.from('player_badges').delete()
+        .eq('player_id', speler.id).eq('badge_id', badge.id)
+    } else {
+      await supabase.from('player_badges').insert({
+        player_id: speler.id,
+        badge_id: badge.id,
+        awarded_by: user?.id ?? null,
+      })
+    }
+
+    await fetchBadges()
+    setBadgeBezig(null)
+  }
 
   async function fetchSpelers() {
     const { data } = await supabase.from('players').select('*').order('name')
@@ -152,7 +190,7 @@ export default function TabSpelers() {
               {/* Speler rij */}
               <div style={{
                 background: 'white', border: `1px solid ${bewerkId === speler.id ? '#93c5fd' : '#e2e8f0'}`,
-                borderRadius: bewerkId === speler.id ? '10px 10px 0 0' : '10px',
+                borderRadius: (bewerkId === speler.id || badgePaneel === speler.id) ? '10px 10px 0 0' : '10px',
                 padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px',
               }}>
                 {/* Avatar */}
@@ -166,6 +204,28 @@ export default function TabSpelers() {
                 <span style={{ flex: 1, fontSize: '14px', fontWeight: '500', color: '#0f172a' }}>{speler.name}</span>
 
                 <div style={{ display: 'flex', gap: '6px' }}>
+                  <button
+                    onClick={() => setBadgePaneel(p => p === speler.id ? null : speler.id)}
+                    title="Handmatige badges toekennen"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '5px',
+                      background: badgePaneel === speler.id ? '#f1f5f9' : 'white',
+                      border: '1px solid #e2e8f0', borderRadius: '6px',
+                      padding: '5px 12px', fontSize: '13px', fontWeight: '500',
+                      color: '#475569', cursor: 'pointer',
+                    }}
+                  >
+                    🏅 Badges
+                    {(toegekend[speler.id]?.size ?? 0) > 0 && (
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        minWidth: '17px', height: '17px', padding: '0 4px', borderRadius: '9px',
+                        background: '#0f172a', color: 'white', fontSize: '10px', fontWeight: '700',
+                      }}>
+                        {toegekend[speler.id].size}
+                      </span>
+                    )}
+                  </button>
                   <button
                     onClick={() => bewerkId === speler.id ? stopBewerken() : startBewerken(speler)}
                     style={{
@@ -187,6 +247,63 @@ export default function TabSpelers() {
                   </button>
                 </div>
               </div>
+
+              {/* Badgepaneel */}
+              {badgePaneel === speler.id && (
+                <div style={{
+                  background: '#f8fafc', border: '1px solid #e2e8f0', borderTop: 'none',
+                  borderRadius: '0 0 10px 10px', padding: '16px 20px',
+                }}>
+                  <p style={{ fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Handmatige badges
+                  </p>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '14px' }}>
+                    Deze badges kan een speler niet zelf verdienen — jij kent ze toe.
+                  </p>
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                    {HANDMATIGE_BADGES.map(badge => {
+                      const heeft = toegekend[speler.id]?.has(badge.id) ?? false
+                      const bezig = badgeBezig === `${speler.id}:${badge.id}`
+                      const c = CAT[badge.categorie] ?? CAT.platina
+                      return (
+                        <button
+                          key={badge.id}
+                          type="button"
+                          onClick={() => toggleBadge(speler, badge)}
+                          disabled={bezig}
+                          title={badge.beschrijving}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: '9px',
+                            padding: '9px 14px', borderRadius: '10px',
+                            border: `1.5px solid ${heeft ? c.lbo : '#e2e8f0'}`,
+                            background: heeft ? c.lb : 'white',
+                            color: heeft ? c.lc : '#64748b',
+                            fontSize: '13px', fontWeight: heeft ? '700' : '500',
+                            cursor: bezig ? 'wait' : 'pointer',
+                            opacity: bezig ? 0.6 : 1,
+                            transition: 'all 0.15s',
+                          }}
+                        >
+                          <span style={{ fontSize: '15px' }}>{badge.emoji}</span>
+                          {badge.naam}
+                          <span style={{
+                            fontSize: '11px', fontWeight: '600',
+                            color: heeft ? c.lc : '#cbd5e1',
+                          }}>
+                            {heeft ? '✓ toegekend' : '+ toekennen'}
+                          </span>
+                        </button>
+                      )
+                    })}
+                    {HANDMATIGE_BADGES.length === 0 && (
+                      <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+                        Er zijn nog geen handmatige badges gedefinieerd.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Inline bewerkformulier */}
               {bewerkId === speler.id && (
