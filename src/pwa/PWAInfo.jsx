@@ -87,7 +87,8 @@ export default function PWAInfo() {
           <Stap nr="❌"><span style={vet}>Ik doen nie mee</span> — je bent er niet bij.</Stap>
           <Stap nr="👀"><span style={vet}>Ik kom zien</span> — je komt kijken, maar speelt niet mee.</Stap>
           <p>
-            Iedereen ziet wie wat gekozen heeft, dus je weet meteen of er genoeg volk is. Van gedacht veranderd?
+            Onder de knoppen staat <span style={vet}>Wie gaf zich op</span> met de tussenstand. Tik erop om de
+            namen open te klappen, zo weet je meteen of er genoeg volk is. Van gedacht veranderd?
             Tik gewoon op een andere knop. Nog eens op je eigen keuze duwen wist ze helemaal.
           </p>
           <Tip>
@@ -132,6 +133,21 @@ export default function PWAInfo() {
           <p>
             Alles wordt per seizoen bijgehouden, dus oudere seizoenen blijven bewaard.
           </p>
+        </Sectie>
+
+        <Sectie emoji="🏅" titel="Badges">
+          <p>
+            Tik linksboven op je profielknop en kies <span style={vet}>Badges</span>. Daar staat je verzameling:
+            wat je al verdiend hebt en wat er nog te halen valt.
+          </p>
+          <p>
+            De meeste badges krijg je automatisch zodra je aan de voorwaarde voldoet. Een paar worden door de
+            admin toegekend. En sommige zijn nog <span style={vet}>geheim</span> — die staan met een ❓ tot ze
+            vrijgegeven worden.
+          </p>
+          <Tip>
+            👥 De badges van je ploegmaats zie je bij <span style={vet}>Spelers</span>, als je iemand aantikt.
+          </Tip>
         </Sectie>
 
         <Sectie emoji="👤" titel="Je profiel en meldingen">

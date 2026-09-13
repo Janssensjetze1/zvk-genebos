@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext'
 import Opgave from '../components/Opgave'
 import { opgaveIsOpen } from '../hooks/useOpgave'
 import { isGespeeld } from '../lib/wedstrijd'
+import { useVerslag } from '../hooks/useVerslag'
+import VerslagPaneel from '../components/VerslagPaneel'
 
 const REACTIE_EMOJIS = ['💪', '❤️', '🎯', '😭']
 
@@ -189,13 +191,12 @@ function AankomendeKaart({ wedstrijd: w }) {
 // ── Gespeelde wedstrijd kaart ────────────────────────────────────────────────
 
 function GespeeldeKaart({ wedstrijd: w }) {
-  const { user, isAdmin } = useAuth()
+  const { user } = useAuth()
   const [open, setOpen] = useState(false)
   const [detailTab, setDetailTab] = useState('details') // 'details' | 'verslag'
   const [reacties, setReacties] = useState([])
   const [mijneReactie, setMijneReactie] = useState(null)
-  const [verslag, setVerslag] = useState(w.report ?? null)
-  const [genereert, setGenereert] = useState(false)
+  const verslagState = useVerslag(w)
   const isThuis = w.home_team?.is_zvk
   const zvkScore = isThuis ? w.home_score : w.away_score
   const tegScore = isThuis ? w.away_score : w.home_score
@@ -236,24 +237,7 @@ function GespeeldeKaart({ wedstrijd: w }) {
   const resultaatBg = { W: '#f0fdf4', V: '#fef2f2', G: '#fffbeb' }[resultaat]
   const resultaatLabel = { W: 'Winst', V: 'Verlies', G: 'Gelijkspel' }[resultaat]
 
-  async function genereerVerslag() {
-    setGenereert(true)
-    setDetailTab('verslag')
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-match-report`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body: JSON.stringify({ match_id: w.id }),
-      })
-      const json = await res.json()
-      if (json.report) setVerslag(json.report)
-    } finally {
-      setGenereert(false)
-    }
-  }
-
-  const heeftBlad = w.match_players?.length > 0 || w.goals?.length > 0 || verslag
+  const heeftBlad = w.match_players?.length > 0 || w.goals?.length > 0 || verslagState.verslag
   const zvkGoals = w.goals?.filter(g => {
     // Goal is van ZVK als de scorer speelde voor ZVK (we controleren via match_players)
     return true // toon alle goals in deze wedstrijd
@@ -413,35 +397,7 @@ function GespeeldeKaart({ wedstrijd: w }) {
 
           {/* Verslag tab */}
           {detailTab === 'verslag' && (
-            <div style={{ padding: '16px 18px' }}>
-              {genereert ? (
-                <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>
-                  <div className="pulse-soft" style={{ fontSize: '28px', marginBottom: '8px' }}>📝</div>
-                  <p style={{ fontSize: '13px' }}>Verslag wordt gegenereerd...</p>
-                </div>
-              ) : verslag ? (
-                <div>
-                  <p style={{ fontSize: '14px', color: '#334155', lineHeight: 1.75, whiteSpace: 'pre-wrap', fontStyle: 'italic' }}>{verslag}</p>
-                  {isAdmin && (
-                    <button onClick={genereerVerslag} style={{ marginTop: '12px', fontSize: '12px', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
-                      Opnieuw genereren
-                    </button>
-                  )}
-                </div>
-              ) : isAdmin ? (
-                <div style={{ textAlign: 'center', padding: '20px' }}>
-                  <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '14px' }}>Nog geen verslag voor deze wedstrijd.</p>
-                  <button
-                    onClick={genereerVerslag}
-                    style={{ background: '#0f172a', color: 'white', border: 'none', borderRadius: '10px', padding: '10px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '7px' }}
-                  >
-                    ✨ Genereer verslag
-                  </button>
-                </div>
-              ) : (
-                <p style={{ fontSize: '13px', color: '#94a3b8', textAlign: 'center', padding: '20px' }}>Nog geen verslag beschikbaar.</p>
-              )}
-            </div>
+            <VerslagPaneel verslagState={verslagState} variant="desktop" />
           )}
         </div>
       )}

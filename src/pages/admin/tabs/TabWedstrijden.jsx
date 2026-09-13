@@ -4,6 +4,8 @@ import { supabase } from '../../../lib/supabase'
 import { useSeason } from '../../../context/SeasonContext'
 import { useAuth } from '../../../context/AuthContext'
 import { opgaveNatuurlijkOpen, opgaveOpentOp } from '../../../hooks/useOpgave'
+import { useVerslag } from '../../../hooks/useVerslag'
+import VerslagPaneel from '../../../components/VerslagPaneel'
 
 const TYPES = ['competitie', 'beker', 'vriendschappelijk']
 const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
@@ -649,8 +651,7 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
   const [open, setOpen] = useState(false)
   const [opgaveOverride, setOpgaveOverride] = useState(w.availability_opens_at ?? null)
   const [opgaveBezig, setOpgaveBezig] = useState(false)
-  const [genereert, setGenereert] = useState(false)
-  const [verslag, setVerslag] = useState(w.report ?? null)
+  const verslagState = useVerslag(w)
   const isThuis = w.home_team?.is_zvk
   const zvkScore = isThuis ? w.home_score : w.away_score
   const tegScore = isThuis ? w.away_score : w.home_score
@@ -675,23 +676,6 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
   const verloren = zvkScore < tegScore
   const resultaatKleur = gewonnen ? '#16a34a' : verloren ? '#ef4444' : '#64748b'
   const resultaatLabel = gewonnen ? 'W' : verloren ? 'V' : 'G'
-
-  async function genereerVerslag() {
-    setGenereert(true)
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-match-report`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body: JSON.stringify({ match_id: w.id }),
-      })
-      const json = await res.json()
-      if (json.report) setVerslag(json.report)
-    } catch (e) {
-      console.error(e)
-    }
-    setGenereert(false)
-  }
 
   return (
     <div style={{
@@ -808,21 +792,21 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
           {/* Verslag knop — enkel voor gespeelde wedstrijden */}
           {isPast && (
             <button
-              onClick={genereerVerslag}
-              disabled={genereert}
-              title={verslag ? 'Verslag opnieuw genereren' : 'Verslag genereren'}
+              onClick={() => { setOpen(true); verslagState.genereer() }}
+              disabled={verslagState.genereert}
+              title={verslagState.verslag ? 'Verslag opnieuw genereren' : 'Verslag genereren'}
               style={{
                 display: 'flex', alignItems: 'center', gap: '5px',
-                background: verslag ? '#f0fdf4' : '#faf5ff',
-                color: verslag ? '#16a34a' : '#7c3aed',
-                border: `1px solid ${verslag ? '#bbf7d0' : '#e9d5ff'}`,
+                background: verslagState.verslag ? '#f0fdf4' : '#faf5ff',
+                color: verslagState.verslag ? '#16a34a' : '#7c3aed',
+                border: `1px solid ${verslagState.verslag ? '#bbf7d0' : '#e9d5ff'}`,
                 borderRadius: '7px', padding: '5px 11px',
-                fontSize: '12px', fontWeight: '600', cursor: genereert ? 'not-allowed' : 'pointer',
-                opacity: genereert ? 0.7 : 1,
+                fontSize: '12px', fontWeight: '600', cursor: verslagState.genereert ? 'not-allowed' : 'pointer',
+                opacity: verslagState.genereert ? 0.7 : 1,
               }}
             >
-              {genereert ? '⏳' : verslag ? '📰' : '✨'}
-              {genereert ? 'Genereert...' : verslag ? 'Hergeneer' : 'Verslag'}
+              {verslagState.genereert ? '⏳' : verslagState.verslag ? '📰' : '✨'}
+              {verslagState.genereert ? 'Genereert...' : verslagState.verslag ? 'Hergeneer' : 'Verslag'}
             </button>
           )}
           <button
@@ -880,16 +864,10 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
               ) : <p style={{ fontSize: '13px', color: '#94a3b8' }}>Nog niet ingevuld.</p>}
             </div>
           </div>
-          {/* Verslag sectie */}
-          {verslag && (
-            <div style={{ borderTop: '1px solid #f1f5f9', padding: '14px 16px' }}>
-              <p style={{ fontSize: '11px', fontWeight: '600', color: '#7c3aed', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>📰 Wedstrijdverslag</p>
-              <p style={{ fontSize: '13px', color: '#334155', lineHeight: 1.7, fontStyle: 'italic', whiteSpace: 'pre-wrap', margin: 0 }}>{verslag}</p>
-            </div>
-          )}
-          {genereert && !verslag && (
-            <div style={{ borderTop: '1px solid #f1f5f9', padding: '14px 16px' }}>
-              <p style={{ fontSize: '13px', color: '#94a3b8', fontStyle: 'italic' }}>📝 Verslag wordt gegenereerd...</p>
+          {/* Verslag sectie — lezen, zelf schrijven of aanpassen */}
+          {isPast && (
+            <div style={{ borderTop: '1px solid #f1f5f9' }}>
+              <VerslagPaneel verslagState={verslagState} variant="admin" toonGenereren={false} />
             </div>
           )}
         </div>

@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext'
 import Opgave from '../components/Opgave'
 import { opgaveIsOpen } from '../hooks/useOpgave'
 import { isGespeeld } from '../lib/wedstrijd'
+import { useVerslag } from '../hooks/useVerslag'
+import VerslagPaneel from '../components/VerslagPaneel'
 
 const REACTIE_EMOJIS = ['💪', '❤️', '🎯', '😭']
 
@@ -80,14 +82,13 @@ export default function PWAWedstrijden() {
 }
 
 function WedstrijdKaart({ wedstrijd: w }) {
-  const { user, isAdmin } = useAuth()
+  const { user } = useAuth()
   const [open, setOpen] = useState(false)
   const [detailTab, setDetailTab] = useState('details')
   const [reacties, setReacties] = useState([])
   const [mijneReactie, setMijneReactie] = useState(null)
   const [gepoptEmoji, setGepoptEmoji] = useState(null)
-  const [verslag, setVerslag] = useState(w.report ?? null)
-  const [genereert, setGenereert] = useState(false)
+  const verslagState = useVerslag(w)
 
   const isThuis = w.home_team?.is_zvk
   const tegenstander = isThuis ? w.away_team : w.home_team
@@ -97,24 +98,7 @@ function WedstrijdKaart({ wedstrijd: w }) {
   const gewonnen = isPast && zvkScore > tegScore
   const verloren = isPast && zvkScore < tegScore
   const datum = new Date(w.date)
-  async function genereerVerslag() {
-    setGenereert(true)
-    setDetailTab('verslag')
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-match-report`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body: JSON.stringify({ match_id: w.id }),
-      })
-      const json = await res.json()
-      if (json.report) setVerslag(json.report)
-    } finally {
-      setGenereert(false)
-    }
-  }
-
-  const heeftDetail = isPast && (w.goals?.length > 0 || w.match_players?.length > 0 || verslag)
+  const heeftDetail = isPast && (w.goals?.length > 0 || w.match_players?.length > 0 || verslagState.verslag)
 
   const dagNaam = datum.toLocaleDateString('nl-BE', { weekday: 'short' })
   const dagNr = datum.getDate()
@@ -324,35 +308,7 @@ function WedstrijdKaart({ wedstrijd: w }) {
 
           {/* Verslag tab */}
           {detailTab === 'verslag' && (
-            <div style={{ padding: '14px 16px' }}>
-              {genereert ? (
-                <div style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>
-                  <div className="pulse-soft" style={{ fontSize: '26px', marginBottom: '8px' }}>📝</div>
-                  <p style={{ fontSize: '13px' }}>Verslag wordt gegenereerd...</p>
-                </div>
-              ) : verslag ? (
-                <div>
-                  <p style={{ fontSize: '13px', color: '#334155', lineHeight: 1.75, whiteSpace: 'pre-wrap', fontStyle: 'italic' }}>{verslag}</p>
-                  {isAdmin && (
-                    <button onClick={genereerVerslag} style={{ marginTop: '10px', fontSize: '12px', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
-                      Opnieuw genereren
-                    </button>
-                  )}
-                </div>
-              ) : isAdmin ? (
-                <div style={{ textAlign: 'center', padding: '16px' }}>
-                  <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '12px' }}>Nog geen verslag.</p>
-                  <button
-                    onClick={genereerVerslag}
-                    style={{ background: '#0f172a', color: 'white', border: 'none', borderRadius: '10px', padding: '10px 18px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
-                  >
-                    ✨ Genereer verslag
-                  </button>
-                </div>
-              ) : (
-                <p style={{ fontSize: '13px', color: '#94a3b8', textAlign: 'center', padding: '16px' }}>Nog geen verslag beschikbaar.</p>
-              )}
-            </div>
+            <VerslagPaneel verslagState={verslagState} variant="pwa" />
           )}
         </div>
       )}

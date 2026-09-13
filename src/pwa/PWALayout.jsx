@@ -203,7 +203,6 @@ function Avatar({ src, naam, size = 38 }) {
 // ─── Profiel-popover (badges + instellingen) ──────────────────────────────────
 function ProfielPopover({ open, onClose }) {
   const navigate = useNavigate()
-  const { isAdmin } = useAuth()
   if (!open) return null
 
   function ga(pad) {
@@ -230,23 +229,21 @@ function ProfielPopover({ open, onClose }) {
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
       }}>
-        {/* Badges — voorlopig enkel voor admins */}
-        {isAdmin && (
-          <button
-            onClick={() => ga('/app/badges')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '10px',
-              width: '100%', padding: '13px 16px',
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'white', fontSize: '14px', fontWeight: '500',
-              textAlign: 'left',
-              borderBottom: '1px solid rgba(255,255,255,0.07)',
-            }}
-          >
-            <span style={{ fontSize: '18px' }}>🏅</span>
-            Badges
-          </button>
-        )}
+        {/* Badges — zichtbaar voor elk goedgekeurd lid */}
+        <button
+          onClick={() => ga('/app/badges')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '10px',
+            width: '100%', padding: '13px 16px',
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: 'white', fontSize: '14px', fontWeight: '500',
+            textAlign: 'left',
+            borderBottom: '1px solid rgba(255,255,255,0.07)',
+          }}
+        >
+          <span style={{ fontSize: '18px' }}>🏅</span>
+          Badges
+        </button>
         <button
           onClick={() => ga('/app/account')}
           style={{
