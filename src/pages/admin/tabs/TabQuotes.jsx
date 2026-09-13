@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useConfirm } from '../../../components/ConfirmDialog'
 import { supabase } from '../../../lib/supabase'
 import { ververseQuotes } from '../../../lib/quotes'
+import { inputStijl, labelStijl } from '../stijlen'
+import { Knop, LegeStaat, Melding, TabKop } from '../ui'
 
 // Beheer van de quotes op de laadpagina ("Quote of the day").
 // Tabel `quotes`; een quote op inactief zetten haalt ze uit de rotatie
@@ -119,44 +121,30 @@ export default function TabQuotes() {
     <>
     {ConfirmUI}
     <div>
-      {/* Toolbar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
-        <div>
-          <p style={{ fontSize: '14px', color: '#94a3b8' }}>
-            {quotes.length} quote{quotes.length !== 1 ? 's' : ''} · {aantalActief} actief op de laadpagina
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <input
-            type="search"
-            value={zoek}
-            onChange={e => setZoek(e.target.value)}
-            placeholder="Zoek op tekst of auteur"
-            style={{ ...inputStijl, width: '220px', padding: '8px 12px' }}
-          />
-          <button
-            onClick={() => { setToonFormulier(v => !v); setFout(''); setTekst(''); setAuteur('') }}
-            style={{
-              background: toonFormulier ? 'white' : '#0f172a',
-              color: toonFormulier ? '#64748b' : 'white',
-              border: toonFormulier ? '1px solid #e2e8f0' : 'none',
-              borderRadius: '8px', padding: '8px 16px',
-              fontSize: '13px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap',
-            }}
-          >
-            {toonFormulier ? 'Annuleren' : '+ Quote toevoegen'}
-          </button>
-        </div>
-      </div>
+      <TabKop
+        titel="Quotes"
+        subtitel={`${quotes.length} ${quotes.length === 1 ? 'quote' : 'quotes'} · ${aantalActief} actief op de laadpagina`}
+      >
+        <input
+          type="search"
+          value={zoek}
+          onChange={e => setZoek(e.target.value)}
+          placeholder="Zoek op tekst of auteur"
+          style={{ ...inputStijl, width: '220px', padding: '8px 12px' }}
+        />
+        <Knop
+          soort={toonFormulier ? 'rand' : 'vol'}
+          onClick={() => { setToonFormulier(v => !v); setFout(''); setTekst(''); setAuteur('') }}
+        >
+          {toonFormulier ? 'Annuleren' : '+ Quote toevoegen'}
+        </Knop>
+      </TabKop>
 
       {laadFout && (
-        <div style={{
-          background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px',
-          padding: '12px 16px', marginBottom: '16px', fontSize: '13px', color: '#b91c1c',
-        }}>
+        <Melding soort="fout" style={{ marginBottom: '16px' }}>
           Quotes ophalen mislukt: {laadFout}. Bestaat de tabel <code>quotes</code> al in Supabase?
           De migratie staat in <code>supabase/migrations/quotes.sql</code>.
-        </div>
+        </Melding>
       )}
 
       {/* Nieuwe quote */}
@@ -185,21 +173,23 @@ export default function TabQuotes() {
               placeholder="Wie zei het?"
               style={{ ...inputStijl, flex: 1 }}
             />
-            <button type="submit" disabled={opslaan} style={knopStijl(opslaan)}>
+            <Knop type="submit" soort="vol" disabled={opslaan}>
               {opslaan ? 'Toevoegen...' : 'Toevoegen'}
-            </button>
+            </Knop>
           </div>
-          {fout && <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '8px' }}>{fout}</p>}
+          {fout && <Melding soort="fout" style={{ marginTop: '10px' }}>{fout}</Melding>}
         </form>
       )}
 
       {/* Lijst */}
       {zichtbaar.length === 0 ? (
-        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
-          <p style={{ fontSize: '14px', color: '#94a3b8' }}>
-            {quotes.length === 0 ? 'Nog geen quotes. Voeg de eerste toe!' : 'Geen quote gevonden.'}
-          </p>
-        </div>
+        <LegeStaat
+          emoji={quotes.length === 0 ? '💬' : '🔍'}
+          titel={quotes.length === 0 ? 'Nog geen quotes' : 'Geen quote gevonden'}
+          tekst={quotes.length === 0
+            ? 'Voeg de eerste toe — ze verschijnt dan op de laadpagina.'
+            : 'Pas je zoekterm aan.'}
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {zichtbaar.map(q => (
@@ -286,11 +276,11 @@ export default function TabQuotes() {
                       required
                       style={{ ...inputStijl, flex: 1, padding: '8px 12px' }}
                     />
-                    <button type="submit" disabled={bewerkOpslaan} style={knopStijl(bewerkOpslaan)}>
+                    <Knop type="submit" soort="vol" disabled={bewerkOpslaan}>
                       {bewerkOpslaan ? 'Opslaan...' : 'Opslaan'}
-                    </button>
+                    </Knop>
                   </div>
-                  {bewerkFout && <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '8px' }}>{bewerkFout}</p>}
+                  {bewerkFout && <Melding soort="fout" style={{ marginTop: '10px' }}>{bewerkFout}</Melding>}
                 </form>
               )}
             </div>
@@ -301,19 +291,3 @@ export default function TabQuotes() {
     </>
   )
 }
-
-const labelStijl = {
-  display: 'block', fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '6px',
-}
-
-const inputStijl = {
-  width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px',
-  padding: '9px 14px', fontSize: '14px', color: '#0f172a', outline: 'none', background: 'white',
-  boxSizing: 'border-box',
-}
-
-const knopStijl = (disabled) => ({
-  background: '#0f172a', color: 'white', border: 'none', borderRadius: '8px',
-  padding: '9px 20px', fontSize: '13px', fontWeight: '600', whiteSpace: 'nowrap',
-  cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1,
-})

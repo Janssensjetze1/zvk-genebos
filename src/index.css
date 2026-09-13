@@ -371,3 +371,68 @@ button:active:not(:disabled) {
   .topscorer-vlak::after,
   .assistkoning-vlak::after { animation: none; }
 }
+
+/* ─── Beheerscherm ──────────────────────────────────────────────────────────
+   Tweede navigatiekolom naast de hoofdnavigatie; op smal scherm een
+   scrollbare rij bovenaan. */
+.admin-shell {
+  display: grid;
+  grid-template-columns: 212px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: sticky;
+  top: 16px;
+}
+
+.admin-nav-knop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.admin-nav-knop:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.admin-nav-knop[aria-current='true'] {
+  background: white;
+  border-color: #e2e8f0;
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+@media (max-width: 900px) {
+  .admin-shell {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  .admin-nav {
+    position: static;
+    flex-direction: row;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .admin-nav::-webkit-scrollbar { display: none; }
+  .admin-nav-knop { width: auto; white-space: nowrap; }
+}

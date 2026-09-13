@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useConfirm } from '../../../components/ConfirmDialog'
 import { supabase } from '../../../lib/supabase'
+import { inputStijl } from '../stijlen'
+import { Knop, LegeStaat, Melding, TabKop } from '../ui'
 
 export default function TabTeams() {
   const { bevestig, ConfirmUI } = useConfirm()
@@ -81,7 +83,7 @@ export default function TabTeams() {
       {/* ZVK team — naam bewerkbaar, niet verwijderbaar */}
       {zvkTeam && (
         <div style={{ marginBottom: '28px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a', marginBottom: '10px' }}>Eigen team</h2>
+          <TabKop titel="Eigen team" subtitel="De ploeg waar het klassement en de stats op slaan" />
           <div>
             <div style={{
               background: 'white',
@@ -128,11 +130,11 @@ export default function TabTeams() {
                     autoFocus
                     style={{ ...inputStijl, padding: '8px 12px' }}
                   />
-                  {bewerkFout && <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '6px' }}>{bewerkFout}</p>}
+                  {bewerkFout && <Melding soort="fout" style={{ marginTop: '8px' }}>{bewerkFout}</Melding>}
                 </div>
-                <button type="submit" disabled={bewerkOpslaan} style={{ ...knopStijl(bewerkOpslaan), marginBottom: bewerkFout ? '22px' : '0' }}>
+                <Knop type="submit" soort="vol" disabled={bewerkOpslaan} style={{ marginBottom: bewerkFout ? '22px' : '0' }}>
                   {bewerkOpslaan ? 'Opslaan...' : 'Opslaan'}
-                </button>
+                </Knop>
               </form>
             )}
           </div>
@@ -141,24 +143,17 @@ export default function TabTeams() {
 
       {/* Tegenstanders */}
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a' }}>Tegenstanders</h2>
-            <span style={{ fontSize: '12px', color: '#94a3b8' }}>{tegenstanders.length} teams</span>
-          </div>
-          <button
+        <TabKop
+          titel="Tegenstanders"
+          subtitel={`${tegenstanders.length} ${tegenstanders.length === 1 ? 'ploeg' : 'ploegen'}`}
+        >
+          <Knop
+            soort={toonFormulier ? 'rand' : 'vol'}
             onClick={() => { setToonFormulier(v => !v); setFout(''); setNaam('') }}
-            style={{
-              background: toonFormulier ? 'white' : '#0f172a',
-              color: toonFormulier ? '#64748b' : 'white',
-              border: toonFormulier ? '1px solid #e2e8f0' : 'none',
-              borderRadius: '8px', padding: '8px 16px',
-              fontSize: '13px', fontWeight: '600', cursor: 'pointer',
-            }}
           >
             {toonFormulier ? 'Annuleren' : '+ Team toevoegen'}
-          </button>
-        </div>
+          </Knop>
+        </TabKop>
 
         {/* Nieuw team formulier */}
         {toonFormulier && (
@@ -179,19 +174,17 @@ export default function TabTeams() {
                 autoFocus
                 style={inputStijl}
               />
-              {fout && <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '6px' }}>{fout}</p>}
+              {fout && <Melding soort="fout" style={{ marginTop: '8px' }}>{fout}</Melding>}
             </div>
-            <button type="submit" disabled={opslaan} style={{ ...knopStijl(opslaan), marginBottom: fout ? '22px' : '0' }}>
+            <Knop type="submit" soort="vol" disabled={opslaan} style={{ marginBottom: fout ? '22px' : '0' }}>
               {opslaan ? 'Toevoegen...' : 'Toevoegen'}
-            </button>
+            </Knop>
           </form>
         )}
 
         {/* Teamlijst */}
         {tegenstanders.length === 0 ? (
-          <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
-            <p style={{ fontSize: '14px', color: '#94a3b8' }}>Nog geen tegenstanders. Voeg de eerste toe!</p>
-          </div>
+          <LegeStaat emoji="🛡️" titel="Nog geen tegenstanders" tekst="Voeg de ploegen toe waar ZVK dit seizoen tegen speelt." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {tegenstanders.map(team => (
@@ -253,11 +246,11 @@ export default function TabTeams() {
                         autoFocus
                         style={{ ...inputStijl, padding: '8px 12px' }}
                       />
-                      {bewerkFout && <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '6px' }}>{bewerkFout}</p>}
+                      {bewerkFout && <Melding soort="fout" style={{ marginTop: '8px' }}>{bewerkFout}</Melding>}
                     </div>
-                    <button type="submit" disabled={bewerkOpslaan} style={{ ...knopStijl(bewerkOpslaan), marginBottom: bewerkFout ? '22px' : '0' }}>
+                    <Knop type="submit" soort="vol" disabled={bewerkOpslaan} style={{ marginBottom: bewerkFout ? '22px' : '0' }}>
                       {bewerkOpslaan ? 'Opslaan...' : 'Opslaan'}
-                    </button>
+                    </Knop>
                   </form>
                 )}
               </div>
@@ -269,15 +262,3 @@ export default function TabTeams() {
     </>
   )
 }
-
-const inputStijl = {
-  width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px',
-  padding: '9px 14px', fontSize: '14px', color: '#0f172a', outline: 'none', background: 'white',
-  boxSizing: 'border-box',
-}
-
-const knopStijl = (disabled) => ({
-  background: '#0f172a', color: 'white', border: 'none', borderRadius: '8px',
-  padding: '9px 20px', fontSize: '13px', fontWeight: '600', whiteSpace: 'nowrap',
-  cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1,
-})
