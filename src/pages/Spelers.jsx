@@ -3,9 +3,13 @@ import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import { ArchiefKiezer } from '../components/ArchiefKiezer'
 import SpelerDetail from '../components/SpelerDetail'
+import { useTopscorer } from '../context/TopscorerContext'
+import EerKronen from '../components/EerKronen'
+import { VLAK_KLASSE } from '../lib/eer'
 
 export default function Spelers() {
   const { actief: seizoen, seizoenen, switchSeizoen } = useSeason()
+  const { eer } = useTopscorer()
   const [spelers, setSpelers] = useState([])
   const [stats, setStats] = useState({})
   const [loading, setLoading] = useState(true)
@@ -100,15 +104,15 @@ export default function Spelers() {
           gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
           gap: '14px',
         }}>
-          {gesorteerd.map((speler, i) => {
+          {gesorteerd.map(speler => {
             const s = stats[speler.id] ?? { goals: 0, assists: 0, matches: 0 }
-            const isTopscorer = i === 0 && s.goals > 0
+            const eretitel = eer(speler.id)
             return (
               <SpelerKaart
                 key={speler.id}
                 speler={speler}
                 stats={s}
-                isTopscorer={isTopscorer}
+                eretitel={eretitel}
                 onClick={() => setGeselecteerdeSpeler(speler)}
               />
             )
@@ -129,7 +133,7 @@ export default function Spelers() {
   )
 }
 
-function SpelerKaart({ speler, stats, isTopscorer, onClick }) {
+function SpelerKaart({ speler, stats, eretitel, onClick }) {
   const [hover, setHover] = useState(false)
 
   return (
@@ -148,12 +152,15 @@ function SpelerKaart({ speler, stats, isTopscorer, onClick }) {
       }}
     >
       {/* Foto sectie */}
-      <div style={{
-        height: '140px',
-        background: speler.photo_url ? 'transparent' : 'linear-gradient(135deg, #dbeafe, #eff6ff)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
+      <div
+        className={eretitel ? VLAK_KLASSE[eretitel] : undefined}
+        style={{
+          height: '140px',
+          background: speler.photo_url ? 'transparent' : 'linear-gradient(135deg, #dbeafe, #eff6ff)',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
         {speler.photo_url ? (
           <img
             src={speler.photo_url}
@@ -171,15 +178,16 @@ function SpelerKaart({ speler, stats, isTopscorer, onClick }) {
           </div>
         )}
 
-        {/* Topscorer badge */}
-        {isTopscorer && (
+        {/* Ereteken */}
+        {eretitel && (
           <div style={{
             position: 'absolute', top: '10px', right: '10px',
-            background: '#f59e0b', color: 'white',
-            fontSize: '10px', fontWeight: '700',
+            display: 'flex', alignItems: 'center', gap: '5px',
+            background: eretitel === 'assistkoning' ? '#7c3aed' : '#f59e0b',
+            color: 'white', fontSize: '10px', fontWeight: '700',
             padding: '3px 8px', borderRadius: '20px',
           }}>
-            🥇 Topscorer
+            👑 {eretitel === 'assistkoning' ? 'Assistenkoning' : eretitel === 'beide' ? 'Top & assists' : 'Topscorer'}
           </div>
         )}
       </div>
@@ -192,6 +200,7 @@ function SpelerKaart({ speler, stats, isTopscorer, onClick }) {
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
           {speler.name}
+          {eretitel && <EerKronen eer={eretitel} grootte={13} style={{ marginLeft: '5px', verticalAlign: 'middle' }} />}
         </p>
 
         {/* Stats */}

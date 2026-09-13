@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { BADGES, CATEGORIE_VOLGORDE, CAT, SHINE } from '../data/badges'
 import { computeStats } from '../lib/badgeStats'
+import SpelerAvatar from './SpelerAvatar'
 
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
 
@@ -268,16 +269,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
   // ── Gedeelde blokken ────────────────────────────────────────────────────
   const spelerHeader = (
     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-      <div style={{
-        width: '68px', height: '68px', borderRadius: '50%', flexShrink: 0,
-        background: '#eff6ff', border: '2px solid #bfdbfe',
-        overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        {speler.photo_url
-          ? <img src={speler.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : <span style={{ fontSize: '26px', fontWeight: '700', color: '#3b82f6' }}>{speler.name?.charAt(0)}</span>
-        }
-      </div>
+      <SpelerAvatar speler={speler} size={68} letterGrootte={26} />
       <div style={{ minWidth: 0 }}>
         <div style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', marginBottom: speler.nickname ? '2px' : 0 }}>
           {speler.name}

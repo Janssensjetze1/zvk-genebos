@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { ververseQuotes } from '../lib/quotes'
 
 const AuthContext = createContext({})
 
@@ -44,6 +45,9 @@ export function AuthProvider({ children }) {
     if (error) console.error('Profiel ophalen mislukt:', error.message)
     setProfile(data ?? null)
     setLoading(false)
+    // Quotes voor de laadpagina op de achtergrond verversen — de laadpagina
+    // zelf wacht hier niet op, ze leest de cache van de vorige keer.
+    if (data?.approved) ververseQuotes()
   }
 
   async function signIn(email, password) {

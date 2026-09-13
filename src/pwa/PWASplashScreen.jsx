@@ -1,23 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
+import { willekeurigeQuote } from '../lib/quotes'
 
-export const QUOTES = [
-  { text: "Voetbal is simpel, maar het moeilijkste da er is, is simpel voetballen.", auteur: "Johan Cruijff" },
-  { text: "Kampioen , we pakken de beker ok nog!", auteur: "Dretze" },
-  { text: "Burgemeester de Bie,beter wordt het nie.", auteur: "Nicole" },
-  { text: "zoals ZVK’ers tegenwoordig doen won ik die wedstrijd ", auteur: "Lander Engelen" },
-  { text: "Ik mut een wijf hemme om te daanse.", auteur: "Frank Den voorzitter" },
-  { text: "Nog een kleine fun fact: al die lichte maaltijden hebben me niet geholpen, heb quasi heel de namiddag op het kleinste kamertje gezeten", auteur: "Lander Engelen" },
-  { text: "Match gedaan, beker de lucht in, bubbels van de voorzitter opdrinken en een goei lange nabespreking in de Kantin. Gelukkig is het nog ni gedaan voor dit jaar, den DUBBEL is nog een optie. Den Antwaaarp deed het ons vorig seizoen voor. Zeer benieuwd of de gouden generatie zich hiervoor nog opgeladen krijgt.. Iedereen is bang van Genebos, nu ook tijdens de match", auteur: "Dretze" },
-  { text: "Voetbal is ne godsdienst en het stadion is onze kerk.", auteur: "Pep Guardiola" },
-  { text: "Mijne zondag begon zoals elke zondag bij mij, goed uitslapen zoals het hoort en een beetje bekomen van de lange nacht die ik tegenmoed was gegaan", auteur: "Jean" },
-  { text: "Had ik nog zoveel moeten eten veu zowe een match.. Das nie het slimste idee dak had", auteur: "Luyte" },
-  { text: "Ik heb wel op de deklat gesjot eh", auteur: "Dretze" },
-  { text: "J'ai soif.", auteur: "Dretze" },
-  { text: "Er werd weer verdedigd als janetten.", auteur: "De ZVK Supporters" },
-  { text: "Dit jaar spelen we kampioen.", auteur: "Dretze" },
-  { text: "Dieje he teveel deklatjuice gedronken", auteur: "Werres" },
-  { text: "Smakelijk Johan", auteur: "Chris Mulkers" },
-]
 
 function randomDuur() {
   return 5000
@@ -32,7 +15,7 @@ export default function PWASplashScreen({ onKlaar }) {
     return null
   }
 
-  const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)])
+  const [quote] = useState(willekeurigeQuote)
   const [duur] = useState(() => randomDuur())
   const [voortgang, setVoortgang] = useState(0)
   const [weggaan, setWeggaan] = useState(false)
@@ -91,7 +74,7 @@ export default function PWASplashScreen({ onKlaar }) {
           fontSize: '15px', fontStyle: 'italic', color: 'rgba(255,255,255,0.85)',
           lineHeight: 1.65, marginBottom: '12px', fontWeight: '400',
         }}>
-          "{quote.text}"
+          "{quote.tekst}"
         </p>
         <p style={{
           fontSize: '12px', fontWeight: '600', color: 'rgba(255,255,255,0.35)',

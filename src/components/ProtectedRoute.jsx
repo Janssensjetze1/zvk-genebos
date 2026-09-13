@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { QUOTES } from '../pwa/PWASplashScreen'
+import { willekeurigeQuote } from '../lib/quotes'
 
 export function ProtectedRoute({ children, skipOnboarding = false }) {
   const { user, profile, isApproved, loading } = useAuth()
@@ -31,7 +31,7 @@ export function AdminRoute({ children, skipOnboarding = true }) {
 }
 
 function LoadingScreen() {
-  const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)])
+  const [quote] = useState(willekeurigeQuote)
 
   return (
     <div style={{
@@ -54,7 +54,7 @@ function LoadingScreen() {
           fontSize: '15px', fontStyle: 'italic', color: 'rgba(255,255,255,0.85)',
           lineHeight: 1.65, marginBottom: '12px', fontWeight: '400',
         }}>
-          "{quote.text}"
+          "{quote.tekst}"
         </p>
         <p style={{
           fontSize: '12px', fontWeight: '600', color: 'rgba(255,255,255,0.35)',

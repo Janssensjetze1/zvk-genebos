@@ -2,10 +2,14 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { usePush } from '../hooks/usePush'
+import { useTopscorer } from '../context/TopscorerContext'
+import EerKronen from '../components/EerKronen'
+import { RING_KLASSE } from '../lib/eer'
 
 // ── Hoofd component ─────────────────────────────────────────────────────────
 export default function PWAAccount() {
   const { user, profile, patchProfile, signOut } = useAuth()
+  const { eer } = useTopscorer()
   const { status: pushStatus, fout: pushFout, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePush()
   const fotoInputRef = useRef(null)
 
@@ -100,6 +104,7 @@ export default function PWAAccount() {
     setBezig(false)
   }
 
+  const jouwEer = eer(profile?.player_id)
   const fotoSrc      = fotoPreview ?? speler?.photo_url ?? profile?.avatar_url ?? null
   const weergaveNaam = naam || profile?.display_name || user?.email?.split('@')[0] || '?'
   const initiaal     = weergaveNaam.charAt(0).toUpperCase()
@@ -128,15 +133,20 @@ export default function PWAAccount() {
         }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '18px', position: 'relative' }}>
-          {/* Avatar */}
+          {/* Avatar — glanzende gouden ring als jij de topscorer bent */}
+          <div
+            className={jouwEer ? RING_KLASSE[jouwEer] : undefined}
+            style={{ width: '80px', height: '80px', flexShrink: 0, borderRadius: '50%' }}
+          >
           <div
             onClick={() => fotoInputRef.current?.click()}
             style={{
-              width: '80px', height: '80px', borderRadius: '50%', flexShrink: 0,
+              width: '100%', height: '100%', borderRadius: '50%',
               background: 'linear-gradient(135deg, #1e3a5f, #1e40af)',
-              border: '3px solid rgba(255,255,255,0.15)',
+              border: jouwEer ? 'none' : '3px solid rgba(255,255,255,0.15)',
+              boxSizing: 'border-box',
               overflow: 'hidden', cursor: 'pointer', position: 'relative',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+              boxShadow: jouwEer ? undefined : '0 4px 20px rgba(0,0,0,0.3)',
             }}
           >
             {fotoSrc
@@ -159,11 +169,13 @@ export default function PWAAccount() {
             </div>
             <input ref={fotoInputRef} type="file" accept="image/*" onChange={handleFotoKiezen} style={{ display: 'none' }} />
           </div>
+          </div>
 
           {/* Naam en info */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: '20px', fontWeight: '800', color: 'white', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {weergaveNaam}
+              {jouwEer && <EerKronen eer={jouwEer} grootte={17} style={{ marginLeft: '6px', verticalAlign: 'middle' }} />}
             </div>
             {bijnaam && (
               <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', marginTop: '2px' }}>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
-import { BADGES, CAT, SHINE, CATEGORIE_STIJL } from '../data/badges'
+import { BADGES, CAT, SHINE, CATEGORIE_STIJL, CATEGORIE_VOLGORDE } from '../data/badges'
 import { haalBadgeData, badgesMetStatus } from '../lib/badgeStats'
 
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
@@ -185,81 +185,117 @@ export default function PWABadges() {
         </div>
       )}
 
-      {/* Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-        {lijst.map(badge => {
-          const cat = CAT[badge.categorie]
-          return (
-            <div
-              key={badge.id}
-              onClick={() => setGeselecteerd(badge)}
-              className={`badge-card ${badge.verdiend ? 'badge-card-earned' : 'badge-card-locked'}`}
-              style={{
-                ...kaartTint(badge.categorie),
-                padding: '20px 12px 16px',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-                cursor: 'pointer',
-                transition: 'transform 0.12s',
-                userSelect: 'none',
-              }}
-              onPointerDown={e => (e.currentTarget.style.transform = 'scale(0.96)')}
-              onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
-              onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-            >
-              {/* Verdiend vinkje */}
-              {badge.verdiend && (
-                <div style={{
-                  position: 'absolute', top: '10px', right: '10px', zIndex: 1,
-                  width: '22px', height: '22px', borderRadius: '50%',
-                  background: 'rgba(74,222,128,0.15)', border: '1.5px solid rgba(74,222,128,0.5)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '11px', color: '#4ade80', fontWeight: '700',
-                }}>✓</div>
-              )}
+      {/* Per categorie — brons, zilver, goud, platina, legendary */}
+      {CATEGORIE_VOLGORDE.map(categorie => {
+        const groep = lijst.filter(b => b.categorie === categorie)
+        if (groep.length === 0) return null
+        const catInfo = CAT[categorie]
+        const verdiendInGroep = groep.filter(b => b.verdiend).length
+        const volledig = verdiendInGroep === groep.length
 
-              {/* Niet verdiend slot */}
-              {!badge.verdiend && (
-                <div style={{
-                  position: 'absolute', top: '10px', right: '10px', zIndex: 1,
-                  width: '22px', height: '22px', borderRadius: '50%',
-                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '11px',
-                }}>🔒</div>
-              )}
+        return (
+          <section key={categorie} style={{ marginBottom: '28px' }}>
 
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <BadgeHex emoji={badge.emoji} categorie={badge.categorie} size={80} verdiend={badge.verdiend} />
-              </div>
-
-              <div style={{ textAlign: 'center', width: '100%', position: 'relative', zIndex: 1 }}>
-                <div style={{
-                  fontSize: '13px', fontWeight: '700', marginBottom: '6px',
-                  color: badge.verdiend ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.35)',
-                }}>
-                  {badge.naam}
-                </div>
-                <span style={{
-                  fontSize: '10px', fontWeight: '600',
-                  padding: '2px 9px', borderRadius: '99px',
-                  background: 'rgba(255,255,255,0.07)',
-                  color: cat.ro,
-                  border: `1px solid ${cat.ro}55`,
-                  opacity: badge.verdiend ? 1 : 0.65,
-                }}>
-                  {cat.label}
-                </span>
-              </div>
-
-              {!badge.verdiend && (
-                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)', margin: 0, textAlign: 'center', lineHeight: 1.4, position: 'relative', zIndex: 1 }}>
-                  {badge.placeholder ? 'Nog geheim' : 'Nog te verdienen'}
-                </p>
-              )}
+            {/* Kop van de categorie */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+              <span style={{
+                width: '9px', height: '9px', borderRadius: '3px', flexShrink: 0,
+                background: catInfo.ro, boxShadow: `0 0 10px ${catInfo.ro}`,
+              }} />
+              <h2 style={{
+                fontSize: '12px', fontWeight: '800', color: '#0f172a', margin: 0,
+                textTransform: 'uppercase', letterSpacing: '0.08em',
+              }}>
+                {catInfo.label}
+              </h2>
+              <span style={{
+                fontSize: '11px', fontWeight: '700', flexShrink: 0,
+                padding: '2px 9px', borderRadius: '99px',
+                background: catInfo.lb, color: catInfo.lc, border: `1px solid ${catInfo.lbo}`,
+              }}>
+                {verdiendInGroep}/{groep.length}{volledig ? ' ✓' : ''}
+              </span>
+              <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
             </div>
-          )
-        })}
-      </div>
+
+            {/* Badges van deze categorie */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+              {groep.map(badge => {
+                const cat = CAT[badge.categorie]
+                return (
+                  <div
+                    key={badge.id}
+                    onClick={() => setGeselecteerd(badge)}
+                    className={`badge-card ${badge.verdiend ? 'badge-card-earned' : 'badge-card-locked'}`}
+                    style={{
+                      ...kaartTint(badge.categorie),
+                      padding: '20px 12px 16px',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+                      cursor: 'pointer',
+                      transition: 'transform 0.12s',
+                      userSelect: 'none',
+                    }}
+                    onPointerDown={e => (e.currentTarget.style.transform = 'scale(0.96)')}
+                    onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+                    onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                  >
+                    {/* Verdiend vinkje */}
+                    {badge.verdiend && (
+                      <div style={{
+                        position: 'absolute', top: '10px', right: '10px', zIndex: 1,
+                        width: '22px', height: '22px', borderRadius: '50%',
+                        background: 'rgba(74,222,128,0.15)', border: '1.5px solid rgba(74,222,128,0.5)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '11px', color: '#4ade80', fontWeight: '700',
+                      }}>✓</div>
+                    )}
+
+                    {/* Niet verdiend slot */}
+                    {!badge.verdiend && (
+                      <div style={{
+                        position: 'absolute', top: '10px', right: '10px', zIndex: 1,
+                        width: '22px', height: '22px', borderRadius: '50%',
+                        background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '11px',
+                      }}>🔒</div>
+                    )}
+
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                      <BadgeHex emoji={badge.emoji} categorie={badge.categorie} size={80} verdiend={badge.verdiend} />
+                    </div>
+
+                    <div style={{ textAlign: 'center', width: '100%', position: 'relative', zIndex: 1 }}>
+                      <div style={{
+                        fontSize: '13px', fontWeight: '700', marginBottom: '6px',
+                        color: badge.verdiend ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.35)',
+                      }}>
+                        {badge.naam}
+                      </div>
+                      <span style={{
+                        fontSize: '10px', fontWeight: '600',
+                        padding: '2px 9px', borderRadius: '99px',
+                        background: 'rgba(255,255,255,0.07)',
+                        color: cat.ro,
+                        border: `1px solid ${cat.ro}55`,
+                        opacity: badge.verdiend ? 1 : 0.65,
+                      }}>
+                        {cat.label}
+                      </span>
+                    </div>
+
+                    {!badge.verdiend && (
+                      <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)', margin: 0, textAlign: 'center', lineHeight: 1.4, position: 'relative', zIndex: 1 }}>
+                        {badge.placeholder ? 'Nog geheim' : 'Nog te verdienen'}
+                      </p>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )
+      })}
 
       {/* Bottom sheet detail */}
       {geselecteerd && (() => {

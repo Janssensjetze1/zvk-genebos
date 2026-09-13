@@ -1,9 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
+import { useTopscorer } from '../context/TopscorerContext'
+import { RING_KLASSE } from '../lib/eer'
 
 export default function Account() {
   const { user, profile, patchProfile } = useAuth()
+
+  const { eer } = useTopscorer()
 
   // Speler data (naam + foto)
   const [speler, setSpeler] = useState(null)
@@ -143,6 +147,7 @@ export default function Account() {
   // Bepaal welk beeld we tonen: nieuwe preview > speler foto > profiel avatar > initiaal
   const fotoSrc = fotoPreview ?? speler?.photo_url ?? profile?.avatar_url ?? null
   const weergaveNaam = naam || speler?.name || profile?.display_name || '?'
+  const jouwEer = eer(profile?.player_id)
 
   return (
     <div style={{ maxWidth: '560px' }}>
@@ -155,15 +160,21 @@ export default function Account() {
 
           {/* Foto upload */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            {/* Klikbare avatar */}
+            {/* Klikbare avatar — glanzende gouden ring als jij de topscorer bent */}
+            <div
+              className={jouwEer && !fotoPreview ? RING_KLASSE[jouwEer] : undefined}
+              style={{ width: '72px', height: '72px', borderRadius: '50%', flexShrink: 0 }}
+            >
             <div
               onClick={() => fotoInputRef.current?.click()}
               style={{
-                width: '72px', height: '72px', borderRadius: '50%',
-                background: '#eff6ff', overflow: 'hidden', flexShrink: 0,
+                width: '100%', height: '100%', borderRadius: '50%',
+                background: '#eff6ff', overflow: 'hidden',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', position: 'relative',
-                border: fotoPreview ? '2px solid #3b82f6' : '2px solid transparent',
+                cursor: 'pointer', position: 'relative', boxSizing: 'border-box',
+                border: fotoPreview
+                  ? '2px solid #3b82f6'
+                  : jouwEer ? 'none' : '2px solid transparent',
                 transition: 'border 0.2s',
               }}
             >
@@ -186,6 +197,7 @@ export default function Account() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
+            </div>
             </div>
 
             <div>

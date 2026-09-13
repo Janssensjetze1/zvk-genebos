@@ -262,3 +262,112 @@ button:active:not(:disabled) {
   0%, 100% { opacity: 0.75; }
   50%      { opacity: 1; }
 }
+
+/* ─── Ereteken: glanzende ring ──────────────────────────────────────────────
+   Goud voor de topscorer, paars voor de assistenkoning. Een draaiende
+   conic-gradient onder de inhoud geeft het metaaleffect.
+   Gebruik: <div class="topscorer-ring" style="width:44px;height:44px">…</div>
+   De directe kinderen moeten zelf rond zijn — de ring is enkel de padding. */
+.topscorer-ring,
+.assistkoning-ring {
+  position: relative;
+  box-sizing: border-box;
+  padding: 3px;
+  border-radius: 50%;
+}
+
+.topscorer-ring::before,
+.assistkoning-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  z-index: 0;
+  animation: eer-ring-draai 4.5s linear infinite;
+}
+
+.topscorer-ring::before {
+  background: conic-gradient(
+    from 0deg,
+    #92400e 0%, #f59e0b 12%, #fde68a 22%, #fffbeb 28%,
+    #f59e0b 38%, #b45309 50%, #f59e0b 62%, #fffbeb 72%,
+    #fde68a 80%, #f59e0b 90%, #92400e 100%
+  );
+}
+
+.assistkoning-ring::before {
+  background: conic-gradient(
+    from 0deg,
+    #4c1d95 0%, #7c3aed 12%, #c4b5fd 22%, #f5f3ff 28%,
+    #8b5cf6 38%, #5b21b6 50%, #8b5cf6 62%, #f5f3ff 72%,
+    #c4b5fd 80%, #7c3aed 90%, #4c1d95 100%
+  );
+}
+
+.topscorer-ring > *,
+.assistkoning-ring > * {
+  position: relative;
+  z-index: 1;
+}
+
+.topscorer-ring    { animation: topscorer-glans 2.8s ease-in-out infinite; }
+.assistkoning-ring { animation: assistkoning-glans 2.8s ease-in-out infinite; }
+
+@keyframes eer-ring-draai {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes topscorer-glans {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(245,158,11,0.30), 0 2px 12px rgba(245,158,11,0.35); }
+  50%      { box-shadow: 0 0 0 1px rgba(245,158,11,0.45), 0 2px 18px rgba(245,158,11,0.60); }
+}
+
+@keyframes assistkoning-glans {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(139,92,246,0.30), 0 2px 12px rgba(139,92,246,0.38); }
+  50%      { box-shadow: 0 0 0 1px rgba(139,92,246,0.48), 0 2px 18px rgba(139,92,246,0.62); }
+}
+
+/* Zelfde glans, maar voor een rechthoekig vlak (spelerskaart op desktop) */
+.topscorer-vlak::after,
+.assistkoning-vlak::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 3px solid transparent;
+  background-size: 300% 100%;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: eer-veeg 4s linear infinite;
+}
+
+.topscorer-vlak::after {
+  background-image: linear-gradient(
+    115deg,
+    #92400e 0%, #f59e0b 15%, #fde68a 24%, #fffbeb 30%,
+    #f59e0b 42%, #b45309 55%, #f59e0b 70%, #fffbeb 80%, #f59e0b 90%, #92400e 100%
+  );
+}
+
+.assistkoning-vlak::after {
+  background-image: linear-gradient(
+    115deg,
+    #4c1d95 0%, #7c3aed 15%, #c4b5fd 24%, #f5f3ff 30%,
+    #8b5cf6 42%, #5b21b6 55%, #8b5cf6 70%, #f5f3ff 80%, #7c3aed 90%, #4c1d95 100%
+  );
+}
+
+@keyframes eer-veeg {
+  to { background-position: -300% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topscorer-ring,
+  .assistkoning-ring,
+  .topscorer-ring::before,
+  .assistkoning-ring::before,
+  .topscorer-vlak::after,
+  .assistkoning-vlak::after { animation: none; }
+}

@@ -75,7 +75,7 @@ export default function PWAKlassement() {
         <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden' }}>
           {/* Header */}
           <div style={{
-            display: 'grid', gridTemplateColumns: '32px 1fr 28px 28px 28px 36px',
+            display: 'grid', gridTemplateColumns: '26px 1fr 24px 24px 24px 34px 32px',
             padding: '10px 14px', borderBottom: '1px solid #f1f5f9',
             fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em',
           }}>
@@ -84,15 +84,17 @@ export default function PWAKlassement() {
             <span style={{ textAlign: 'center' }}>G</span>
             <span style={{ textAlign: 'center' }}>W</span>
             <span style={{ textAlign: 'center' }}>V</span>
+            <span style={{ textAlign: 'center' }} title="Doelpuntensaldo">+/-</span>
             <span style={{ textAlign: 'center', fontWeight: '700', color: '#64748b' }}>Pnt</span>
           </div>
 
           {klassement.map((team, i) => {
             const isZVK = team.is_zvk
             const top3 = i < 3
+            const saldo = team.dv - team.dt
             return (
               <div key={team.id} style={{
-                display: 'grid', gridTemplateColumns: '32px 1fr 28px 28px 28px 36px',
+                display: 'grid', gridTemplateColumns: '26px 1fr 24px 24px 24px 34px 32px',
                 padding: '13px 14px', alignItems: 'center',
                 borderBottom: i < klassement.length - 1 ? '1px solid #f8fafc' : 'none',
                 background: isZVK ? '#eff6ff' : 'white',
@@ -115,6 +117,12 @@ export default function PWAKlassement() {
                 <span style={{ textAlign: 'center', fontSize: '13px', color: '#64748b' }}>{team.g}</span>
                 <span style={{ textAlign: 'center', fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>{team.w}</span>
                 <span style={{ textAlign: 'center', fontSize: '13px', color: '#ef4444', fontWeight: '600' }}>{team.v}</span>
+                <span style={{
+                  textAlign: 'center', fontSize: '13px', fontWeight: '600',
+                  color: saldo > 0 ? '#16a34a' : saldo < 0 ? '#ef4444' : '#94a3b8',
+                }}>
+                  {saldo > 0 ? `+${saldo}` : saldo}
+                </span>
                 <span style={{ textAlign: 'center', fontSize: '15px', fontWeight: '800', color: isZVK ? '#1d4ed8' : '#0f172a' }}>{team.pnt}</span>
               </div>
             )

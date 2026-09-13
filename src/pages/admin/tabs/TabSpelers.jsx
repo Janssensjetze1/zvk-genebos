@@ -3,6 +3,7 @@ import { useConfirm } from '../../../components/ConfirmDialog'
 import { supabase } from '../../../lib/supabase'
 import { useAuth } from '../../../context/AuthContext'
 import { HANDMATIGE_BADGES, CAT } from '../../../data/badges'
+import SpelerAvatar from '../../../components/SpelerAvatar'
 
 export default function TabSpelers() {
   const { bevestig, ConfirmUI } = useConfirm()
@@ -194,12 +195,13 @@ export default function TabSpelers() {
                 padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px',
               }}>
                 {/* Avatar */}
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
-                  {speler.photo_url
-                    ? <img src={speler.photo_url} alt={speler.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : <span style={{ fontSize: '14px', fontWeight: '700', color: '#1d4ed8' }}>{speler.name.charAt(0)}</span>
-                  }
-                </div>
+                <SpelerAvatar
+                  speler={speler}
+                  size={36}
+                  rand="none"
+                  letterKleur="#1d4ed8"
+                  letterGrootte={14}
+                />
 
                 <span style={{ flex: 1, fontSize: '14px', fontWeight: '500', color: '#0f172a' }}>{speler.name}</span>
 

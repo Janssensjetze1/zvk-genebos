@@ -7,6 +7,7 @@ import TabWedstrijden from './tabs/TabWedstrijden'
 import TabSeizoen from './tabs/TabSeizoen'
 import TabMeldingen from './tabs/TabMeldingen'
 import TabFeedback from './tabs/TabFeedback'
+import TabQuotes from './tabs/TabQuotes'
 
 const tabs = [
   { id: 'leden', label: 'Ledenbeheer' },
@@ -15,6 +16,7 @@ const tabs = [
   { id: 'wedstrijden', label: 'Wedstrijden' },
   { id: 'seizoen', label: 'Seizoenen' },
   { id: 'meldingen', label: 'Meldingen' },
+  { id: 'quotes', label: 'Quotes' },
   { id: 'feedback', label: 'Feedback' },
 ]
 
@@ -86,6 +88,7 @@ export default function Admin() {
       {actieveTab === 'wedstrijden' && <TabWedstrijden />}
       {actieveTab === 'seizoen' && <TabSeizoen />}
       {actieveTab === 'meldingen' && <TabMeldingen />}
+      {actieveTab === 'quotes' && <TabQuotes />}
       {actieveTab === 'feedback' && <TabFeedback onGelezen={() => setOngelezen(0)} />}
     </div>
   )

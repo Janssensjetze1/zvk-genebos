@@ -133,12 +133,19 @@ export default function PWAInfo() {
           <p>
             Alles wordt per seizoen bijgehouden, dus oudere seizoenen blijven bewaard.
           </p>
+          <Tip>
+            👑 <span style={vet}>Topscorer en assistenkoning.</span> Wie dit seizoen het meest scoort krijgt overal
+            een glanzend gouden randje rond zijn foto, wie het meest assists geeft een paars randje — allebei met
+            een kroontje. Staan er twee gelijk, dan krijgen ze het allebei.
+          </Tip>
         </Sectie>
 
         <Sectie emoji="🏅" titel="Badges">
           <p>
             Tik linksboven op je profielknop en kies <span style={vet}>Badges</span>. Daar staat je verzameling:
-            wat je al verdiend hebt en wat er nog te halen valt.
+            wat je al verdiend hebt en wat er nog te halen valt, netjes per categorie —
+            <span style={vet}> brons, zilver, goud, platina</span> en <span style={vet}>legendary</span>. Achter elke
+            categorie staat hoeveel je er daar al van hebt.
           </p>
           <p>
             De meeste badges krijg je automatisch zodra je aan de voorwaarde voldoet. Een paar worden door de

@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import { isGespeeld } from '../lib/wedstrijd'
+import SpelerAvatar from '../components/SpelerAvatar'
+import { useTopscorer } from '../context/TopscorerContext'
+import EerKronen from '../components/EerKronen'
+import { RING_KLASSE } from '../lib/eer'
 
 export default function PWAStats() {
   const { actief: seizoen } = useSeason()
@@ -183,6 +187,7 @@ function SectieHeader({ emoji, titel, subtitel, kleur, achtergrond, rand, topMar
 // Visuele volgorde podium: links=2e, midden=1e, rechts=3e
 // origIdx = positie in originele gesorteerde array (0=1e, 1=2e, 2=3e)
 function GloriePodium({ spelers, stat, accentKleur }) {
+  const { eer } = useTopscorer()
   if (spelers.length === 0) return null
 
   // Visuele volgorde: 2e links, 1e midden, 3e rechts
@@ -219,36 +224,52 @@ function GloriePodium({ spelers, stat, accentKleur }) {
           const mKleur    = medalKleuren[oi]   ?? '#94a3b8'
           const avSize    = avatarSizes[oi]    ?? 42
           const waarde    = speler[stat]
+          // Goud = topscorer, paars = assistenkoning — overal hetzelfde
+          const eretitel  = eer(speler.id)
+          const isTop     = !!eretitel
 
           return (
             <div key={speler.id} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
 
-              {/* Bouncing kroon boven winnaar */}
-              {isWinnaar && (
-                <div style={{
-                  fontSize: '22px', lineHeight: 1,
-                  animation: 'crown-bounce 2.2s ease-in-out infinite',
-                  filter: `drop-shadow(0 2px 4px ${mKleur}80)`,
-                }}>👑</div>
+              {/* Bouncende kroon boven de topscorer / assistenkoning */}
+              {eretitel && (
+                <EerKronen
+                  eer={eretitel}
+                  grootte={22}
+                  style={{ animation: 'crown-bounce 2.2s ease-in-out infinite' }}
+                />
               )}
 
-              {/* Avatar */}
-              <div style={{
-                width: avSize, height: avSize, borderRadius: '50%',
-                border: `3px solid ${mKleur}`,
-                overflow: 'hidden', flexShrink: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: `${mKleur}18`,
-                boxShadow: isWinnaar
-                  ? `0 0 0 4px ${mKleur}20, 0 4px 20px ${mKleur}40`
-                  : `0 2px 8px rgba(0,0,0,0.08)`,
-              }}>
-                {speler.photo_url
-                  ? <img src={speler.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <span style={{ color: isWinnaar ? 'white' : '#475569', fontWeight: '800', fontSize: isWinnaar ? '24px' : '16px', background: `${mKleur}22` }}>
-                      {speler.name?.charAt(0)}
-                    </span>
-                }
+              {/* Avatar — de topscorer krijgt de glanzende gouden ring */}
+              <div
+                className={eretitel ? RING_KLASSE[eretitel] : undefined}
+                style={{
+                  width: avSize, height: avSize, borderRadius: '50%',
+                  border: isTop ? 'none' : `3px solid ${mKleur}`,
+                  boxSizing: 'border-box',
+                  overflow: isTop ? 'visible' : 'hidden',
+                  flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: isTop ? 'transparent' : `${mKleur}18`,
+                  boxShadow: isTop
+                    ? undefined
+                    : isWinnaar
+                    ? `0 0 0 4px ${mKleur}20, 0 4px 20px ${mKleur}40`
+                    : '0 2px 8px rgba(0,0,0,0.08)',
+                }}
+              >
+                <div style={{
+                  width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: `${mKleur}18`,
+                }}>
+                  {speler.photo_url
+                    ? <img src={speler.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <span style={{ color: isWinnaar ? 'white' : '#475569', fontWeight: '800', fontSize: isWinnaar ? '24px' : '16px' }}>
+                        {speler.name?.charAt(0)}
+                      </span>
+                  }
+                </div>
               </div>
 
               {/* Naam & score */}
@@ -327,17 +348,14 @@ function LijstKaart({ spelers, stat, offset, accentKleur }) {
               width: '22px', textAlign: 'center', flexShrink: 0,
             }}>{offset + i}</span>
 
-            <div style={{
-              width: '36px', height: '36px', borderRadius: '50%',
-              background: '#f8fafc', overflow: 'hidden', flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '1.5px solid #f1f5f9',
-            }}>
-              {s.photo_url
-                ? <img src={s.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : <span style={{ fontSize: '14px', fontWeight: '700', color: '#94a3b8' }}>{s.name?.charAt(0)}</span>
-              }
-            </div>
+            <SpelerAvatar
+              speler={s}
+              size={36}
+              achtergrond="#f8fafc"
+              rand="1.5px solid #f1f5f9"
+              letterKleur="#94a3b8"
+              letterGrootte={14}
+            />
 
             <span style={{ flex: 1, fontSize: '14px', fontWeight: '500', color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {s.name}

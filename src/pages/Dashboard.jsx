@@ -3,6 +3,9 @@ import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
 import { supabase } from '../lib/supabase'
 import { isGespeeld, vandaagISO } from '../lib/wedstrijd'
+import { useTopscorer } from '../context/TopscorerContext'
+import EerKronen from '../components/EerKronen'
+import { RING_KLASSE } from '../lib/eer'
 
 const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
 const TYPE_COLORS = {
@@ -182,6 +185,7 @@ const PODIUM = [
 const DISPLAY_ORDER = [1, 0, 2]
 
 function Podium({ spelers, sleutel, label, loading }) {
+  const { eer } = useTopscorer()
   if (loading) return <LegeKaart tekst="Laden..." />
   if (spelers.length === 0) return <LegeKaart tekst="Nog geen data dit seizoen." />
 
@@ -193,6 +197,9 @@ function Podium({ spelers, sleutel, label, loading }) {
           const speler = spelers[idx]
           const { hoogte, kleur, bg, label: medaille, ring } = PODIUM[idx]
           const isGoud = idx === 0
+          // Goud = topscorer, paars = assistenkoning — overal hetzelfde
+          const eretitel = eer(speler?.id)
+          const isTop = !!eretitel
 
           if (!speler) return (
             <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -206,13 +213,27 @@ function Podium({ spelers, sleutel, label, loading }) {
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                 {/* Ring */}
                 <div style={{
+                  position: 'relative',
                   width: isGoud ? '68px' : '54px',
                   height: isGoud ? '68px' : '54px',
                   borderRadius: '50%',
                   padding: '3px',
-                  background: `linear-gradient(135deg, ${ring}, white)`,
-                  boxShadow: `0 4px 12px ${ring}44`,
-                }}>
+                  background: isTop ? 'transparent' : `linear-gradient(135deg, ${ring}, white)`,
+                  boxShadow: isTop ? undefined : `0 4px 12px ${ring}44`,
+                  boxSizing: 'border-box',
+                }}
+                className={eretitel ? RING_KLASSE[eretitel] : undefined}
+                >
+                  {eretitel && (
+                    <EerKronen
+                      eer={eretitel}
+                      grootte={19}
+                      style={{
+                        position: 'absolute', top: '-10px', right: '-6px',
+                        transform: 'rotate(18deg)', zIndex: 2,
+                      }}
+                    />
+                  )}
                   <div style={{
                     width: '100%', height: '100%', borderRadius: '50%',
                     background: speler.photo_url ? 'transparent' : '#eff6ff',

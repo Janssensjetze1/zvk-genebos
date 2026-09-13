@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import SpelerDetail from '../components/SpelerDetail'
+import SpelerAvatar from '../components/SpelerAvatar'
 import { isGespeeld } from '../lib/wedstrijd'
 
 export default function PWASpelers() {
@@ -88,16 +89,7 @@ export default function PWASpelers() {
               </span>
 
               {/* Foto */}
-              <div style={{
-                width: '44px', height: '44px', borderRadius: '50%', flexShrink: 0,
-                background: '#eff6ff', border: '2px solid #bfdbfe',
-                overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {speler.photo_url
-                  ? <img src={speler.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <span style={{ fontSize: '17px', fontWeight: '700', color: '#3b82f6' }}>{speler.name?.charAt(0)}</span>
-                }
-              </div>
+              <SpelerAvatar speler={speler} size={44} letterGrootte={17} />
 
               {/* Naam */}
               <div style={{ flex: 1, minWidth: 0 }}>

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { SeasonProvider } from './context/SeasonContext'
+import { TopscorerProvider } from './context/TopscorerContext'
 import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import PWALayout from './pwa/PWALayout'
@@ -156,9 +157,11 @@ export default function App() {
   return (
     <AuthProvider>
       <SeasonProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
+        <TopscorerProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </TopscorerProvider>
       </SeasonProvider>
     </AuthProvider>
   )
