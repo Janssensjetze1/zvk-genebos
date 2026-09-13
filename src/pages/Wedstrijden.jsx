@@ -4,6 +4,7 @@ import { useSeason } from '../context/SeasonContext'
 import { useAuth } from '../context/AuthContext'
 import Opgave from '../components/Opgave'
 import { opgaveIsOpen } from '../hooks/useOpgave'
+import { isGespeeld } from '../lib/wedstrijd'
 
 const REACTIE_EMOJIS = ['💪', '❤️', '🎯', '😭']
 
@@ -39,12 +40,11 @@ export default function Wedstrijden() {
     setLoading(false)
   }
 
-  const vandaag = new Date().toISOString().split('T')[0]
   const zvkWedstrijden = wedstrijden.filter(w => w.home_team?.is_zvk || w.away_team?.is_zvk)
   const andereWedstrijden = wedstrijden.filter(w => !w.home_team?.is_zvk && !w.away_team?.is_zvk)
 
-  const aankomend = zvkWedstrijden.filter(w => w.date >= vandaag).reverse() // chronologisch
-  const gespeeld = zvkWedstrijden.filter(w => w.date < vandaag) // meest recent eerst
+  const aankomend = zvkWedstrijden.filter(w => !isGespeeld(w)).reverse() // chronologisch
+  const gespeeld = zvkWedstrijden.filter(w => isGespeeld(w)) // meest recent eerst
 
   if (!seizoen) return (
     <div style={{ textAlign: 'center', padding: '80px 0' }}>

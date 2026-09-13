@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { MAX_MEE, OPGAVE_STATUSSEN, opgaveIsOpen, useOpgave } from '../hooks/useOpgave'
 
 // Opgave voor een aankomende wedstrijd: elke speler duidt zelf aan of hij meedoet.
@@ -5,6 +6,7 @@ import { MAX_MEE, OPGAVE_STATUSSEN, opgaveIsOpen, useOpgave } from '../hooks/use
 export default function Opgave({ wedstrijd, variant = 'pwa' }) {
   const { perStatus, mijnStatus, zetStatus, loading, bezig, gebruikerId, magMeedoen, aantalMee, vol, fout } = useOpgave(wedstrijd.id)
   const compact = variant === 'pwa'
+  const [toonLijst, setToonLijst] = useState(false)
 
   // De ouder verbergt dit blok al, dit is enkel een vangnet
   if (!opgaveIsOpen(wedstrijd)) return null
@@ -120,35 +122,74 @@ export default function Opgave({ wedstrijd, variant = 'pwa' }) {
         </div>
       )}
 
-      {/* Overzicht per status */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {OPGAVE_STATUSSEN.map(s => {
-          const lijst = perStatus[s.id]
-          if (lijst.length === 0) return null
-          return (
-            <div key={s.id}>
-              <div style={{ fontSize: '11px', fontWeight: '600', color: s.kleur, marginBottom: '6px' }}>
-                {s.emoji} {s.kort} ({lijst.length}{s.id === 'mee' ? `/${MAX_MEE}` : ''})
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                {lijst
-                  .slice()
-                  .sort((a, b) => (a.naam ?? '').localeCompare(b.naam ?? ''))
-                  .map(o => (
-                    <span key={o.user_id} style={{
-                      fontSize: '12px', color: '#475569', background: s.bg,
-                      border: `1px solid ${s.rand}`, borderRadius: '20px', padding: '3px 10px',
-                    }}>
-                      {o.naam ?? 'Onbekend'}
-                    </span>
-                  ))}
-              </div>
-            </div>
-          )
-        })}
-        {niemand && (
-          <div style={{ fontSize: '12px', color: '#cbd5e1', fontStyle: 'italic' }}>
-            Nog niemand heeft zich opgegeven.
+      {/* Overzicht per status — uitklapbaar */}
+      <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
+        <button
+          type="button"
+          onClick={e => { e.stopPropagation(); if (!niemand) setToonLijst(o => !o) }}
+          disabled={niemand}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', gap: '8px',
+            background: 'none', border: 'none', padding: '2px 0',
+            cursor: niemand ? 'default' : 'pointer', textAlign: 'left',
+          }}
+        >
+          <span style={{
+            fontSize: '11px', fontWeight: '700', color: '#94a3b8',
+            textTransform: 'uppercase', letterSpacing: '0.05em',
+          }}>
+            Wie gaf zich op
+          </span>
+
+          {/* Samenvatting blijft ook dichtgeklapt zichtbaar */}
+          {niemand ? (
+            <span style={{ fontSize: '12px', color: '#cbd5e1', fontStyle: 'italic' }}>
+              nog niemand
+            </span>
+          ) : (
+            <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              {OPGAVE_STATUSSEN.map(st => (
+                <span key={st.id} style={{ fontSize: '12px', color: st.kleur, fontWeight: '600' }}>
+                  {st.emoji} {perStatus[st.id].length}
+                </span>
+              ))}
+            </span>
+          )}
+
+          {!niemand && (
+            <svg width="13" height="13" fill="none" stroke="#cbd5e1" strokeWidth="2" viewBox="0 0 24 24"
+              style={{ marginLeft: 'auto', flexShrink: 0, transform: toonLijst ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          )}
+        </button>
+
+        {toonLijst && !niemand && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+            {OPGAVE_STATUSSEN.map(st => {
+              const lijst = perStatus[st.id]
+              if (lijst.length === 0) return null
+              return (
+                <div key={st.id}>
+                  <div style={{ fontSize: '11px', fontWeight: '600', color: st.kleur, marginBottom: '6px' }}>
+                    {st.emoji} {st.kort} ({lijst.length}{st.id === 'mee' ? `/${MAX_MEE}` : ''})
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                    {lijst
+                      .slice()
+                      .sort((x, y) => (x.naam ?? '').localeCompare(y.naam ?? ''))
+                      .map(o => (
+                        <span key={o.user_id} style={{
+                          fontSize: '12px', color: '#475569', background: st.bg,
+                          border: `1px solid ${st.rand}`, borderRadius: '20px', padding: '3px 10px',
+                        }}>
+                          {o.naam ?? 'Onbekend'}
+                        </span>
+                      ))}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>

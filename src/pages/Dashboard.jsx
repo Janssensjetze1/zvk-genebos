@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
 import { supabase } from '../lib/supabase'
+import { isGespeeld, vandaagISO } from '../lib/wedstrijd'
 
 const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
 const TYPE_COLORS = {
@@ -26,7 +27,7 @@ export default function Dashboard() {
 
   async function fetchData() {
     setLoading(true)
-    const vandaag = new Date().toISOString().split('T')[0]
+    const vandaag = vandaagISO()
 
     // Haal seizoen match-ids op
     const { data: matchIds } = await supabase
@@ -38,17 +39,18 @@ export default function Dashboard() {
     const queries = [
       // Aankomende wedstrijden — haal meerdere op en filter client-side op ZVK
       supabase.from('matches')
-        .select('*, home_team:home_team_id(id,name,is_zvk), away_team:away_team_id(id,name,is_zvk)')
+        .select('*, home_team:home_team_id(id,name,is_zvk), away_team:away_team_id(id,name,is_zvk), match_players(player_id), goals(id)')
         .eq('season_id', seizoen.id)
         .gte('date', vandaag)
         .order('date', { ascending: true })
         .limit(20),
 
       // Meest recente gespeelde wedstrijden — filter client-side op ZVK
+      // (datum van vandaag zit erbij: die telt mee zodra het blad is ingevuld)
       supabase.from('matches')
-        .select('*, home_team:home_team_id(id,name,is_zvk), away_team:away_team_id(id,name,is_zvk)')
+        .select('*, home_team:home_team_id(id,name,is_zvk), away_team:away_team_id(id,name,is_zvk), match_players(player_id), goals(id)')
         .eq('season_id', seizoen.id)
-        .lt('date', vandaag)
+        .lte('date', vandaag)
         .order('date', { ascending: false })
         .limit(10),
 
@@ -63,8 +65,8 @@ export default function Dashboard() {
     const [{ data: volgendeData }, { data: vorigeData }, { data: goalsData }] = await Promise.all(queries)
 
     // Bepaal volgende en vorige ZVK-wedstrijd
-    const aankomendZVK = (volgendeData ?? []).filter(w => w.home_team?.is_zvk || w.away_team?.is_zvk)
-    const gespeeldZVK = (vorigeData ?? []).filter(w => w.home_team?.is_zvk || w.away_team?.is_zvk)
+    const aankomendZVK = (volgendeData ?? []).filter(w => (w.home_team?.is_zvk || w.away_team?.is_zvk) && !isGespeeld(w))
+    const gespeeldZVK = (vorigeData ?? []).filter(w => (w.home_team?.is_zvk || w.away_team?.is_zvk) && isGespeeld(w))
     setVolgende(aankomendZVK[0] ?? null)
     setVorige(gespeeldZVK[0] ?? null)
 

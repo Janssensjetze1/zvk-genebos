@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
+import { isGespeeld } from '../lib/wedstrijd'
 
 export default function PWAKlassement() {
   const { actief: seizoen } = useSeason()
@@ -16,7 +17,7 @@ export default function PWAKlassement() {
       supabase.from('teams').select('id, name, is_zvk').order('name'),
       supabase
         .from('matches')
-        .select('*, home_team:home_team_id(id,name,is_zvk), away_team:away_team_id(id,name,is_zvk)')
+        .select('*, home_team:home_team_id(id,name,is_zvk), away_team:away_team_id(id,name,is_zvk), match_players(player_id), goals(id)')
         .eq('season_id', seizoen.id)
         .eq('type', 'competitie')
         .order('date', { ascending: true }),
@@ -27,19 +28,17 @@ export default function PWAKlassement() {
   }
 
   function berekenKlassement() {
-    const vandaag = new Date().toISOString().split('T')[0]
-
     // Stap 1: begin met ALLE teams op 0
     const teams = {}
     for (const team of alleTeams) {
       teams[team.id] = { id: team.id, name: team.name, is_zvk: team.is_zvk, g: 0, w: 0, ge: 0, v: 0, dv: 0, dt: 0, pnt: 0 }
     }
 
-    // Stap 2: tel stats enkel voor gespeelde wedstrijden (datum in verleden + score ingevuld)
+    // Stap 2: tel stats enkel voor wedstrijden die al gespeeld zijn
     for (const w of wedstrijden) {
-      const { home_team, away_team, home_score, away_score, date } = w
+      const { home_team, away_team, home_score, away_score } = w
       if (!home_team || !away_team) continue
-      if (date >= vandaag) continue
+      if (!isGespeeld(w)) continue
       if (home_score == null || away_score == null) continue
       const thuis = teams[home_team.id]
       const uit = teams[away_team.id]

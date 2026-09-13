@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
+import { isGespeeld } from '../lib/wedstrijd'
 
 export default function PWAStats() {
   const { actief: seizoen } = useSeason()
@@ -12,13 +13,13 @@ export default function PWAStats() {
 
   async function fetchData() {
     setLoading(true)
-    const vandaag = new Date().toISOString().split('T')[0]
     const [{ data: gData }, { data: sData }] = await Promise.all([
       supabase.from('goals').select('*, match:match_id(date, season_id)')
         .eq('match.season_id', seizoen.id),
       supabase.from('players').select('*'),
     ])
-    const gefilterd = (gData ?? []).filter(g => g.match?.date < vandaag)
+    // Een doelpunt bestaat enkel als het wedstrijdblad is ingevuld, dus telt het mee
+    const gefilterd = (gData ?? []).filter(g => isGespeeld({ ...g.match, goals: [g] }))
     setGoals(gefilterd)
     setSpelers(sData ?? [])
     setLoading(false)

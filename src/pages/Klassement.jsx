@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { isGespeeld } from '../lib/wedstrijd'
 
 const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
 const TYPE_COLORS = {
@@ -25,7 +26,7 @@ export default function Klassement() {
       supabase.from('teams').select('id, name, is_zvk').order('name'),
       supabase
         .from('matches')
-        .select('*, home_team:home_team_id(id, name, is_zvk), away_team:away_team_id(id, name, is_zvk)')
+        .select('*, home_team:home_team_id(id, name, is_zvk), away_team:away_team_id(id, name, is_zvk), match_players(player_id), goals(id)')
         .eq('season_id', seizoen.id)
         .order('date', { ascending: true }),
     ])
@@ -36,7 +37,6 @@ export default function Klassement() {
 
   // Bereken klassement voor een bepaald type wedstrijd
   function berekenKlassement(type) {
-    const vandaag = new Date().toISOString().split('T')[0]
     const gefilterd = wedstrijden.filter(w => w.type === type)
 
     // Stap 1: begin met ALLE teams op 0
@@ -49,11 +49,11 @@ export default function Klassement() {
       }
     }
 
-    // Stap 2: tel stats enkel voor wedstrijden die al gespeeld zijn (datum in verleden + score ingevuld)
+    // Stap 2: tel stats enkel voor wedstrijden die al gespeeld zijn
     for (const w of gefilterd) {
-      const { home_team, away_team, home_score, away_score, date } = w
+      const { home_team, away_team, home_score, away_score } = w
       if (!home_team || !away_team) continue
-      if (date >= vandaag) continue // nog niet gespeeld
+      if (!isGespeeld(w)) continue // nog niet gespeeld / blad nog niet ingevuld
       if (home_score == null || away_score == null) continue // score niet ingevuld
 
       const thuis = teams[home_team.id]

@@ -4,6 +4,7 @@ import { useSeason } from '../context/SeasonContext'
 import { useAuth } from '../context/AuthContext'
 import Opgave from '../components/Opgave'
 import { opgaveIsOpen } from '../hooks/useOpgave'
+import { isGespeeld } from '../lib/wedstrijd'
 
 const REACTIE_EMOJIS = ['💪', '❤️', '🎯', '😭']
 
@@ -39,10 +40,9 @@ export default function PWAWedstrijden() {
     setLoading(false)
   }
 
-  const vandaag = new Date().toISOString().split('T')[0]
   const zvkWedstrijden = wedstrijden.filter(w => w.home_team?.is_zvk || w.away_team?.is_zvk)
-  const aankomend = zvkWedstrijden.filter(w => w.date >= vandaag)
-  const gespeeld = zvkWedstrijden.filter(w => w.date < vandaag).reverse()
+  const aankomend = zvkWedstrijden.filter(w => !isGespeeld(w))
+  const gespeeld = zvkWedstrijden.filter(w => isGespeeld(w)).reverse()
 
   return (
     <div style={{ padding: '20px 16px' }}>
@@ -93,7 +93,7 @@ function WedstrijdKaart({ wedstrijd: w }) {
   const tegenstander = isThuis ? w.away_team : w.home_team
   const zvkScore = isThuis ? w.home_score : w.away_score
   const tegScore = isThuis ? w.away_score : w.home_score
-  const isPast = w.date < new Date().toISOString().split('T')[0]
+  const isPast = isGespeeld(w)
   const gewonnen = isPast && zvkScore > tegScore
   const verloren = isPast && zvkScore < tegScore
   const datum = new Date(w.date)

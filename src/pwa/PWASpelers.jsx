@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import SpelerDetail from '../components/SpelerDetail'
+import { isGespeeld } from '../lib/wedstrijd'
 
 export default function PWASpelers() {
   const { actief: seizoen } = useSeason()
@@ -15,14 +16,13 @@ export default function PWASpelers() {
 
   async function fetchData() {
     setLoading(true)
-    const vandaag = new Date().toISOString().split('T')[0]
     const [{ data: sData }, { data: gData }] = await Promise.all([
       supabase.from('players').select('*').order('name'),
       supabase.from('goals').select('scorer_id, match:match_id(date, season_id)')
         .eq('match.season_id', seizoen.id),
     ])
     setSpelers(sData ?? [])
-    setGoals((gData ?? []).filter(g => g.match?.date < vandaag))
+    setGoals((gData ?? []).filter(g => isGespeeld({ ...g.match, goals: [g] })))
     setLoading(false)
   }
 
