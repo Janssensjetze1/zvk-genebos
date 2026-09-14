@@ -264,6 +264,7 @@ function ProfielPopover({ open, onClose }) {
 
 // ─── Secundaire nav (drie puntjes) ────────────────────────────────────────────
 const MEER_ITEMS = [
+  { label: 'Pronostiek', icon: '🔮', path: '/app/pronostiek' },
   { label: 'Info', icon: 'ℹ️', path: '/app/info' },
   { label: 'Feedback', icon: '💬', path: '/app/feedback' },
 ]

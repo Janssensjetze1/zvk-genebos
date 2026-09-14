@@ -3,7 +3,9 @@ import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import { useAuth } from '../context/AuthContext'
 import Opgave from '../components/Opgave'
+import Pronostiek from '../components/Pronostiek'
 import { opgaveIsOpen } from '../hooks/useOpgave'
+import { pronostiekStatus } from '../hooks/usePronostiek'
 import { isGespeeld } from '../lib/wedstrijd'
 import { useVerslag } from '../hooks/useVerslag'
 import VerslagPaneel from '../components/VerslagPaneel'
@@ -271,6 +273,16 @@ function WedstrijdKaart({ wedstrijd: w }) {
           onClick={e => e.stopPropagation()}
         >
           <Opgave wedstrijd={w} variant="pwa" />
+        </div>
+      )}
+
+      {/* Pronostiek — open vanaf een week voor de match tot een uur ervoor */}
+      {!isPast && pronostiekStatus(w) === 'open' && (
+        <div
+          style={{ padding: '14px 16px', borderTop: '1px solid #f1f5f9', background: '#fcfdff' }}
+          onClick={e => e.stopPropagation()}
+        >
+          <Pronostiek wedstrijd={w} variant="pwa" />
         </div>
       )}
 

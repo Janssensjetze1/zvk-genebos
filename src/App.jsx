@@ -31,8 +31,10 @@ import PWAAccount from './pwa/PWAAccount'
 import PWABadges from './pwa/PWABadges'
 import PWAInfo from './pwa/PWAInfo'
 import PWAFeedback from './pwa/PWAFeedback'
+import PWAPronostiek from './pwa/PWAPronostiek'
 import Invullen from './pages/Invullen'
 import Badges from './pages/Badges'
+import Pronostiek from './pages/Pronostiek'
 
 function AppRoutes() {
   const isMobile = useIsMobile()
@@ -88,6 +90,11 @@ function AppRoutes() {
             <PWALayout><PWABadges /></PWALayout>
           </ProtectedRoute>
         } />
+        <Route path="/app/pronostiek" element={
+          <ProtectedRoute>
+            <PWALayout><PWAPronostiek /></PWALayout>
+          </ProtectedRoute>
+        } />
         <Route path="/app/info" element={
           <ProtectedRoute>
             <PWALayout><PWAInfo /></PWALayout>
@@ -131,6 +138,9 @@ function AppRoutes() {
       } />
       <Route path="/klassement" element={
         <ProtectedRoute><Layout><Klassement /></Layout></ProtectedRoute>
+      } />
+      <Route path="/pronostiek" element={
+        <ProtectedRoute><Layout><Pronostiek /></Layout></ProtectedRoute>
       } />
       <Route path="/account" element={
         <ProtectedRoute><Layout><Account /></Layout></ProtectedRoute>

@@ -159,6 +159,22 @@ export default function PWAInfo() {
           </Tip>
         </Sectie>
 
+        <Sectie emoji="🔮" titel="Pronostiek">
+          <p>
+            Voorspel de score van onze wedstrijden en verzamel punten. Je vindt het achter de drie puntjes bij
+            <span style={vet}> Pronostiek</span>, en de invoer staat ook gewoon onder de wedstrijd zelf.
+          </p>
+          <p>
+            <span style={vet}>5 punten</span> voor de exacte score, <span style={vet}>3</span> als het doelsaldo klopt
+            (je zei 4-2, het werd 5-3), <span style={vet}>1</span> als je enkel de juiste afloop had. Ben je de énige
+            met de exacte score, dan komt daar nog een <span style={vet}>durfbonus</span> bovenop.
+          </p>
+          <Tip>
+            ⏱️ Voorspellen kan vanaf een week voor de wedstrijd tot een uur voor de aftrap. Aanpassen mag zoveel je
+            wil, en niemand ziet jouw score tot de pronostiek sluit.
+          </Tip>
+        </Sectie>
+
         <Sectie emoji="👤" titel="Je profiel en meldingen">
           <p>
             Onder <span style={vet}>Account</span> pas je je naam aan en zet je een profielfoto. Die foto zie je
