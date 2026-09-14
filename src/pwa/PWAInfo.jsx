@@ -149,6 +149,9 @@ export default function PWAInfo() {
             categorie staat hoeveel je er daar al van hebt.
           </p>
           <p>
+            Er zijn ook badges voor de pronostiek — die verdient élk lid, ook wie nog geen spelersfiche heeft.
+          </p>
+          <p>
             De meeste badges krijg je automatisch zodra je aan de voorwaarde voldoet: hoeveel wedstrijden je
             speelde, hoeveel je scoorde, hoeveel assists je gaf en hoe vaak de tegenstander niet scoorde terwijl
             jij op het veld stond. Een paar worden door de admin toegekend. En er is een categorie

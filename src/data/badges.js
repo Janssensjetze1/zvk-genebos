@@ -26,8 +26,8 @@ export const geheim = (id, categorie) => ({
 })
 
 // Kleine helper zodat elke drempel-badge er hetzelfde uitziet
-const drempel = ({ id, naam, emoji, categorie, beschrijving, conditieTekst, veld, min }) => ({
-  id, naam, emoji, categorie, beschrijving, conditieTekst,
+const drempel = ({ id, naam, emoji, categorie, beschrijving, conditieTekst, veld, min, zonderFiche }) => ({
+  id, naam, emoji, categorie, beschrijving, conditieTekst, zonderFiche,
   conditie: s => (s[veld] ?? 0) >= min,
 })
 
@@ -70,6 +70,19 @@ export const BADGES = [
     veld: 'cleanSheets', min: 1,
   }),
 
+  drempel({
+    id: 'eerste-voorspelling', naam: 'Waarzegger', emoji: '🔮', categorie: 'brons',
+    beschrijving: 'Je gaf je eerste pronostiek in.',
+    conditieTekst: '1 voorspelling',
+    veld: 'voorspellingen', min: 1, zonderFiche: true,
+  }),
+  drempel({
+    id: 'tien-voorspellingen', naam: 'Trouwe Gokker', emoji: '📋', categorie: 'brons',
+    beschrijving: 'Tien wedstrijden voorspeld.',
+    conditieTekst: '10 voorspellingen',
+    veld: 'voorspellingen', min: 10, zonderFiche: true,
+  }),
+
   // ─── Zilver ──────────────────────────────────────────────────
   drempel({
     id: 'zilver-1', naam: 'Vaste Klant', emoji: '🪑', categorie: 'zilver',
@@ -94,6 +107,13 @@ export const BADGES = [
     beschrijving: 'Vijf wedstrijden waarin de tegenstander droog bleef staan.',
     conditieTekst: '5 keer de nul gehouden',
     veld: 'cleanSheets', min: 5,
+  }),
+
+  drempel({
+    id: 'eerste-exacte', naam: 'Glazen Bol', emoji: '🎯', categorie: 'zilver',
+    beschrijving: 'Je had de exacte score van een wedstrijd juist.',
+    conditieTekst: '1 exacte score',
+    veld: 'exacteVoorspellingen', min: 1, zonderFiche: true,
   }),
 
   // ─── Goud ────────────────────────────────────────────────────
@@ -122,6 +142,19 @@ export const BADGES = [
     veld: 'cleanSheets', min: 10,
   }),
 
+  drempel({
+    id: 'vijf-exacte', naam: 'Helderziende', emoji: '🔭', categorie: 'goud',
+    beschrijving: 'Vijf keer de exacte score juist voorspeld.',
+    conditieTekst: '5 exacte scores',
+    veld: 'exacteVoorspellingen', min: 5, zonderFiche: true,
+  }),
+  drempel({
+    id: 'durfal', naam: 'Durfal', emoji: '😎', categorie: 'goud',
+    beschrijving: 'Drie keer als enige de exacte score juist.',
+    conditieTekst: '3 durfbonussen',
+    veld: 'durfbonussen', min: 3, zonderFiche: true,
+  }),
+
   // ─── Platina ─────────────────────────────────────────────────
   drempel({
     id: 'platina-1', naam: 'Genebos-monument', emoji: '🗿', categorie: 'platina',
@@ -146,6 +179,13 @@ export const BADGES = [
     beschrijving: 'Twintig wedstrijden waarin er achteraan niets doorkwam.',
     conditieTekst: '20 keer de nul gehouden',
     veld: 'cleanSheets', min: 20,
+  }),
+
+  drempel({
+    id: 'orakel', naam: 'Het Orakel', emoji: '💯', categorie: 'platina',
+    beschrijving: 'Honderd punten verzameld met de pronostiek.',
+    conditieTekst: '100 pronostiekpunten',
+    veld: 'pronostiekPunten', min: 100, zonderFiche: true,
   }),
 
   // ─── Legendary ─────────────────────────────────────────────
@@ -194,6 +234,11 @@ export const BADGES = [
 // Gebruik deze helper overal waar je een badge toont.
 export const verborgen = badge =>
   !!badge.placeholder || (badge.categorie === 'geheim' && !badge.verdiend)
+
+// Zonder spelersfiche vallen de speelbadges weg — die kan je niet verdienen.
+// De pronostiekbadges hangen aan het account en blijven dus wél staan.
+export const badgesVoor = heeftSpelersfiche =>
+  heeftSpelersfiche ? BADGES : BADGES.filter(b => b.zonderFiche)
 
 // Badges die enkel een admin kan toekennen (beheerscherm)
 export const HANDMATIGE_BADGES = BADGES.filter(b => b.handmatig)

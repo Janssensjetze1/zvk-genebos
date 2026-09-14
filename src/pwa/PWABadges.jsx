@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
-import { BADGES, CAT, SHINE, CATEGORIE_STIJL, CATEGORIE_VOLGORDE, verborgen } from '../data/badges'
+import { badgesVoor, CAT, SHINE, CATEGORIE_STIJL, CATEGORIE_VOLGORDE, verborgen } from '../data/badges'
 import { haalBadgeData, badgesMetStatus } from '../lib/badgeStats'
 
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
@@ -104,44 +104,31 @@ export default function PWABadges() {
   const [dbBadgeIds, setDbBadgeIds] = useState(new Set())
   const [loading, setLoading] = useState(true)
 
+  // Ook zonder spelersfiche laden: de pronostiekbadges hangen aan het account.
   useEffect(() => {
-    if (!profile?.player_id) { setLoading(false); return }
     let levend = true
-    haalBadgeData({
-      playerId: profile.player_id,
-      seizoenId: seizoen?.id,
-      userCreatedAt: user?.created_at,
-    }).then(({ stats, dbBadgeIds }) => {
-      if (!levend) return
-      setStats(stats)
-      setDbBadgeIds(dbBadgeIds)
-      setLoading(false)
-    })
+
+    function laad() {
+      if (!user?.id) return
+      haalBadgeData({
+        playerId: profile?.player_id ?? null,
+        seizoenId: seizoen?.id,
+        userCreatedAt: user?.created_at,
+        userId: user.id,
+      }).then(({ stats, dbBadgeIds }) => {
+        if (!levend) return
+        setStats(stats)
+        setDbBadgeIds(dbBadgeIds)
+        setLoading(false)
+      })
+    }
+
+    laad()
     return () => { levend = false }
-  }, [profile?.player_id, seizoen?.id, user?.created_at])
+  }, [profile?.player_id, seizoen?.id, user?.created_at, user?.id])
 
-  // Geen spelersfiche → niks te berekenen
-  if (!profile?.player_id) {
-    return (
-      <div style={{ padding: '20px 16px' }}>
-        <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', margin: '0 0 20px' }}>Badges</h1>
-        <div className="badge-card" style={{
-          padding: '40px 24px', textAlign: 'center',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-        }}>
-          <span style={{ fontSize: '36px', position: 'relative', zIndex: 1 }}>🔗</span>
-          <p style={{ fontSize: '15px', fontWeight: '700', color: 'rgba(255,255,255,0.8)', margin: 0, position: 'relative', zIndex: 1 }}>
-            Geen spelersfiche gekoppeld
-          </p>
-          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.35)', margin: 0, lineHeight: 1.5, maxWidth: '240px', position: 'relative', zIndex: 1 }}>
-            Een admin koppelt je account aan een spelersfiche. Pas dan worden je badges berekend.
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  const lijst = badgesMetStatus(BADGES, stats, dbBadgeIds)
+  const heeftFiche = !!profile?.player_id
+  const lijst = badgesMetStatus(badgesVoor(heeftFiche), stats, dbBadgeIds)
   const aantalVerdiend = lijst.filter(b => b.verdiend).length
   const totaal = lijst.length
   const progPct = totaal > 0 ? (aantalVerdiend / totaal) * 100 : 0
@@ -156,6 +143,23 @@ export default function PWABadges() {
           {loading ? 'Berekenen...' : `${aantalVerdiend} van ${totaal} verdiend`}
         </p>
       </div>
+
+      {/* Zonder spelersfiche zie je enkel de badges die aan je account hangen */}
+      {!heeftFiche && !loading && (
+        <div style={{
+          marginTop: '14px',
+          background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '12px',
+          padding: '12px 14px',
+        }}>
+          <div style={{ fontSize: '13px', fontWeight: '700', color: '#1d4ed8', marginBottom: '3px' }}>
+            🔗 Nog geen spelersfiche
+          </div>
+          <p style={{ fontSize: '12px', color: '#3b82f6', margin: 0, lineHeight: 1.5 }}>
+            De badges voor wedstrijden, goals en assists verschijnen zodra een admin je account aan een
+            spelersfiche koppelt. De pronostiekbadges hieronder kan je nu al verdienen.
+          </p>
+        </div>
+      )}
 
       {/* Progress bar */}
       {totaal > 0 && (

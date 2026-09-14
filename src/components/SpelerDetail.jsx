@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { BADGES, CATEGORIE_VOLGORDE, CAT, SHINE, verborgen } from '../data/badges'
-import { computeStats } from '../lib/badgeStats'
+import { computeStats, haalPronostiekStats } from '../lib/badgeStats'
 import SpelerAvatar from './SpelerAvatar'
 
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
@@ -229,7 +229,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
 
   async function fetchStats() {
     setLoading(true)
-    const [goalsRes, assistsRes, matchesRes, dbRes] = await Promise.all([
+    const [goalsRes, assistsRes, matchesRes, dbRes, pronoStats] = await Promise.all([
       supabase.from('goals')
         .select('id, match_id, match:match_id(season_id)')
         .eq('scorer_id', speler.id),
@@ -241,6 +241,8 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
         .eq('player_id', speler.id),
       // Handmatig toegekende badges (bv. de Gouden Schoen)
       supabase.from('player_badges').select('badge_id').eq('player_id', speler.id),
+      // Pronostiek hangt aan het account; de view geeft het player_id mee
+      haalPronostiekStats({ playerId: speler.id }),
     ])
 
     setDbBadgeIds(new Set((dbRes.data ?? []).map(r => r.badge_id)))
@@ -254,7 +256,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
     const seizoenAssists = assistsArr.filter(a => a.match?.season_id === seizoenId).length
     const seizoenMatches = matchesArr.filter(m => m.match?.season_id === seizoenId).length
 
-    const computed = computeStats({ goalsArr, assistsArr, matchesArr, seizoenId })
+    const computed = computeStats({ goalsArr, assistsArr, matchesArr, seizoenId, pronostiek: pronoStats })
 
     setRawStats({ ...computed, seizoenGoals, seizoenAssists, seizoenMatches })
     setLoading(false)

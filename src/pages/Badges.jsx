@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
-import { supabase } from '../lib/supabase'
-import { BADGES, CAT, SHINE, CATEGORIE_VOLGORDE, verborgen } from '../data/badges'
-import { computeStats } from '../lib/badgeStats'
+import { badgesVoor, CAT, SHINE, CATEGORIE_VOLGORDE, verborgen } from '../data/badges'
+import { haalBadgeData } from '../lib/badgeStats'
 
 
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
@@ -79,59 +78,38 @@ export default function Badges() {
   const [dbBadgeIds,    setDbBadgeIds]    = useState(new Set())
   const [loading,       setLoading]       = useState(false)
 
+  // Ook zonder spelersfiche laden: de pronostiekbadges hangen aan het account.
   useEffect(() => {
-    if (!profile?.player_id) return
-    async function fetchBadgeData() {
+    let levend = true
+
+    function laad() {
+      if (!user?.id) return
       setLoading(true)
-      const playerId = profile.player_id
-      const [goalsRes, assistsRes, matchesRes, dbRes] = await Promise.all([
-        supabase.from('goals').select('id, match_id, match:match_id(season_id)').eq('scorer_id', playerId),
-        supabase.from('goals').select('id, match_id, match:match_id(season_id)').eq('assist_id', playerId),
-        supabase.from('match_players').select('match_id, match:match_id(season_id, home_score, away_score, home_team:home_team_id(is_zvk), away_team:away_team_id(is_zvk))').eq('player_id', playerId),
-        supabase.from('player_badges').select('badge_id').eq('player_id', playerId),
-      ])
-      setBadgeStats(computeStats({
-        goalsArr:     goalsRes.data   ?? [],
-        assistsArr:   assistsRes.data  ?? [],
-        matchesArr:   matchesRes.data  ?? [],
-        seizoenId:    seizoen?.id,
+      haalBadgeData({
+        playerId: profile?.player_id ?? null,
+        seizoenId: seizoen?.id,
         userCreatedAt: user?.created_at,
-      }))
-      setDbBadgeIds(new Set((dbRes.data ?? []).map(r => r.badge_id)))
-      setLoading(false)
+        userId: user.id,
+      }).then(({ stats, dbBadgeIds }) => {
+        if (!levend) return
+        setBadgeStats(stats)
+        setDbBadgeIds(dbBadgeIds)
+        setLoading(false)
+      })
     }
-    fetchBadgeData()
-  }, [profile?.player_id, seizoen?.id])
 
-  // Geen spelersfiche → geen badges
-  if (!profile?.player_id) {
-    return (
-      <div style={{ maxWidth: '480px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px' }}>Badges</h1>
-        <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '32px' }}>Jouw verdiende badges</p>
-        <div style={{
-          background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px',
-          padding: '40px 32px', textAlign: 'center',
-        }}>
-          <div style={{ fontSize: '40px', marginBottom: '14px' }}>🔗</div>
-          <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>
-            Geen spelersfiche gekoppeld
-          </div>
-          <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
-            Je account is nog niet gekoppeld aan een spelersfiche.
-            Een admin doet dit voor je. Pas dan worden jouw badges berekend.
-          </p>
-        </div>
-      </div>
-    )
-  }
+    laad()
+    return () => { levend = false }
+  }, [profile?.player_id, seizoen?.id, user?.created_at, user?.id])
 
+  const heeftFiche = !!profile?.player_id
+  const zichtbaar = badgesVoor(heeftFiche)
   const badgesMetStatus = badgeStats
-    ? BADGES.map(b => ({
+    ? zichtbaar.map(b => ({
         ...b,
         verdiend: dbBadgeIds.has(b.id) || (() => { try { return b.conditie(badgeStats) } catch { return false } })(),
       }))
-    : BADGES.map(b => ({ ...b, verdiend: false }))
+    : zichtbaar.map(b => ({ ...b, verdiend: false }))
 
   const aantalVerdiend = badgesMetStatus.filter(b => b.verdiend).length
   const totaal = badgesMetStatus.length
@@ -154,6 +132,22 @@ export default function Badges() {
           }} />
         )}
       </div>
+
+      {/* Zonder spelersfiche zie je enkel wat aan je account hangt */}
+      {!heeftFiche && !loading && (
+        <div style={{
+          background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '14px',
+          padding: '14px 18px', marginBottom: '20px', maxWidth: '560px',
+        }}>
+          <div style={{ fontSize: '14px', fontWeight: '700', color: '#1d4ed8', marginBottom: '3px' }}>
+            🔗 Nog geen spelersfiche gekoppeld
+          </div>
+          <p style={{ fontSize: '13px', color: '#3b82f6', margin: 0, lineHeight: 1.55 }}>
+            De badges voor wedstrijden, goals en assists verschijnen zodra een admin je account aan een
+            spelersfiche koppelt. De pronostiekbadges hieronder kan je nu al verdienen.
+          </p>
+        </div>
+      )}
 
       {/* Voortgang — enkel tonen als er badges zijn */}
       {totaal > 0 && (
