@@ -14,7 +14,7 @@
 //   placeholder    — true = naam en beschrijving blijven verborgen
 //   conditie(stats) — stats komen uit src/lib/badgeStats.js
 
-const geheim = (id, categorie) => ({
+export const geheim = (id, categorie) => ({
   id,
   naam: '???',
   emoji: '❓',
@@ -25,33 +25,136 @@ const geheim = (id, categorie) => ({
   conditie: () => false,
 })
 
+// Kleine helper zodat elke drempel-badge er hetzelfde uitziet
+const drempel = ({ id, naam, emoji, categorie, beschrijving, conditieTekst, veld, min }) => ({
+  id, naam, emoji, categorie, beschrijving, conditieTekst,
+  conditie: s => (s[veld] ?? 0) >= min,
+})
+
 export const BADGES = [
-  // ─── Brons ─────────────────────────────────────────────────────────────────
-  {
-    id: 'vijf-wedstrijden',
-    naam: 'Vaste Waarde',
-    emoji: '⚽',
-    categorie: 'brons',
+  // ─── Brons ───────────────────────────────────────────────────
+  drempel({
+    id: 'vijf-wedstrijden', naam: 'Vaste Waarde', emoji: '⚽', categorie: 'brons',
     beschrijving: 'Je speelde vijf wedstrijden mee voor ZVK Genebos.',
     conditieTekst: '5 wedstrijden gespeeld',
-    conditie: s => (s.aantalWedstrijden ?? 0) >= 5,
-  },
+    veld: 'aantalWedstrijden', min: 5,
+  }),
+  drempel({
+    id: 'eerste-goal', naam: 'De Eerste', emoji: '🎉', categorie: 'brons',
+    beschrijving: 'Je eerste doelpunt voor de ploeg zit erin.',
+    conditieTekst: '1 goal gescoord',
+    veld: 'aantalGoals', min: 1,
+  }),
+  drempel({
+    id: 'tien-goals', naam: 'Netjesvinder', emoji: '🕸️', categorie: 'brons',
+    beschrijving: 'Tien keer de weg naar het doel gevonden.',
+    conditieTekst: '10 goals gescoord',
+    veld: 'aantalGoals', min: 10,
+  }),
+  drempel({
+    id: 'eerste-assist', naam: 'Gulle Gever', emoji: '🎁', categorie: 'brons',
+    beschrijving: 'Je legde er eentje klaar voor een ploegmaat.',
+    conditieTekst: '1 assist gegeven',
+    veld: 'aantalAssists', min: 1,
+  }),
+  drempel({
+    id: 'tien-assists', naam: 'Aangever', emoji: '👉', categorie: 'brons',
+    beschrijving: 'Tien keer de laatste pass gegeven.',
+    conditieTekst: '10 assists gegeven',
+    veld: 'aantalAssists', min: 10,
+  }),
+  drempel({
+    id: 'propere-lei', naam: 'Propere Lei', emoji: '🧼', categorie: 'brons',
+    beschrijving: 'Je speelde een wedstrijd waarin de tegenstander niet scoorde.',
+    conditieTekst: '1 keer de nul gehouden',
+    veld: 'cleanSheets', min: 1,
+  }),
 
-  // ─── Zilver ────────────────────────────────────────────────────────────────
-  geheim('zilver-1', 'zilver'),
-  geheim('zilver-2', 'zilver'),
-  geheim('zilver-3', 'zilver'),
+  // ─── Zilver ──────────────────────────────────────────────────
+  drempel({
+    id: 'zilver-1', naam: 'Vaste Klant', emoji: '🪑', categorie: 'zilver',
+    beschrijving: 'Vijftien wedstrijden meegespeeld. Ze rekenen op je.',
+    conditieTekst: '15 wedstrijden gespeeld',
+    veld: 'aantalWedstrijden', min: 15,
+  }),
+  drempel({
+    id: 'zilver-2', naam: 'Sluipschutter', emoji: '🎯', categorie: 'zilver',
+    beschrijving: 'Vijfentwintig doelpunten op je naam.',
+    conditieTekst: '25 goals gescoord',
+    veld: 'aantalGoals', min: 25,
+  }),
+  drempel({
+    id: 'zilver-3', naam: 'Spelverdeler', emoji: '🧠', categorie: 'zilver',
+    beschrijving: 'Vijfentwintig assists. Jij ziet de pass die niemand ziet.',
+    conditieTekst: '25 assists gegeven',
+    veld: 'aantalAssists', min: 25,
+  }),
+  drempel({
+    id: 'de-muur', naam: 'De Muur', emoji: '🧱', categorie: 'zilver',
+    beschrijving: 'Vijf wedstrijden waarin de tegenstander droog bleef staan.',
+    conditieTekst: '5 keer de nul gehouden',
+    veld: 'cleanSheets', min: 5,
+  }),
 
-  // ─── Goud ──────────────────────────────────────────────────────────────────
-  geheim('goud-1', 'goud'),
-  geheim('goud-2', 'goud'),
+  // ─── Goud ────────────────────────────────────────────────────
+  drempel({
+    id: 'goud-1', naam: 'Clublegende', emoji: '🏛️', categorie: 'goud',
+    beschrijving: 'Dertig wedstrijden voor ZVK Genebos. Een legende.',
+    conditieTekst: '30 wedstrijden gespeeld',
+    veld: 'aantalWedstrijden', min: 30,
+  }),
+  drempel({
+    id: 'goud-2', naam: 'Bommenwerper', emoji: '💣', categorie: 'goud',
+    beschrijving: 'Vijftig doelpunten. De tegenstander kent je naam.',
+    conditieTekst: '50 goals gescoord',
+    veld: 'aantalGoals', min: 50,
+  }),
+  drempel({
+    id: 'dirigent', naam: 'Dirigent', emoji: '🎼', categorie: 'goud',
+    beschrijving: 'Vijftig assists. Jij bepaalt het tempo.',
+    conditieTekst: '50 assists gegeven',
+    veld: 'aantalAssists', min: 50,
+  }),
+  drempel({
+    id: 'kluis-van-genebos', naam: 'Kluis van Genebos', emoji: '🔒', categorie: 'goud',
+    beschrijving: 'Tien wedstrijden zonder tegendoelpunt met jou op het veld.',
+    conditieTekst: '10 keer de nul gehouden',
+    veld: 'cleanSheets', min: 10,
+  }),
 
-  // ─── Platina ───────────────────────────────────────────────────────────────
-  geheim('platina-1', 'platina'),
-  geheim('platina-2', 'platina'),
-  geheim('platina-3', 'platina'),
+  // ─── Platina ─────────────────────────────────────────────────
+  drempel({
+    id: 'platina-1', naam: 'Genebos-monument', emoji: '🗿', categorie: 'platina',
+    beschrijving: 'Zestig wedstrijden. Je hoort bij het meubilair.',
+    conditieTekst: '60 wedstrijden gespeeld',
+    veld: 'aantalWedstrijden', min: 60,
+  }),
+  drempel({
+    id: 'platina-2', naam: 'Doelpuntenmachine', emoji: '🏭', categorie: 'platina',
+    beschrijving: 'Honderd doelpunten voor de ploeg.',
+    conditieTekst: '100 goals gescoord',
+    veld: 'aantalGoals', min: 100,
+  }),
+  drempel({
+    id: 'platina-3', naam: 'Architect', emoji: '📐', categorie: 'platina',
+    beschrijving: 'Honderd assists. Half de goals van de club zijn van jouw hand.',
+    conditieTekst: '100 assists gegeven',
+    veld: 'aantalAssists', min: 100,
+  }),
+  drempel({
+    id: 'onneembaar', naam: 'Onneembaar', emoji: '🏰', categorie: 'platina',
+    beschrijving: 'Twintig wedstrijden waarin er achteraan niets doorkwam.',
+    conditieTekst: '20 keer de nul gehouden',
+    veld: 'cleanSheets', min: 20,
+  }),
 
-  // ─── Legendary ─────────────────────────────────────────────────────────────
+  // ─── Legendary ─────────────────────────────────────────────
+  drempel({
+    id: 'onsterfelijk', naam: 'Onsterfelijk', emoji: '♾️', categorie: 'legendary',
+    beschrijving: 'Honderd wedstrijden voor ZVK Genebos.',
+    conditieTekst: '100 wedstrijden gespeeld',
+    veld: 'aantalWedstrijden', min: 100,
+  }),
   {
     id: 'gouden-schoen',
     naam: 'Gouden Schoen',
