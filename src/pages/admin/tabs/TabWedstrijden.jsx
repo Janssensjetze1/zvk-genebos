@@ -881,6 +881,7 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
 function AndereWedstrijd({ seizoenId, teams, wedstrijd, onSluiten, onOpgeslagen }) {
   const isBewerk = !!wedstrijd
   const [datum, setDatum] = useState(isBewerk ? wedstrijd.date : '')
+  const [uur, setUur] = useState(isBewerk ? (wedstrijd.time ?? '') : '')
   const [type, setType] = useState(isBewerk ? wedstrijd.type : 'competitie')
   const [thuisId, setThuisId] = useState(isBewerk ? wedstrijd.home_team_id : '')
   const [uitId, setUitId] = useState(isBewerk ? wedstrijd.away_team_id : '')
@@ -897,14 +898,15 @@ function AndereWedstrijd({ seizoenId, teams, wedstrijd, onSluiten, onOpgeslagen 
 
     if (isBewerk) {
       const { error } = await supabase.from('matches').update({
-        date: datum, type, home_team_id: thuisId, away_team_id: uitId,
+        date: datum, time: (uur && uur !== '__anders__') ? uur : null, type,
+        home_team_id: thuisId, away_team_id: uitId,
         home_score: thuisScore, away_score: uitScore,
       }).eq('id', wedstrijd.id)
       setOpslaan(false)
       if (error) { setFout('Opslaan mislukt: ' + error.message); return }
     } else {
       const { error } = await supabase.from('matches').insert({
-        season_id: seizoenId, date: datum, type,
+        season_id: seizoenId, date: datum, time: (uur && uur !== '__anders__') ? uur : null, type,
         home_team_id: thuisId, away_team_id: uitId,
         home_score: thuisScore, away_score: uitScore,
       })
@@ -927,7 +929,10 @@ function AndereWedstrijd({ seizoenId, teams, wedstrijd, onSluiten, onOpgeslagen 
           <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a', margin: 0 }}>
             {isBewerk ? 'Wedstrijd bewerken' : 'Andere wedstrijd invoeren'}
           </h3>
-          <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>Score is voldoende voor het klassement</p>
+          <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>
+            Score is voldoende voor het klassement. Vul het uur in als er gepronostikeerd wordt —
+            zonder uur sluit de pronostiek om 19:00 (een uur voor 20:00).
+          </p>
         </div>
         <button type="button" onClick={onSluiten} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: '20px' }}>×</button>
       </div>
@@ -937,6 +942,38 @@ function AndereWedstrijd({ seizoenId, teams, wedstrijd, onSluiten, onOpgeslagen 
           <div style={{ flex: 1, minWidth: '140px' }}>
             <label style={labelStijl}>Datum *</label>
             <input type="date" value={datum} onChange={e => setDatum(e.target.value)} required style={inputStijl} />
+          </div>
+          <div>
+            <label style={labelStijl}>Uur</label>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              {['18:00', '19:00'].map(t => (
+                <button key={t} type="button" onClick={() => setUur(t)} style={{
+                  padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500',
+                  cursor: 'pointer', border: 'none',
+                  background: uur === t ? '#0f172a' : '#f1f5f9',
+                  color: uur === t ? 'white' : '#64748b',
+                }}>{t}u</button>
+              ))}
+              <button type="button" onClick={() => setUur(uur === '18:00' || uur === '19:00' || uur === '' ? '__anders__' : uur)} style={{
+                padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500',
+                cursor: 'pointer', border: 'none',
+                background: uur !== '18:00' && uur !== '19:00' && uur !== '' ? '#0f172a' : '#f1f5f9',
+                color: uur !== '18:00' && uur !== '19:00' && uur !== '' ? 'white' : '#64748b',
+              }}>Anders</button>
+              {uur !== '18:00' && uur !== '19:00' && uur !== '' && (
+                <input
+                  type="time"
+                  value={uur === '__anders__' ? '' : uur}
+                  onChange={e => setUur(e.target.value)}
+                  style={{ ...inputStijl, width: '110px', padding: '6px 10px' }}
+                />
+              )}
+              {uur !== '' && (
+                <button type="button" onClick={() => setUur('')} title="Uur wissen" style={{
+                  background: 'none', border: 'none', cursor: 'pointer', color: '#cbd5e1', fontSize: '14px', padding: '4px 2px',
+                }}>✕</button>
+              )}
+            </div>
           </div>
           <div>
             <label style={labelStijl}>Type</label>
@@ -1043,6 +1080,17 @@ function AndereWedstrijdKaart({ wedstrijd: w, actief, onBewerken, onVerwijderen 
           fontSize: '11px', fontWeight: '600', padding: '1px 7px', borderRadius: '10px',
           background: TYPE_COLORS[w.type]?.bg, color: TYPE_COLORS[w.type]?.color,
         }}>{TYPE_LABELS[w.type]}</span>
+        {w.time ? (
+          <span style={{ fontSize: '11px', color: '#94a3b8' }}>🕐 {w.time.slice(0, 5)}</span>
+        ) : (
+          <span
+            title="Zonder uur rekent de pronostiek met 20:00 als aftrap"
+            style={{
+              fontSize: '11px', fontWeight: '600', padding: '1px 7px', borderRadius: '10px',
+              background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a',
+            }}
+          >geen uur</span>
+        )}
       </div>
 
       {/* Acties */}

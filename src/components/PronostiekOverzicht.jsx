@@ -81,6 +81,7 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
   const [wedstrijden, setWedstrijden] = useState([])
   const [laden, setLaden] = useState(true)
   const [tab, setTab] = useState('wedstrijden')
+  const [uitlegOpen, setUitlegOpen] = useState(false)
 
   useEffect(() => {
     let actief = true
@@ -183,7 +184,7 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
                     <Kaart key={w.id}>
                       <WedstrijdTitel w={w} />
                       <div style={{ padding: '14px 16px' }}>
-                        <Pronostiek wedstrijd={w} variant={variant} />
+                        <Pronostiek wedstrijd={w} standaardOpen />
                       </div>
                     </Kaart>
                   ))}
@@ -239,7 +240,7 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
                     <Kaart key={w.id}>
                       <WedstrijdTitel w={w} />
                       <div style={{ padding: '14px 16px' }}>
-                        <Pronostiek wedstrijd={w} variant={variant} />
+                        <Pronostiek wedstrijd={w} />
                       </div>
                     </Kaart>
                   ))}
@@ -318,13 +319,25 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
         )
       )}
 
-      {/* Puntenuitleg */}
+      {/* Puntenuitleg — ingeklapt, je leest ze één keer */}
       <Kaart style={{ marginTop: '22px', background: '#f8fafc' }}>
         <div style={{ padding: '14px 16px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
-            Hoe worden de punten geteld?
+          <div
+            onClick={() => setUitlegOpen(o => !o)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              cursor: 'pointer', userSelect: 'none',
+            }}
+          >
+            <span style={{ flex: 1, fontSize: '11px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Hoe worden de punten geteld?
+            </span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="3"
+              style={{ transform: uitlegOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s' }}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+          <div style={{ display: uitlegOpen ? 'flex' : 'none', flexDirection: 'column', gap: '7px', marginTop: '10px' }}>
             {PUNTEN_UITLEG.map(p => (
               <div key={p.punten} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{
@@ -336,7 +349,7 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
               </div>
             ))}
           </div>
-          <p style={{ fontSize: '11px', color: '#94a3b8', margin: '10px 0 0', lineHeight: 1.5 }}>
+          <p style={{ display: uitlegOpen ? 'block' : 'none', fontSize: '11px', color: '#94a3b8', margin: '10px 0 0', lineHeight: 1.5 }}>
             Enkel het hoogste dat van toepassing is telt. Voorspellen kan van een week voor de wedstrijd tot een uur
             voor de aftrap, en je mag tot dan zoveel aanpassen als je wil.
           </p>

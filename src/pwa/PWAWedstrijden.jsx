@@ -282,7 +282,7 @@ function WedstrijdKaart({ wedstrijd: w }) {
           style={{ padding: '14px 16px', borderTop: '1px solid #f1f5f9', background: '#fcfdff' }}
           onClick={e => e.stopPropagation()}
         >
-          <Pronostiek wedstrijd={w} variant="pwa" />
+          <Pronostiek wedstrijd={w} />
         </div>
       )}
 

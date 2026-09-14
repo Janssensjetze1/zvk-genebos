@@ -143,7 +143,7 @@ export default function PWAInfo() {
 
         <Sectie emoji="🏅" titel="Badges">
           <p>
-            Tik linksboven op je profielknop en kies <span style={vet}>Badges</span>. Daar staat je verzameling:
+            Tik rechtsonder op de drie puntjes en kies <span style={vet}>Badges</span>. Daar staat je verzameling:
             wat je al verdiend hebt en wat er nog te halen valt, netjes per categorie —
             <span style={vet}> brons, zilver, goud, platina</span> en <span style={vet}>legendary</span>. Achter elke
             categorie staat hoeveel je er daar al van hebt.
@@ -178,7 +178,8 @@ export default function PWAInfo() {
 
         <Sectie emoji="👤" titel="Je profiel en meldingen">
           <p>
-            Onder <span style={vet}>Account</span> pas je je naam aan en zet je een profielfoto. Die foto zie je
+            Onder <span style={vet}>Instellingen</span> — achter de drie puntjes, of gewoon op je profielfoto
+            linksboven tikken — pas je je naam aan en zet je een profielfoto. Die foto zie je
             terug bij de spelers.
           </p>
           <p>

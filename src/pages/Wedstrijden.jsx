@@ -190,7 +190,7 @@ function AankomendeKaart({ wedstrijd: w }) {
       {/* Pronostiek — open vanaf een week voor de match tot een uur ervoor */}
       {pronostiekStatus(w) === 'open' && (
         <div style={{ borderTop: '1px solid #f1f5f9', background: '#fcfdff', padding: '16px 24px' }}>
-          <Pronostiek wedstrijd={w} variant="desktop" />
+          <Pronostiek wedstrijd={w} />
         </div>
       )}
     </div>

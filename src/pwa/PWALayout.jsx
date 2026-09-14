@@ -200,73 +200,13 @@ function Avatar({ src, naam, size = 38 }) {
   )
 }
 
-// ─── Profiel-popover (badges + instellingen) ──────────────────────────────────
-function ProfielPopover({ open, onClose }) {
-  const navigate = useNavigate()
-  if (!open) return null
-
-  function ga(pad) {
-    onClose()
-    navigate(pad)
-  }
-
-  return (
-    <>
-      {/* Klikbaar overlay om te sluiten */}
-      <div
-        onClick={onClose}
-        style={{ position: 'fixed', inset: 0, zIndex: 98 }}
-      />
-      {/* Popover kaartje */}
-      <div style={{
-        position: 'fixed', top: '72px', left: '16px', zIndex: 99,
-        background: 'rgba(18,18,32,0.97)',
-        border: '1px solid rgba(255,255,255,0.12)',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-        minWidth: '170px',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-      }}>
-        {/* Badges — zichtbaar voor elk goedgekeurd lid */}
-        <button
-          onClick={() => ga('/app/badges')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '10px',
-            width: '100%', padding: '13px 16px',
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'white', fontSize: '14px', fontWeight: '500',
-            textAlign: 'left',
-            borderBottom: '1px solid rgba(255,255,255,0.07)',
-          }}
-        >
-          <span style={{ fontSize: '18px' }}>🏅</span>
-          Badges
-        </button>
-        <button
-          onClick={() => ga('/app/account')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '10px',
-            width: '100%', padding: '13px 16px',
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'white', fontSize: '14px', fontWeight: '500',
-            textAlign: 'left',
-          }}
-        >
-          <span style={{ fontSize: '18px' }}>⚙️</span>
-          Instellingen
-        </button>
-      </div>
-    </>
-  )
-}
-
 // ─── Secundaire nav (drie puntjes) ────────────────────────────────────────────
 const MEER_ITEMS = [
   { label: 'Pronostiek', icon: '🔮', path: '/app/pronostiek' },
+  { label: 'Badges', icon: '🏅', path: '/app/badges' },
   { label: 'Info', icon: 'ℹ️', path: '/app/info' },
   { label: 'Feedback', icon: '💬', path: '/app/feedback' },
+  { label: 'Instellingen', icon: '⚙️', path: '/app/account' },
 ]
 
 function MeerMenu({ open, onClose, isAdmin }) {
@@ -364,8 +304,8 @@ export default function PWALayout({ children }) {
   const { isAdmin, profile } = useAuth()
   const { actief: seizoen } = useSeason()
   const [splashKlaar, setSplashKlaar] = useState(() => !!sessionStorage.getItem('splash_done'))
-  const [profielOpen, setProfielOpen] = useState(false)
   const [meerOpen, setMeerOpen] = useState(false)
+  const navigate = useNavigate()
 
   const mainRef = useRef(null)
   const { pullDist, refreshing } = usePullToRefresh(mainRef)
@@ -389,9 +329,12 @@ export default function PWALayout({ children }) {
         overflow: 'visible',
       }}>
 
-        {/* Links: profielfoto */}
+        {/* Links: profielfoto — gaat rechtstreeks naar je instellingen.
+            Badges en Instellingen staan sinds 2026-09-14 in het Meer-menu. */}
         <button
-          onClick={() => setProfielOpen(v => !v)}
+          onClick={() => navigate('/app/account')}
+          aria-label="Instellingen"
+          title="Instellingen"
           style={{
             background: 'none', border: 'none', padding: 0,
             cursor: 'pointer', flexShrink: 0, lineHeight: 0,
@@ -432,8 +375,6 @@ export default function PWALayout({ children }) {
       </header>
 
       {/* Profiel popover */}
-      <ProfielPopover open={profielOpen} onClose={() => setProfielOpen(false)} />
-
       {/* Meer menu */}
       <MeerMenu open={meerOpen} onClose={() => setMeerOpen(false)} isAdmin={isAdmin} />
 
