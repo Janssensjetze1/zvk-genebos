@@ -161,7 +161,8 @@ export default function PWAInfo() {
 
         <Sectie emoji="🔮" titel="Pronostiek">
           <p>
-            Voorspel de score van onze wedstrijden en verzamel punten. Je vindt het achter de drie puntjes bij
+            Voorspel de score van élke wedstrijd uit het seizoen — ook die van de tegenstanders onderling — en
+            verzamel punten. Je vindt het achter de drie puntjes bij
             <span style={vet}> Pronostiek</span>, en de invoer staat ook gewoon onder de wedstrijd zelf.
           </p>
           <p>

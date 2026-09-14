@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext'
 import { isGespeeld } from '../lib/wedstrijd'
 
 // ─── Pronostiek ──────────────────────────────────────────────────────────────
-// Iedereen voorspelt de score van onze wedstrijden. Punten:
+// Iedereen voorspelt de score van élke wedstrijd van het seizoen, ook die van
+// tegenstanders onderling. Punten:
 //   5  exacte score      3  juist doelsaldo      1  juiste afloop      0  fout
 //   +1 durfbonus als je de énige bent met de exacte score
 // Het hoogste dat van toepassing is telt; ze stapelen niet.

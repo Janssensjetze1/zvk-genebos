@@ -22,6 +22,7 @@ function Kaart({ children, style }) {
 function WedstrijdTitel({ w }) {
   const datum = new Date(w.date)
   const gespeeld = isGespeeld(w)
+  const onze = w.home_team?.is_zvk || w.away_team?.is_zvk
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: '10px',
@@ -38,10 +39,23 @@ function WedstrijdTitel({ w }) {
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontSize: '14px', fontWeight: '700', color: '#0f172a',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          display: 'flex', alignItems: 'center', gap: '7px',
+          overflow: 'hidden',
         }}>
-          {w.home_team?.name} – {w.away_team?.name}
+          <span style={{
+            fontSize: '14px', fontWeight: '700', color: '#0f172a',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {w.home_team?.name} – {w.away_team?.name}
+          </span>
+          {onze && (
+            <span style={{
+              flexShrink: 0, fontSize: '9px', fontWeight: '800', letterSpacing: '0.06em',
+              textTransform: 'uppercase', color: '#1d4ed8',
+              background: '#eff6ff', border: '1px solid #bfdbfe',
+              borderRadius: '20px', padding: '2px 7px',
+            }}>Onze match</span>
+          )}
         </div>
         <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
           {datum.toLocaleDateString('nl-BE', { weekday: 'long' })}
@@ -79,7 +93,8 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
         .eq('season_id', seizoenId)
         .order('date', { ascending: true })
       if (!actief) return
-      setWedstrijden((data ?? []).filter(w => w.home_team?.is_zvk || w.away_team?.is_zvk))
+      // Alle wedstrijden van het seizoen, ook die van tegenstanders onderling
+      setWedstrijden(data ?? [])
       setLaden(false)
     }
 
@@ -102,7 +117,7 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
         Pronostiek
       </h1>
       <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0 0 18px' }}>
-        {seizoen?.name} · voorspel de scores, verdien punten
+        {seizoen?.name} · voorspel elke wedstrijd, verdien punten
       </p>
 
       {/* Jouw stand */}

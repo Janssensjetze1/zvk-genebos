@@ -1,6 +1,7 @@
 -- ─── Pronostiek ───────────────────────────────────────────────────────────────
 --
--- Elk goedgekeurd lid mag de score van onze eigen wedstrijden voorspellen.
+-- Elk goedgekeurd lid mag de score van élke wedstrijd van het seizoen
+-- voorspellen, dus ook van tegenstanders onderling.
 -- Ook wie geen spelersfiche heeft doet mee: de identiteit is user_id, net als
 -- bij de opgave.
 --
@@ -49,24 +50,12 @@ returns boolean language sql stable as $$
      and now() <  public.pronostiek_aftrap(p_match_id) - interval '1 hour';
 $$;
 
--- ─── Bewaker: enkel onze wedstrijden, enkel binnen het venster ───────────────
+-- ─── Bewaker: enkel binnen het venster ──────────────────────────────────────
 create or replace function public.check_pronostiek()
 returns trigger language plpgsql as $$
 declare
-  v_onze boolean;
   v_aftrap timestamptz;
 begin
-  select (ht.is_zvk or at.is_zvk) into v_onze
-    from public.matches m
-    join public.teams ht on ht.id = m.home_team_id
-    join public.teams at on at.id = m.away_team_id
-   where m.id = new.match_id;
-
-  if not coalesce(v_onze, false) then
-    raise exception 'Je kan enkel op wedstrijden van ZVK Genebos pronostikeren'
-      using errcode = 'check_violation';
-  end if;
-
   if not public.pronostiek_open(new.match_id) then
     v_aftrap := public.pronostiek_aftrap(new.match_id);
     if now() < v_aftrap - interval '7 days' then
