@@ -93,7 +93,8 @@ export default function PWAInfo() {
           </p>
           <Tip>
             ⏱️ <span style={vet}>Wanneer kan je je opgeven?</span> De opgave gaat open op de woensdag van de week
-            van de wedstrijd. Daarvoor zie je de knoppen nog niet staan.
+            van de wedstrijd, om 10 uur 's ochtends. Je krijgt dan een melding op je telefoon als je die aan hebt
+            staan. Daarvoor zie je de knoppen nog niet staan.
           </Tip>
           <Tip>
             🔟 <span style={vet}>Maximum {MAX_MEE} spelers.</span> Zijn de {MAX_MEE} plekken vol, dan kan je niet meer
@@ -150,7 +151,8 @@ export default function PWAInfo() {
           <p>
             De meeste badges krijg je automatisch zodra je aan de voorwaarde voldoet: hoeveel wedstrijden je
             speelde, hoeveel je scoorde, hoeveel assists je gaf en hoe vaak de tegenstander niet scoorde terwijl
-            jij op het veld stond. Een paar worden door de admin toegekend.
+            jij op het veld stond. Een paar worden door de admin toegekend. En er is een categorie
+            <span style={vet}> geheim</span>: die badges blijven met een ❓ verborgen tot er iemand ze krijgt.
           </p>
           <Tip>
             👥 De badges van je ploegmaats zie je bij <span style={vet}>Spelers</span>, als je iemand aantikt.

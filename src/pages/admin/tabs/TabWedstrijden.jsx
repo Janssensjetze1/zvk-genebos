@@ -743,7 +743,7 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
           {/* Opgave — enkel zinvol bij aankomende wedstrijden */}
           {!isPast && (natuurlijkOpen ? (
             <span
-              title="De opgave staat open volgens de vaste regel: woensdag van de matchweek"
+              title="De opgave staat open volgens de vaste regel: woensdag 10u van de matchweek"
               style={{
                 display: 'flex', alignItems: 'center', gap: '5px',
                 background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0',

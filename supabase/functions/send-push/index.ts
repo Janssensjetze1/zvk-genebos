@@ -167,6 +167,11 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
+
+    // Aanroep met de service-role sleutel (de cron-job in de database) mag door
+    // zonder ingelogde gebruiker. Alles daarbuiten moet een admin zijn.
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim()
+    const isServiceRole = token === (Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '\u0000')
     const userClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -174,14 +179,16 @@ Deno.serve(async (req) => {
     )
 
     // Controleer of aanvrager admin is
-    const { data: { user } } = await userClient.auth.getUser()
-    if (!user) return new Response(JSON.stringify({ error: 'Niet ingelogd' }), {
-      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-    const { data: profile } = await supabaseAdmin.from('profiles').select('role').eq('id', user.id).single()
-    if (profile?.role !== 'admin') return new Response(JSON.stringify({ error: 'Geen admin rechten' }), {
-      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    if (!isServiceRole) {
+      const { data: { user } } = await userClient.auth.getUser()
+      if (!user) return new Response(JSON.stringify({ error: 'Niet ingelogd' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+      const { data: profile } = await supabaseAdmin.from('profiles').select('role').eq('id', user.id).single()
+      if (profile?.role !== 'admin') return new Response(JSON.stringify({ error: 'Geen admin rechten' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
 
     const { title, body, url } = await req.json()
     if (!title || !body) return new Response(JSON.stringify({ error: 'Titel en bericht zijn verplicht' }), {

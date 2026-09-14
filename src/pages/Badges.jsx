@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
 import { supabase } from '../lib/supabase'
-import { BADGES, CAT, SHINE, CATEGORIE_VOLGORDE } from '../data/badges'
+import { BADGES, CAT, SHINE, CATEGORIE_VOLGORDE, verborgen } from '../data/badges'
 import { computeStats } from '../lib/badgeStats'
 
 
@@ -273,13 +273,13 @@ export default function Badges() {
                         fontSize: '13px', fontWeight: '700', marginBottom: '6px',
                         color: badge.verdiend ? '#0f172a' : '#94a3b8',
                       }}>
-                        {badge.naam}
+                        {verborgen(badge) ? '???' : badge.naam}
                       </div>
                       <p style={{
                         fontSize: '11px', color: badge.verdiend ? '#64748b' : '#cbd5e1',
                         margin: 0, lineHeight: 1.5,
                       }}>
-                        {badge.beschrijving}
+                        {verborgen(badge) ? '' : badge.beschrijving}
                       </p>
                     </div>
                   </div>
@@ -313,7 +313,7 @@ export default function Badges() {
                 <BadgeHex emoji={geselecteerd.emoji} categorie={geselecteerd.categorie} size={108} verdiend={geselecteerd.verdiend} />
                 <div style={{ textAlign: 'center' }}>
                   <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: '0 0 10px' }}>
-                    {geselecteerd.naam}
+                    {verborgen(geselecteerd) ? '???' : geselecteerd.naam}
                   </h2>
                   <span style={{
                     fontSize: '12px', fontWeight: '600',
@@ -324,7 +324,7 @@ export default function Badges() {
                   </span>
                 </div>
                 <p style={{ fontSize: '14px', color: '#475569', textAlign: 'center', lineHeight: 1.65, margin: 0 }}>
-                  {geselecteerd.beschrijving || 'Deze badge is nog geheim.'}
+                  {(verborgen(geselecteerd) ? '' : geselecteerd.beschrijving) || 'Deze badge is nog geheim.'}
                 </p>
                 <button
                   onClick={() => setGeselecteerd(null)}

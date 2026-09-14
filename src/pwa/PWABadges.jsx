@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
-import { BADGES, CAT, SHINE, CATEGORIE_STIJL, CATEGORIE_VOLGORDE } from '../data/badges'
+import { BADGES, CAT, SHINE, CATEGORIE_STIJL, CATEGORIE_VOLGORDE, verborgen } from '../data/badges'
 import { haalBadgeData, badgesMetStatus } from '../lib/badgeStats'
 
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
@@ -270,7 +270,7 @@ export default function PWABadges() {
                         fontSize: '13px', fontWeight: '700', marginBottom: '6px',
                         color: badge.verdiend ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.35)',
                       }}>
-                        {badge.naam}
+                        {verborgen(badge) ? '???' : badge.naam}
                       </div>
                       <span style={{
                         fontSize: '10px', fontWeight: '600',
@@ -286,7 +286,7 @@ export default function PWABadges() {
 
                     {!badge.verdiend && (
                       <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)', margin: 0, textAlign: 'center', lineHeight: 1.4, position: 'relative', zIndex: 1 }}>
-                        {badge.placeholder ? 'Nog geheim' : 'Nog te verdienen'}
+                        {verborgen(badge) ? 'Nog geheim' : 'Nog te verdienen'}
                       </p>
                     )}
                   </div>
@@ -325,7 +325,7 @@ export default function PWABadges() {
 
                 <div style={{ textAlign: 'center' }}>
                   <h2 style={{ fontSize: '22px', fontWeight: '800', color: 'rgba(255,255,255,0.95)', margin: '0 0 8px' }}>
-                    {geselecteerd.naam}
+                    {verborgen(geselecteerd) ? '???' : geselecteerd.naam}
                   </h2>
                   <span style={{
                     fontSize: '11px', fontWeight: '600',
@@ -339,7 +339,7 @@ export default function PWABadges() {
                 </div>
 
                 <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.55)', textAlign: 'center', lineHeight: 1.65, margin: 0, maxWidth: '280px' }}>
-                  {geselecteerd.beschrijving || 'Deze badge is nog geheim.'}
+                  {(verborgen(geselecteerd) ? '' : geselecteerd.beschrijving) || 'Deze badge is nog geheim.'}
                 </p>
 
                 <button

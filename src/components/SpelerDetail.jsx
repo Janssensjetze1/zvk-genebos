@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { BADGES, CATEGORIE_VOLGORDE, CAT, SHINE } from '../data/badges'
+import { BADGES, CATEGORIE_VOLGORDE, CAT, SHINE, verborgen } from '../data/badges'
 import { computeStats } from '../lib/badgeStats'
 import SpelerAvatar from './SpelerAvatar'
 
@@ -167,7 +167,7 @@ function BadgesTab({ badgesMetStatus, geselecteerdeBadge, setGeselecteerdeBadge 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
               {groep.map(badge => {
                 const c = CAT[badge.categorie]
-                const isGeheim = badge.categorie === 'geheim' && !badge.verdiend
+                const isGeheim = verborgen(badge)
                 const isSelected = geselecteerdeBadge?.id === badge.id
                 return (
                   <div
@@ -368,7 +368,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
           <BadgeHex emoji={b.emoji} categorie={b.categorie} size={96} verdiend={b.verdiend} />
 
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>{b.naam}</div>
+            <div style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>{verborgen(b) ? '???' : b.naam}</div>
             <span style={{
               fontSize: '12px', fontWeight: '600',
               padding: '4px 12px', borderRadius: '99px',
@@ -379,7 +379,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
           </div>
 
           <p style={{ fontSize: '14px', color: '#475569', textAlign: 'center', lineHeight: 1.65, margin: 0 }}>
-            {b.beschrijving || 'Deze badge is nog geheim.'}
+            {(verborgen(b) ? '' : b.beschrijving) || 'Deze badge is nog geheim.'}
           </p>
 
           <button

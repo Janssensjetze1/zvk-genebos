@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext'
 export const MAX_MEE = 10
 
 // ─── Wanneer gaat de opgave open? ────────────────────────────────────────────
-// Standaard: woensdag 00:00 van de week van de wedstrijd — de laatste woensdag
+// Standaard: woensdag 10:00 van de week van de wedstrijd — de laatste woensdag
 // op of vóór de matchdag. Een admin kan dat vervroegen via
 // matches.availability_opens_at. Zelfde regel als de trigger in
 // supabase/migrations/match_availability_opening.sql — pas beide aan.
@@ -20,7 +20,7 @@ export function opgaveOpentOp(wedstrijd) {
   // getDay(): zo=0, wo=3 → aantal dagen terug tot de laatste woensdag
   const dagenTerug = (d.getDay() - 3 + 7) % 7
   d.setDate(d.getDate() - dagenTerug)
-  d.setHours(0, 0, 0, 0)
+  d.setHours(10, 0, 0, 0)
   return d
 }
 

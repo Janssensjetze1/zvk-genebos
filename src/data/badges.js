@@ -165,7 +165,35 @@ export const BADGES = [
     handmatig: true,
     conditie: () => false,
   },
+
+  // ─── Geheim (handmatig, jaarprijzen) ─────────────────────────
+  // Naam en beschrijving blijven verborgen tot een admin de badge toekent.
+  {
+    id: 'pannenkoek', naam: 'Pannenkoek van het Jaar', emoji: '🥞',
+    categorie: 'geheim', beschrijving: 'De blunder waar iedereen nog over praat.',
+    conditieTekst: '', handmatig: true, conditie: () => false,
+  },
+  {
+    id: 'gouden-lat', naam: 'Gouden Lat', emoji: '🥅',
+    categorie: 'geheim', beschrijving: 'Meeste keren paal of lat.',
+    conditieTekst: '', handmatig: true, conditie: () => false,
+  },
+  {
+    id: 'gulle-gever-xl', naam: 'Gulle Gever XL', emoji: '🙃',
+    categorie: 'geheim', beschrijving: 'Scoorde in eigen doel.',
+    conditieTekst: '', handmatig: true, conditie: () => false,
+  },
+  {
+    id: 'zatlapke', naam: "'T Zatlapke", emoji: '🍻',
+    categorie: 'geheim', beschrijving: 'Kwam duidelijk rechtstreeks van elders.',
+    conditieTekst: '', handmatig: true, conditie: () => false,
+  },
 ]
+
+// Een geheime badge verbergt naam en beschrijving tot ze verdiend is.
+// Gebruik deze helper overal waar je een badge toont.
+export const verborgen = badge =>
+  !!badge.placeholder || (badge.categorie === 'geheim' && !badge.verdiend)
 
 // Badges die enkel een admin kan toekennen (beheerscherm)
 export const HANDMATIGE_BADGES = BADGES.filter(b => b.handmatig)

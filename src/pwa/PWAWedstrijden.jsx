@@ -100,6 +100,16 @@ function WedstrijdKaart({ wedstrijd: w }) {
   const datum = new Date(w.date)
   const heeftDetail = isPast && (w.goals?.length > 0 || w.match_players?.length > 0 || verslagState.verslag)
 
+  // Countdown-label voor aankomende wedstrijden (zelfde logica als de webapp).
+  // Een datum in het verleden die nog niet als gespeeld geldt, valt terug op 'Gepland'.
+  const vandaag = new Date(); vandaag.setHours(0, 0, 0, 0)
+  const dagenTot = Math.round((new Date(w.date) - vandaag) / 86400000)
+  const countdown =
+    dagenTot === 0 ? { tekst: 'Vandaag!',             kleur: '#16a34a', bg: '#f0fdf4', rand: '#bbf7d0' } :
+    dagenTot === 1 ? { tekst: 'Morgen',               kleur: '#d97706', bg: '#fffbeb', rand: '#fde68a' } :
+    dagenTot >   1 ? { tekst: `Over ${dagenTot} dagen`, kleur: '#475569', bg: '#f8fafc', rand: '#e2e8f0' } :
+                     { tekst: 'Gepland',              kleur: '#64748b', bg: '#f1f5f9', rand: '#e2e8f0' }
+
   const dagNaam = datum.toLocaleDateString('nl-BE', { weekday: 'short' })
   const dagNr = datum.getDate()
   const maand = datum.toLocaleDateString('nl-BE', { month: 'short' })
@@ -198,8 +208,13 @@ function WedstrijdKaart({ wedstrijd: w }) {
               </div>
             </>
           ) : (
-            <span style={{ fontSize: '12px', color: '#64748b', background: '#f1f5f9', borderRadius: '8px', padding: '5px 10px', fontWeight: '500' }}>
-              Gepland
+            <span style={{
+              fontSize: '12px', fontWeight: '700', whiteSpace: 'nowrap',
+              color: countdown.kleur, background: countdown.bg,
+              border: `1px solid ${countdown.rand}`,
+              borderRadius: '20px', padding: '5px 11px',
+            }}>
+              {countdown.tekst}
             </span>
           )}
         </div>
