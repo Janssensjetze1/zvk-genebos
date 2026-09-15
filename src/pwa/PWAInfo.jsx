@@ -174,8 +174,9 @@ export default function PWAInfo() {
             met de exacte score, dan komt daar nog een <span style={vet}>durfbonus</span> bovenop.
           </p>
           <Tip>
-            ⏱️ Voorspellen kan vanaf een week voor de wedstrijd tot een uur voor de aftrap. Aanpassen mag zoveel je
-            wil, en niemand ziet jouw score tot de pronostiek sluit.
+            ⏱️ Voorspellen kan vanaf een week voor de wedstrijd tot een uur voor de aftrap, aanpassen mag zoveel
+            je wil. Zodra je zelf ingevuld hebt, zie je ook wat de rest gokte — afkijken zonder zelf kleur te
+            bekennen gaat dus niet.
           </Tip>
         </Sectie>
 

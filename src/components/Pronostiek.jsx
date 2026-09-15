@@ -45,6 +45,41 @@ function Stepper({ label, waarde, zet, disabled }) {
   )
 }
 
+function Voorspellingenlijst({ lijst, metPunten, gebruikerId }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+      {lijst.map((v, i) => {
+        const ikzelf = v.user_id === gebruikerId
+        const vThuis = metPunten ? v.voorspeld_thuis : v.home_score
+        const vUit   = metPunten ? v.voorspeld_uit   : v.away_score
+        return (
+          <div key={v.user_id ?? i} style={{
+            display: 'flex', alignItems: 'center', gap: '10px',
+            padding: '6px 9px', borderRadius: '8px',
+            background: ikzelf ? '#eef2ff' : '#f8fafc',
+          }}>
+            <span style={{
+              flex: 1, minWidth: 0, fontSize: '12px',
+              fontWeight: ikzelf ? '700' : '500',
+              color: ikzelf ? ACCENT : '#334155',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>{v.naam ?? 'Onbekend'}</span>
+            <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', fontVariantNumeric: 'tabular-nums' }}>
+              {vThuis}–{vUit}
+            </span>
+            {metPunten && (
+              <span style={{
+                fontSize: '12px', fontWeight: '800', minWidth: '30px', textAlign: 'right',
+                color: v.punten >= 5 ? '#16a34a' : v.punten > 0 ? '#d97706' : '#cbd5e1',
+              }}>{v.punten > 0 ? `+${v.punten}` : '0'}{v.durfbonus ? '🎯' : ''}</span>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function Pronostiek({ wedstrijd, standaardOpen = false }) {
   const { mijn, alle, scores, aantal, loading, bezig, fout, opslaan, status, gebruikerId } = usePronostiek(wedstrijd)
   const [uit_geklapt, setUitgeklapt] = useState(standaardOpen)
@@ -85,11 +120,16 @@ export default function Pronostiek({ wedstrijd, standaardOpen = false }) {
     chip = { tekst: 'gesloten', kleur: '#64748b', bg: '#f1f5f9', rand: '#e2e8f0' }
   }
 
+  const anderen = alle
+    .filter(v => v.user_id !== gebruikerId)
+    .sort((a, b) => (a.naam ?? '').localeCompare(b.naam ?? ''))
+
   const lijst = metPunten
     ? [...scores].sort((a, b) => b.punten - a.punten || (a.naam ?? '').localeCompare(b.naam ?? ''))
     : [...alle].sort((a, b) => (a.naam ?? '').localeCompare(b.naam ?? ''))
 
-  const uitklapbaar = status !== 'nog-niet'
+  // Op de detailpagina (standaardOpen) valt er niets te vouwen: alles staat open.
+  const uitklapbaar = !standaardOpen && status !== 'nog-niet'
   const gewijzigd = !mijn || mijn.home_score !== thuis || mijn.away_score !== uit
 
   return (
@@ -157,9 +197,22 @@ export default function Pronostiek({ wedstrijd, standaardOpen = false }) {
 
           {fout && <p style={{ fontSize: '12px', color: '#ef4444', margin: 0 }}>{fout}</p>}
 
+          {/* Wat gokten de anderen? Zichtbaar zodra je zelf ingevuld hebt. */}
+          {mijn && anderen.length > 0 && (
+            <>
+              <div style={{
+                fontSize: '11px', fontWeight: '700', color: '#94a3b8',
+                textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '2px',
+              }}>De rest gokte</div>
+              <Voorspellingenlijst lijst={anderen} metPunten={false} gebruikerId={gebruikerId} />
+            </>
+          )}
+
           <p style={{ fontSize: '11px', color: '#cbd5e1', margin: 0, lineHeight: 1.4 }}>
-            {aantal === 0 ? 'Nog niemand voorspelde deze wedstrijd.' : `${aantal} ${aantal === 1 ? 'lid gokte' : 'leden gokten'} al.`}
-            {' '}Je ziet hun gok zodra de pronostiek sluit.
+            {aantal === 0
+              ? 'Nog niemand voorspelde deze wedstrijd.'
+              : `${aantal} ${aantal === 1 ? 'lid gokte' : 'leden gokten'} al.`}
+            {!mijn && aantal > 0 ? ' Vul zelf in om te zien wat zij gokten.' : ''}
           </p>
         </>
       ) : (
@@ -167,37 +220,14 @@ export default function Pronostiek({ wedstrijd, standaardOpen = false }) {
         lijst.length === 0 ? (
           <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>Niemand had een voorspelling ingediend.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            {lijst.map((v, i) => {
-              const ikzelf = v.user_id === gebruikerId
-              const vThuis = metPunten ? v.voorspeld_thuis : v.home_score
-              const vUit   = metPunten ? v.voorspeld_uit   : v.away_score
-              return (
-                <div key={v.user_id ?? i} style={{
-                  display: 'flex', alignItems: 'center', gap: '10px',
-                  padding: '6px 9px', borderRadius: '8px',
-                  background: ikzelf ? '#eef2ff' : '#f8fafc',
-                }}>
-                  <span style={{
-                    flex: 1, minWidth: 0, fontSize: '12px',
-                    fontWeight: ikzelf ? '700' : '500',
-                    color: ikzelf ? ACCENT : '#334155',
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                  }}>{v.naam ?? 'Onbekend'}</span>
-                  <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', fontVariantNumeric: 'tabular-nums' }}>
-                    {vThuis}–{vUit}
-                  </span>
-                  {metPunten && (
-                    <span style={{
-                      fontSize: '12px', fontWeight: '800', minWidth: '30px', textAlign: 'right',
-                      color: v.punten >= 5 ? '#16a34a' : v.punten > 0 ? '#d97706' : '#cbd5e1',
-                    }}>{v.punten > 0 ? `+${v.punten}` : '0'}{v.durfbonus ? '🎯' : ''}</span>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+          <Voorspellingenlijst lijst={lijst} metPunten={metPunten} gebruikerId={gebruikerId} />
         )
+      )}
+
+      {uit_geklapt && metPunten && lijst.some(v => v.durfbonus) && (
+        <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
+          🎯 durfbonus: als enige de exacte score juist.
+        </p>
       )}
     </div>
   )

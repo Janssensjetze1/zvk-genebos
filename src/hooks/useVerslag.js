@@ -4,15 +4,19 @@ import { supabase } from '../lib/supabase'
 // Het wedstrijdverslag van één wedstrijd: laten genereren, zelf schrijven of
 // achteraf bijwerken. De tekst staat in matches.report; een leeg verslag wordt
 // als null bewaard zodat "nog geen verslag" één betekenis houdt.
+// wedstrijd mag null zijn (pagina die nog aan het laden is); de hook doet dan
+// gewoon niets. Let op: de begintoestand komt van de eerste render, dus mount
+// het paneel pas wanneer de wedstrijd er écht is — zie WedstrijdDetail.
 export function useVerslag(wedstrijd) {
-  const [verslag, setVerslag] = useState(wedstrijd.report ?? null)
+  const [verslag, setVerslag] = useState(wedstrijd?.report ?? null)
   const [genereert, setGenereert] = useState(false)
   const [bewerkt, setBewerkt] = useState(false)
-  const [tekst, setTekst] = useState(wedstrijd.report ?? '')
+  const [tekst, setTekst] = useState(wedstrijd?.report ?? '')
   const [bezig, setBezig] = useState(false)
   const [fout, setFout] = useState('')
 
   async function genereer() {
+    if (!wedstrijd?.id) return
     setFout('')
     setBewerkt(false)
     setGenereert(true)
@@ -50,6 +54,7 @@ export function useVerslag(wedstrijd) {
   }
 
   async function bewaar() {
+    if (!wedstrijd?.id) return
     setFout('')
     setBezig(true)
     const nieuw = tekst.trim() ? tekst.trim() : null

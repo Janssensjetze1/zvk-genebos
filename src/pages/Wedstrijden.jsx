@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import { useAuth } from '../context/AuthContext'
 import Opgave from '../components/Opgave'
-import Pronostiek from '../components/Pronostiek'
 import { opgaveIsOpen } from '../hooks/useOpgave'
-import { pronostiekStatus } from '../hooks/usePronostiek'
 import { isGespeeld } from '../lib/wedstrijd'
-import { useVerslag } from '../hooks/useVerslag'
-import VerslagPaneel from '../components/VerslagPaneel'
 
 const REACTIE_EMOJIS = ['💪', '❤️', '🎯', '😭']
 
@@ -109,6 +106,7 @@ export default function Wedstrijden() {
 // ── Aankomende wedstrijd kaart ───────────────────────────────────────────────
 
 function AankomendeKaart({ wedstrijd: w }) {
+  const navigate = useNavigate()
   const isThuis = w.home_team?.is_zvk
   const tegenstander = isThuis ? w.away_team : w.home_team
   const datum = new Date(w.date)
@@ -128,12 +126,16 @@ function AankomendeKaart({ wedstrijd: w }) {
       borderRadius: '14px',
       overflow: 'hidden',
     }}>
-      <div style={{
-        padding: '20px 24px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '20px',
-      }}>
+      <div
+        onClick={() => navigate(`/wedstrijd/${w.id}`)}
+        style={{
+          padding: '20px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '20px',
+          cursor: 'pointer',
+        }}
+      >
       {/* Datum blok */}
       <div style={{
         flexShrink: 0, textAlign: 'center', width: '52px',
@@ -178,6 +180,10 @@ function AankomendeKaart({ wedstrijd: w }) {
       }}>
         {countdownLabel.tekst}
       </div>
+
+      <svg width="14" height="14" fill="none" stroke="#cbd5e1" strokeWidth="3" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
       </div>
 
       {/* Opgave */}
@@ -187,12 +193,6 @@ function AankomendeKaart({ wedstrijd: w }) {
         </div>
       )}
 
-      {/* Pronostiek — open vanaf een week voor de match tot een uur ervoor */}
-      {pronostiekStatus(w) === 'open' && (
-        <div style={{ borderTop: '1px solid #f1f5f9', background: '#fcfdff', padding: '16px 24px' }}>
-          <Pronostiek wedstrijd={w} />
-        </div>
-      )}
     </div>
   )
 }
@@ -201,11 +201,9 @@ function AankomendeKaart({ wedstrijd: w }) {
 
 function GespeeldeKaart({ wedstrijd: w }) {
   const { user } = useAuth()
-  const [open, setOpen] = useState(false)
-  const [detailTab, setDetailTab] = useState('details') // 'details' | 'verslag'
+  const navigate = useNavigate()
   const [reacties, setReacties] = useState([])
   const [mijneReactie, setMijneReactie] = useState(null)
-  const verslagState = useVerslag(w)
   const isThuis = w.home_team?.is_zvk
   const zvkScore = isThuis ? w.home_score : w.away_score
   const tegScore = isThuis ? w.away_score : w.home_score
@@ -246,12 +244,6 @@ function GespeeldeKaart({ wedstrijd: w }) {
   const resultaatBg = { W: '#f0fdf4', V: '#fef2f2', G: '#fffbeb' }[resultaat]
   const resultaatLabel = { W: 'Winst', V: 'Verlies', G: 'Gelijkspel' }[resultaat]
 
-  const heeftBlad = w.match_players?.length > 0 || w.goals?.length > 0 || verslagState.verslag
-  const zvkGoals = w.goals?.filter(g => {
-    // Goal is van ZVK als de scorer speelde voor ZVK (we controleren via match_players)
-    return true // toon alle goals in deze wedstrijd
-  }) ?? []
-
   return (
     <div style={{
       background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px',
@@ -259,11 +251,11 @@ function GespeeldeKaart({ wedstrijd: w }) {
     }}>
       {/* Hoofd rij */}
       <div
-        onClick={() => heeftBlad && setOpen(o => !o)}
+        onClick={() => navigate(`/wedstrijd/${w.id}`)}
         style={{
           display: 'flex', alignItems: 'center', gap: '16px',
           padding: '14px 18px',
-          cursor: heeftBlad ? 'pointer' : 'default',
+          cursor: 'pointer',
         }}
       >
         {/* Resultaat badge */}
@@ -312,12 +304,9 @@ function GespeeldeKaart({ wedstrijd: w }) {
         {/* Resultaatlabel + chevron */}
         <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontSize: '12px', fontWeight: '600', color: resultaatKleur }}>{resultaatLabel}</span>
-          {heeftBlad && (
-            <svg width="16" height="16" fill="none" stroke="#94a3b8" strokeWidth="2" viewBox="0 0 24 24"
-              style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          )}
+          <svg width="14" height="14" fill="none" stroke="#cbd5e1" strokeWidth="3" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
         </div>
       </div>
 
@@ -352,64 +341,6 @@ function GespeeldeKaart({ wedstrijd: w }) {
         })}
       </div>
 
-      {/* Uitklap sectie */}
-      {open && heeftBlad && (
-        <div style={{ borderTop: '1px solid #f1f5f9', background: '#fafafa' }}>
-
-          {/* Tab bar */}
-          <div style={{ display: 'flex', borderBottom: '1px solid #f1f5f9', padding: '0 18px' }}>
-            {[['details', '📋 Details'], ['verslag', '📰 Verslag']].map(([id, label]) => (
-              <button key={id} onClick={() => setDetailTab(id)} style={{
-                padding: '10px 14px', fontSize: '12px', fontWeight: detailTab === id ? '700' : '500',
-                color: detailTab === id ? '#1d4ed8' : '#94a3b8',
-                background: 'none', border: 'none', cursor: 'pointer',
-                borderBottom: detailTab === id ? '2px solid #3b82f6' : '2px solid transparent',
-                marginBottom: '-1px', transition: 'all 0.15s',
-              }}>{label}</button>
-            ))}
-          </div>
-
-          {/* Details tab */}
-          {detailTab === 'details' && (
-            <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {zvkGoals.length > 0 && (
-                <div>
-                  <p style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>Doelpunten</p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    {zvkGoals.map(g => (
-                      <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '14px' }}>⚽</span>
-                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>{g.scorer?.name}</span>
-                        {g.assist?.name && <span style={{ fontSize: '12px', color: '#94a3b8' }}>assist: {g.assist.name}</span>}
-                        {g.minute && <span style={{ fontSize: '12px', color: '#cbd5e1', marginLeft: 'auto' }}>{g.minute}'</span>}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {w.match_players?.length > 0 && (
-                <div>
-                  <p style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
-                    Aanwezig ({w.match_players.length})
-                  </p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                    {w.match_players.slice().sort((a, b) => (a.player?.name ?? '').localeCompare(b.player?.name ?? '')).map(mp => (
-                      <span key={mp.player_id} style={{ fontSize: '12px', color: '#475569', background: 'white', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '3px 10px' }}>
-                        {mp.player?.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Verslag tab */}
-          {detailTab === 'verslag' && (
-            <VerslagPaneel verslagState={verslagState} variant="desktop" />
-          )}
-        </div>
-      )}
     </div>
   )
 }

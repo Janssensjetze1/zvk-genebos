@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import { useAuth } from '../context/AuthContext'
 import Opgave from '../components/Opgave'
-import Pronostiek from '../components/Pronostiek'
 import { opgaveIsOpen } from '../hooks/useOpgave'
-import { pronostiekStatus } from '../hooks/usePronostiek'
 import { isGespeeld } from '../lib/wedstrijd'
-import { useVerslag } from '../hooks/useVerslag'
-import VerslagPaneel from '../components/VerslagPaneel'
 
 const REACTIE_EMOJIS = ['💪', '❤️', '🎯', '😭']
 
@@ -85,12 +82,10 @@ export default function PWAWedstrijden() {
 
 function WedstrijdKaart({ wedstrijd: w }) {
   const { user } = useAuth()
-  const [open, setOpen] = useState(false)
-  const [detailTab, setDetailTab] = useState('details')
+  const navigate = useNavigate()
   const [reacties, setReacties] = useState([])
   const [mijneReactie, setMijneReactie] = useState(null)
   const [gepoptEmoji, setGepoptEmoji] = useState(null)
-  const verslagState = useVerslag(w)
 
   const isThuis = w.home_team?.is_zvk
   const tegenstander = isThuis ? w.away_team : w.home_team
@@ -100,7 +95,6 @@ function WedstrijdKaart({ wedstrijd: w }) {
   const gewonnen = isPast && zvkScore > tegScore
   const verloren = isPast && zvkScore < tegScore
   const datum = new Date(w.date)
-  const heeftDetail = isPast && (w.goals?.length > 0 || w.match_players?.length > 0 || verslagState.verslag)
 
   // Countdown-label voor aankomende wedstrijden (zelfde logica als de webapp).
   // Een datum in het verleden die nog niet als gespeeld geldt, valt terug op 'Gepland'.
@@ -169,8 +163,8 @@ function WedstrijdKaart({ wedstrijd: w }) {
     }}>
       {/* Hoofdrij */}
       <div
-        style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '14px', cursor: heeftDetail ? 'pointer' : 'default' }}
-        onClick={() => heeftDetail && setOpen(o => !o)}
+        style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer' }}
+        onClick={() => navigate(`/app/wedstrijd/${w.id}`)}
       >
         {/* Datum blok */}
         <div style={{
@@ -221,13 +215,10 @@ function WedstrijdKaart({ wedstrijd: w }) {
           )}
         </div>
 
-        {/* Uitklappijl */}
-        {heeftDetail && (
-          <svg width="14" height="14" fill="none" stroke="#cbd5e1" strokeWidth="2" viewBox="0 0 24 24"
-            style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        )}
+        {/* Naar de detailpagina */}
+        <svg width="14" height="14" fill="none" stroke="#cbd5e1" strokeWidth="3" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
       </div>
 
       {/* Emoji-reacties — altijd zichtbaar bij gespeelde wedstrijden */}
@@ -276,69 +267,6 @@ function WedstrijdKaart({ wedstrijd: w }) {
         </div>
       )}
 
-      {/* Pronostiek — open vanaf een week voor de match tot een uur ervoor */}
-      {!isPast && pronostiekStatus(w) === 'open' && (
-        <div
-          style={{ padding: '14px 16px', borderTop: '1px solid #f1f5f9', background: '#fcfdff' }}
-          onClick={e => e.stopPropagation()}
-        >
-          <Pronostiek wedstrijd={w} />
-        </div>
-      )}
-
-      {/* Uitklapdetail */}
-      {open && heeftDetail && (
-        <div style={{ borderTop: '1px solid #f1f5f9', background: '#fafafa' }}>
-
-          {/* Tab bar */}
-          <div style={{ display: 'flex', borderBottom: '1px solid #f1f5f9', padding: '0 16px' }}>
-            {[['details', '📋 Details'], ['verslag', '📰 Verslag']].map(([id, label]) => (
-              <button key={id} onClick={() => setDetailTab(id)} style={{
-                padding: '10px 12px', fontSize: '12px', fontWeight: detailTab === id ? '700' : '500',
-                color: detailTab === id ? '#1d4ed8' : '#94a3b8',
-                background: 'none', border: 'none', cursor: 'pointer',
-                borderBottom: detailTab === id ? '2px solid #3b82f6' : '2px solid transparent',
-                marginBottom: '-1px',
-              }}>{label}</button>
-            ))}
-          </div>
-
-          {/* Details tab */}
-          {detailTab === 'details' && (
-            <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {w.goals?.length > 0 && (
-                <div>
-                  <div style={{ fontSize: '11px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>⚽ Doelpunten</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                    {w.goals.map(g => (
-                      <span key={g.id} style={{ fontSize: '12px', color: '#475569', background: 'white', borderRadius: '20px', padding: '4px 10px', border: '1px solid #e2e8f0' }}>
-                        {g.scorer?.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {w.match_players?.length > 0 && (
-                <div>
-                  <div style={{ fontSize: '11px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>👥 Aanwezig ({w.match_players.length})</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                    {w.match_players.slice().sort((a, b) => (a.player?.name ?? '').localeCompare(b.player?.name ?? '')).map(mp => (
-                      <span key={mp.player_id} style={{ fontSize: '12px', color: '#475569', background: 'white', borderRadius: '20px', padding: '4px 10px', border: '1px solid #e2e8f0' }}>
-                        {mp.player?.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Verslag tab */}
-          {detailTab === 'verslag' && (
-            <VerslagPaneel verslagState={verslagState} variant="pwa" />
-          )}
-        </div>
-      )}
     </div>
   )
 }

@@ -32,9 +32,11 @@ import PWABadges from './pwa/PWABadges'
 import PWAInfo from './pwa/PWAInfo'
 import PWAFeedback from './pwa/PWAFeedback'
 import PWAPronostiek from './pwa/PWAPronostiek'
+import PWAWedstrijdDetail from './pwa/PWAWedstrijdDetail'
 import Invullen from './pages/Invullen'
 import Badges from './pages/Badges'
 import Pronostiek from './pages/Pronostiek'
+import WedstrijdDetailPagina from './pages/WedstrijdDetailPagina'
 
 function AppRoutes() {
   const isMobile = useIsMobile()
@@ -90,6 +92,11 @@ function AppRoutes() {
             <PWALayout><PWABadges /></PWALayout>
           </ProtectedRoute>
         } />
+        <Route path="/app/wedstrijd/:id" element={
+          <ProtectedRoute>
+            <PWALayout><PWAWedstrijdDetail /></PWALayout>
+          </ProtectedRoute>
+        } />
         <Route path="/app/pronostiek" element={
           <ProtectedRoute>
             <PWALayout><PWAPronostiek /></PWALayout>
@@ -141,6 +148,9 @@ function AppRoutes() {
       } />
       <Route path="/pronostiek" element={
         <ProtectedRoute><Layout><Pronostiek /></Layout></ProtectedRoute>
+      } />
+      <Route path="/wedstrijd/:id" element={
+        <ProtectedRoute><Layout><WedstrijdDetailPagina /></Layout></ProtectedRoute>
       } />
       <Route path="/account" element={
         <ProtectedRoute><Layout><Account /></Layout></ProtectedRoute>
