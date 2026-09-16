@@ -436,3 +436,34 @@ button:active:not(:disabled) {
   .admin-nav::-webkit-scrollbar { display: none; }
   .admin-nav-knop { width: auto; white-space: nowrap; }
 }
+
+/* ─── Gouden ster op het laadscherm ──────────────────────────────────────────
+   Opacity en beweging staan bewust in twee aparte animaties: een vervaging
+   loopt het mooist lineair, een beweging niet. Zo zit er nergens een knik.
+   De gloed nadien laat de opacity met rust — anders krijg je een dipje op het
+   moment dat de opkomst eindigt en de gloed begint. */
+@keyframes zvk-ster-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes zvk-ster-stijg {
+  from { transform: translate3d(0, 7px, 0) scale(0.88); }
+  to   { transform: translate3d(0, 0, 0)  scale(1); }
+}
+@keyframes zvk-ster-glans {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(251,191,36,0.20)); }
+  50%      { filter: drop-shadow(0 0 9px rgba(251,191,36,0.42)); }
+}
+
+.zvk-ster {
+  will-change: opacity, transform, filter;
+  backface-visibility: hidden;
+  animation:
+    zvk-ster-fade  3s linear 0.4s both,
+    zvk-ster-stijg 3s cubic-bezier(0.2, 0.7, 0.25, 1) 0.4s both,
+    zvk-ster-glans 6s ease-in-out 3.4s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zvk-ster { animation: zvk-ster-fade 0.6s linear both; }
+}

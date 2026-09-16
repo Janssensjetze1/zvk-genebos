@@ -6,6 +6,43 @@ function randomDuur() {
   return 5000
 }
 
+// Gouden ster boven het logo. Met de hand getekend, geen icoonpakket: een
+// klassieke vijfpuntige ster met facetten — elke punt bestaat uit een lichte
+// en een donkere helft, zodat ze gefacetteerd oogt in plaats van vlak.
+// De animaties (opkomst + trage gloed) staan in index.css.
+function Ster({ weg }) {
+  const STER = 'M50 5 L60.9 36 L93.7 36.8 L67.6 56.7 L77 88.2 L50 69.5 L23 88.2 L32.4 56.7 L6.3 36.8 L39.1 36 Z'
+  const LICHT = 'M50 51 L39.1 36 L50 5 Z M50 51 L60.9 36 L93.7 36.8 Z M50 51 L67.6 56.7 L77 88.2 Z M50 51 L50 69.5 L23 88.2 Z M50 51 L32.4 56.7 L6.3 36.8 Z'
+  const DONKER = 'M50 51 L50 5 L60.9 36 Z M50 51 L93.7 36.8 L67.6 56.7 Z M50 51 L77 88.2 L50 69.5 Z M50 51 L23 88.2 L32.4 56.7 Z M50 51 L6.3 36.8 L39.1 36 Z'
+
+  return (
+    <svg
+      className="zvk-ster"
+      width="26" height="26" viewBox="0 0 100 100"
+      aria-hidden="true"
+      style={{
+        marginBottom: '16px',
+        opacity: weg ? 0 : undefined,
+        transition: 'opacity 0.4s',
+      }}
+    >
+      <defs>
+        <linearGradient id="zvk-goud" x1="25%" y1="0%" x2="75%" y2="100%">
+          <stop offset="0%"   stopColor="#fff3c4" />
+          <stop offset="30%"  stopColor="#fcd34d" />
+          <stop offset="72%"  stopColor="#f0a318" />
+          <stop offset="100%" stopColor="#d97706" />
+        </linearGradient>
+      </defs>
+
+      <path d={STER} fill="url(#zvk-goud)" />
+      <path d={LICHT} fill="#ffffff" opacity="0.22" />
+      <path d={DONKER} fill="#92400e" opacity="0.18" />
+      <path d={STER} fill="none" stroke="#fff7d6" strokeOpacity="0.5" strokeWidth="1.1" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export default function PWASplashScreen({ onKlaar }) {
   // Pull-to-refresh herlaadt de pagina — splash overslaan
   if (sessionStorage.getItem('ptr_reload')) {
@@ -49,6 +86,9 @@ export default function PWASplashScreen({ onKlaar }) {
       opacity: weggaan ? 0 : 1,
       transition: 'opacity 0.5s ease',
     }}>
+      {/* Gouden ster boven het logo */}
+      <Ster weg={weggaan} />
+
       {/* Logo */}
       <img
         src="/logo.png"
