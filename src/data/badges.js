@@ -4,15 +4,15 @@
 // handmatig toekende via de tabel player_badges.
 //
 // Velden:
-//   id             — verwijst naar player_badges.badge_id, nooit wijzigen na gebruik
-//   naam           — '???' bij een badge die nog geheim moet blijven
-//   emoji          — enkel zichtbaar zodra de badge verdiend is
-//   categorie      — brons | zilver | goud | platina | legendary | geheim
-//   beschrijving   — leeg laten bij een geheime badge
-//   conditieTekst  — korte samenvatting, getoond bij een verdiende badge
-//   handmatig      — true = enkel toe te kennen door een admin
-//   placeholder    — true = naam en beschrijving blijven verborgen
-//   conditie(stats) — stats komen uit src/lib/badgeStats.js
+//   id            : verwijst naar player_badges.badge_id, nooit wijzigen na gebruik
+//   naam          : '???' bij een badge die nog geheim moet blijven
+//   emoji         : enkel zichtbaar zodra de badge verdiend is
+//   categorie     : brons | zilver | goud | platina | legendary | geheim
+//   beschrijving  : leeg laten bij een geheime badge
+//   conditieTekst : korte samenvatting, getoond bij een verdiende badge
+//   handmatig     : true = enkel toe te kennen door een admin
+//   placeholder   : true = naam en beschrijving blijven verborgen
+//   conditie(stats): stats komen uit src/lib/badgeStats.js
 
 export const geheim = (id, categorie) => ({
   id,
@@ -235,7 +235,7 @@ export const BADGES = [
 export const verborgen = badge =>
   !!badge.placeholder || (badge.categorie === 'geheim' && !badge.verdiend)
 
-// Zonder spelersfiche vallen de speelbadges weg — die kan je niet verdienen.
+// Zonder spelersfiche vallen de speelbadges weg, die kan je niet verdienen.
 // De pronostiekbadges hangen aan het account en blijven dus wél staan.
 export const badgesVoor = heeftSpelersfiche =>
   heeftSpelersfiche ? BADGES : BADGES.filter(b => b.zonderFiche)
@@ -287,7 +287,7 @@ export const SHINE = {
     glow:       'rgba(210,160,0,0.58)',
   },
   platina: {
-    // Ijzige aurora — exact als de referentie-afbeelding: ijsblauw, mint, lila
+    // Ijzige aurora: exact als de referentie-afbeelding: ijsblauw, mint, lila
     outerGrad: [
       'linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.08) 28%, transparent 48%)',
       'radial-gradient(ellipse at 15% 35%, #c8e8ff 0%, transparent 52%)',

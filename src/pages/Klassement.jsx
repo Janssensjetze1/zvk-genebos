@@ -231,7 +231,7 @@ export default function Klassement() {
         </div>
       )}
 
-      {/* Legenda — enkel desktop */}
+      {/* Legenda: enkel desktop */}
       {!isMobile && (
         <div style={{ marginTop: '16px', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
           {['G = Gespeeld', 'W = Gewonnen', 'G = Gelijkspel', 'V = Verloren', 'DV–DT = Doelpunten voor–tegen', 'Pnt = Punten'].map(label => (

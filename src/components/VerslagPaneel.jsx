@@ -1,6 +1,6 @@
 import { useAuth } from '../context/AuthContext'
 
-// Toont het wedstrijdverslag en — voor admins — de knoppen om het te laten
+// Toont het wedstrijdverslag en, voor admins, de knoppen om het te laten
 // genereren, zelf te schrijven of aan te passen.
 // De state komt van useVerslag(wedstrijd), zodat een kaart die zelf al een
 // genereerknop heeft (het beheerscherm) dezelfde toestand deelt.

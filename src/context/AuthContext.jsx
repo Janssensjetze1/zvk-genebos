@@ -4,6 +4,24 @@ import { ververseQuotes } from '../lib/quotes'
 
 const AuthContext = createContext({})
 
+// Bijhouden wanneer iemand de app laatst opende. Een sessie blijft maanden
+// geldig, dus de logindatum zegt niets over wie er nog actief is.
+// Hoogstens een keer per kwartier schrijven, anders gaat dit bij elke
+// paginalading naar de database.
+const ONLINE_INTERVAL = 15 * 60 * 1000
+
+async function markeerOnline(userId) {
+  if (!userId) return
+  try {
+    const vorige = Number(localStorage.getItem('last_seen_geschreven') ?? 0)
+    if (Date.now() - vorige < ONLINE_INTERVAL) return
+    localStorage.setItem('last_seen_geschreven', String(Date.now()))
+  } catch {
+    // Privémodus zonder localStorage: dan schrijven we gewoon elke keer
+  }
+  await supabase.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', userId)
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -13,8 +31,12 @@ export function AuthProvider({ children }) {
     // Haal huidige sessie op
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
-      if (session?.user) fetchProfile(session.user.id)
-      else setLoading(false)
+      if (session?.user) {
+        fetchProfile(session.user.id)
+        markeerOnline(session.user.id)
+      } else {
+        setLoading(false)
+      }
     })
 
     // Luister naar auth wijzigingen
@@ -23,9 +45,8 @@ export function AuthProvider({ children }) {
       if (session?.user) {
         setLoading(true) // Wacht op profiel voor ProtectedRoute evalueert
         fetchProfile(session.user.id)
-        // Sla laatste login op bij elke nieuwe sessie
-        if (event === 'SIGNED_IN') {
-          supabase.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', session.user.id)
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          markeerOnline(session.user.id)
         }
       } else {
         setProfile(null)
@@ -45,7 +66,7 @@ export function AuthProvider({ children }) {
     if (error) console.error('Profiel ophalen mislukt:', error.message)
     setProfile(data ?? null)
     setLoading(false)
-    // Quotes voor de laadpagina op de achtergrond verversen — de laadpagina
+    // Quotes voor de laadpagina op de achtergrond verversen, de laadpagina
     // zelf wacht hier niet op, ze leest de cache van de vorige keer.
     if (data?.approved) ververseQuotes()
   }
@@ -57,7 +78,7 @@ export function AuthProvider({ children }) {
 
   async function signUp(email, password, voornaam, naam) {
     const displayName = [voornaam, naam].filter(Boolean).join(' ')
-    // Geef naam mee als user_metadata — de DB-trigger leest dit bij aanmaken
+    // Geef naam mee als user_metadata, de DB-trigger leest dit bij aanmaken
     const { error } = await supabase.auth.signUp({
       email,
       password,

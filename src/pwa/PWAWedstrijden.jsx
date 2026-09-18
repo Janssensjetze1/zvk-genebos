@@ -221,7 +221,7 @@ function WedstrijdKaart({ wedstrijd: w }) {
         </svg>
       </div>
 
-      {/* Emoji-reacties — altijd zichtbaar bij gespeelde wedstrijden */}
+      {/* Emoji-reacties: altijd zichtbaar bij gespeelde wedstrijden */}
       {isPast && (
         <div
           style={{ padding: '0 16px 14px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}
@@ -257,13 +257,13 @@ function WedstrijdKaart({ wedstrijd: w }) {
         </div>
       )}
 
-      {/* Opgave — enkel bij aankomende wedstrijden */}
+      {/* Opgave: enkel bij aankomende wedstrijden */}
       {!isPast && opgaveIsOpen(w) && (
         <div
           style={{ padding: '14px 16px', borderTop: '1px solid #f1f5f9', background: '#fafafa' }}
           onClick={e => e.stopPropagation()}
         >
-          <Opgave wedstrijd={w} variant="pwa" />
+          <Opgave wedstrijd={w} />
         </div>
       )}
 

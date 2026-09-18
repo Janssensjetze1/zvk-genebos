@@ -4,14 +4,14 @@ import { useAuth } from '../context/AuthContext'
 
 // Maximaal aantal spelers dat kan meedoen aan één wedstrijd.
 // Wordt ook afgedwongen door een trigger in de database
-// (supabase/migrations/match_availability_limiet.sql) — pas beide aan.
+// (supabase/migrations/match_availability_limiet.sql): pas beide aan.
 export const MAX_MEE = 10
 
 // ─── Wanneer gaat de opgave open? ────────────────────────────────────────────
-// Standaard: woensdag 10:00 van de week van de wedstrijd — de laatste woensdag
+// Standaard: woensdag 10:00 van de week van de wedstrijd, de laatste woensdag
 // op of vóór de matchdag. Een admin kan dat vervroegen via
 // matches.availability_opens_at. Zelfde regel als de trigger in
-// supabase/migrations/match_availability_opening.sql — pas beide aan.
+// supabase/migrations/match_availability_opening.sql: pas beide aan.
 export function opgaveOpentOp(wedstrijd) {
   if (wedstrijd?.availability_opens_at) return new Date(wedstrijd.availability_opens_at)
   if (!wedstrijd?.date) return null
@@ -88,7 +88,7 @@ export function useOpgave(matchId) {
     if (!gebruikerId || bezig) return
     if (!magMeedoen && status !== 'kijken') return
     if (status === 'mee' && vol) {
-      setFout(`Volzet — er kunnen maar ${MAX_MEE} spelers meedoen.`)
+      setFout(`Volzet, er kunnen maar ${MAX_MEE} spelers meedoen.`)
       return
     }
 
@@ -120,7 +120,7 @@ export function useOpgave(matchId) {
       setOpgaves(vorige)
       setFout(
         error.message?.includes('Volzet')
-          ? `Net te laat — de ${MAX_MEE} plekken zijn ingenomen.`
+          ? `Net te laat, de ${MAX_MEE} plekken zijn ingenomen.`
           : 'Opslaan mislukt, probeer het opnieuw.'
       )
       // Verse stand ophalen zodat je meteen ziet wie er wél staat

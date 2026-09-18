@@ -150,7 +150,7 @@ function BadgesTab({ badgesMetStatus, geselecteerdeBadge, setGeselecteerdeBadge 
         const verdiendInGroep = groep.filter(b => b.verdiend).length
         return (
           <div key={cat} style={{ marginBottom: '18px', marginTop: catIdx === 0 ? 0 : '4px' }}>
-            {/* Categorie header — horizontale scheidingslijn */}
+            {/* Categorie header: horizontale scheidingslijn */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
               <span style={{
                 fontSize: '10px', fontWeight: '800', color: catInfo.lc,

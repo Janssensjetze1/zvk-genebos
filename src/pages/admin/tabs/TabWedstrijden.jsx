@@ -176,7 +176,7 @@ export default function TabWedstrijden() {
         <h2 style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
           Andere Wedstrijden
           <span style={{ fontSize: '11px', fontWeight: '400', color: '#94a3b8', textTransform: 'none', marginLeft: '8px', letterSpacing: 0 }}>
-            — voor het klassement
+            voor het klassement
           </span>
         </h2>
         {andereWedstrijden.length === 0 ? (
@@ -299,7 +299,7 @@ function NieuweWedstrijd({ seizoenId, zvkTeam, tegenstanders, wedstrijd, onSluit
           <div style={{ flex: 2, minWidth: '180px' }}>
             <label style={labelStijl}>Tegenstander *</label>
             <select value={tegenstanderId} onChange={e => setTegenstanderId(e.target.value)} style={inputStijl}>
-              <option value="">— Kies tegenstander —</option>
+              <option value="">Kies tegenstander</option>
               {tegenstanders.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
           </div>
@@ -381,7 +381,7 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
         if (!levend) return
         const rijen = data ?? []
         setOpgaves(rijen)
-        // Voorvullen als suggestie — enkel zolang er nog niks geregistreerd is
+        // Voorvullen als suggestie: enkel zolang er nog niks geregistreerd is
         if (w.match_players.length === 0) {
           const mee = rijen.filter(o => o.status === 'mee').map(o => o.player_id)
           if (mee.length > 0) setAanwezig(new Set(mee))
@@ -390,7 +390,7 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
     return () => { levend = false }
   }, [w.id])
 
-  // Kijkers zonder spelersfiche hebben geen player_id — die horen hier niet thuis
+  // Kijkers zonder spelersfiche hebben geen player_id, die horen hier niet thuis
   const opgaveMap = Object.fromEntries(opgaves.filter(o => o.player_id).map(o => [o.player_id, o.status]))
   const meeIds = opgaves.filter(o => o.status === 'mee' && o.player_id).map(o => o.player_id)
 
@@ -577,7 +577,7 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
                 <label style={{ ...labelStijl, marginBottom: '2px' }}>Doelpunten ZVK</label>
-                <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>Score ZVK: {zvkScore} — Tegenstander: {tegScore}</p>
+                <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>Score ZVK: {zvkScore} · Tegenstander: {tegScore}</p>
               </div>
               <button
                 type="button"
@@ -603,14 +603,14 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
                 <div style={{ flex: 2, minWidth: '140px' }}>
                   <label style={labelStijl}>Doelpuntenmaker *</label>
                   <select value={d.scorerId} onChange={e => setDoelpunten(prev => prev.map((x, i) => i === idx ? { ...x, scorerId: e.target.value } : x))} style={inputStijl}>
-                    <option value="">— Kies speler —</option>
+                    <option value="">Kies speler</option>
                     {(aanwezigeLijst.length > 0 ? aanwezigeLijst : spelers).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                 </div>
                 <div style={{ flex: 2, minWidth: '140px' }}>
                   <label style={labelStijl}>Assist (optioneel)</label>
                   <select value={d.assistId} onChange={e => setDoelpunten(prev => prev.map((x, i) => i === idx ? { ...x, assistId: e.target.value } : x))} style={inputStijl}>
-                    <option value="">— Geen assist —</option>
+                    <option value="">Geen assist</option>
                     {(aanwezigeLijst.length > 0 ? aanwezigeLijst : spelers).filter(s => s.id !== d.scorerId).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                 </div>
@@ -618,7 +618,7 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
                   <label style={labelStijl}>Minuut</label>
                   <input type="number" min="1" max="120" value={d.minuut}
                     onChange={e => setDoelpunten(prev => prev.map((x, i) => i === idx ? { ...x, minuut: e.target.value } : x))}
-                    placeholder="—" style={{ ...inputStijl, textAlign: 'center' }} />
+                    placeholder="-" style={{ ...inputStijl, textAlign: 'center' }} />
                 </div>
                 <button
                   type="button"
@@ -740,7 +740,7 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
 
         {/* Acties */}
         <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-          {/* Opgave — enkel zinvol bij aankomende wedstrijden */}
+          {/* Opgave: enkel zinvol bij aankomende wedstrijden */}
           {!isPast && (natuurlijkOpen ? (
             <span
               title="De opgave staat open volgens de vaste regel: woensdag 10u van de matchweek"
@@ -755,8 +755,8 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
               onClick={toggleOpgave}
               disabled={opgaveBezig}
               title={opgaveOverride
-                ? `Terug naar de vaste regel — opent dan op ${openingLabel}`
-                : `Opgave nu al openzetten — gaat anders open op ${openingLabel}`}
+                ? `Terug naar de vaste regel, opent dan op ${openingLabel}`
+                : `Opgave nu al openzetten, gaat anders open op ${openingLabel}`}
               style={{
                 display: 'flex', alignItems: 'center', gap: '5px',
                 background: opgaveOverride ? '#f0fdf4' : 'white',
@@ -771,7 +771,7 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
               {opgaveOverride ? '✋ Vervroegd open' : '🔒 Opgave openen'}
             </button>
           ))}
-          {/* Wedstrijdblad knop — prominent als nog niet ingevuld */}
+          {/* Wedstrijdblad knop: prominent als nog niet ingevuld */}
           <button
             onClick={onWedstrijdblad}
             title="Wedstrijdblad invullen"
@@ -789,7 +789,7 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
             </svg>
             {heeftData ? 'Blad bewerken' : 'Invullen'}
           </button>
-          {/* Verslag knop — enkel voor gespeelde wedstrijden */}
+          {/* Verslag knop: enkel voor gespeelde wedstrijden */}
           {isPast && (
             <button
               onClick={() => { setOpen(true); verslagState.genereer() }}
@@ -864,7 +864,7 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
               ) : <p style={{ fontSize: '13px', color: '#94a3b8' }}>Nog niet ingevuld.</p>}
             </div>
           </div>
-          {/* Verslag sectie — lezen, zelf schrijven of aanpassen */}
+          {/* Verslag sectie: lezen, zelf schrijven of aanpassen */}
           {isPast && (
             <div style={{ borderTop: '1px solid #f1f5f9' }}>
               <VerslagPaneel verslagState={verslagState} variant="admin" toonGenereren={false} />
@@ -930,8 +930,7 @@ function AndereWedstrijd({ seizoenId, teams, wedstrijd, onSluiten, onOpgeslagen 
             {isBewerk ? 'Wedstrijd bewerken' : 'Andere wedstrijd invoeren'}
           </h3>
           <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>
-            Score is voldoende voor het klassement. Vul het uur in als er gepronostikeerd wordt —
-            zonder uur sluit de pronostiek om 19:00 (een uur voor 20:00).
+            Score volstaat voor het klassement. Vul het uur in, anders sluit de pronostiek om 19:00.
           </p>
         </div>
         <button type="button" onClick={onSluiten} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: '20px' }}>×</button>
@@ -997,7 +996,7 @@ function AndereWedstrijd({ seizoenId, teams, wedstrijd, onSluiten, onOpgeslagen 
           <div style={{ flex: 2, minWidth: '160px' }}>
             <label style={labelStijl}>Thuisteam *</label>
             <select value={thuisId} onChange={e => setThuisId(e.target.value)} style={inputStijl}>
-              <option value="">— Kies team —</option>
+              <option value="">Kies team</option>
               {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
           </div>
@@ -1022,7 +1021,7 @@ function AndereWedstrijd({ seizoenId, teams, wedstrijd, onSluiten, onOpgeslagen 
           <div style={{ flex: 2, minWidth: '160px' }}>
             <label style={labelStijl}>Uitteam *</label>
             <select value={uitId} onChange={e => setUitId(e.target.value)} style={inputStijl}>
-              <option value="">— Kies team —</option>
+              <option value="">Kies team</option>
               {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
           </div>

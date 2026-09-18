@@ -73,89 +73,71 @@ export default function PWAInfo() {
     <div style={{ padding: '20px 16px' }}>
       <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>Info</h1>
       <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '20px', lineHeight: 1.6 }}>
-        Alles wat je moet weten om de app te gebruiken. Tik op een onderwerp om het open te klappen.
+        Tik op een onderwerp om het open te klappen.
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
 
         <Sectie emoji="✋" titel="Je opgeven voor een wedstrijd" standaardOpen>
           <p>
-            Bij elke aankomende wedstrijd op het tabblad <span style={vet}>Wedstrijden</span> staan drie knoppen.
-            Duid aan wat voor jou van toepassing is:
+            Bij elke aankomende wedstrijd staan drie knoppen:
           </p>
-          <Stap nr="✅"><span style={vet}>Ik doen mee</span> — je speelt mee.</Stap>
-          <Stap nr="❌"><span style={vet}>Ik doen nie mee</span> — je bent er niet bij.</Stap>
-          <Stap nr="👀"><span style={vet}>Ik kom zien</span> — je komt kijken, maar speelt niet mee.</Stap>
+          <Stap nr="✅"><span style={vet}>Ik doen mee</span></Stap>
+          <Stap nr="❌"><span style={vet}>Ik doen nie mee</span></Stap>
+          <Stap nr="👀"><span style={vet}>Ik kom zien</span>, je komt kijken maar speelt niet mee</Stap>
           <p>
-            Onder de knoppen staat <span style={vet}>Wie gaf zich op</span> met de tussenstand. Tik erop om de
-            namen open te klappen, zo weet je meteen of er genoeg volk is. Van gedacht veranderd?
-            Tik gewoon op een andere knop. Nog eens op je eigen keuze duwen wist ze helemaal.
+            Tik op een andere knop om te wisselen, nog eens op dezelfde om je keuze te wissen. Onder de knoppen
+            zie je wie zich al opgaf.
           </p>
           <Tip>
-            ⏱️ <span style={vet}>Wanneer kan je je opgeven?</span> De opgave gaat open op de woensdag van de week
-            van de wedstrijd, om 10 uur 's ochtends. Je krijgt dan een melding op je telefoon als je die aan hebt
-            staan. Daarvoor zie je de knoppen nog niet staan.
+            ⏱️ De opgave opent woensdag om 10u van de week van de wedstrijd. Je krijgt dan een melding als je
+            die aan hebt staan.
           </Tip>
           <Tip>
-            🔟 <span style={vet}>Maximum {MAX_MEE} spelers.</span> Zijn de {MAX_MEE} plekken vol, dan kan je niet meer
-            op "Ik doen mee" duwen. Er is geen wachtlijst — valt er iemand af, dan komt die plek gewoon weer vrij,
-            dus het loont om er snel bij te zijn.
+            🔟 Maximum {MAX_MEE} spelers, geen wachtlijst. Valt er iemand af, dan komt die plek weer vrij.
           </Tip>
         </Sectie>
 
         <Sectie emoji="📅" titel="Wedstrijden">
           <p>
-            Bovenaan schakel je tussen <span style={vet}>Aankomend</span> en <span style={vet}>Gespeeld</span>.
-            Bij aankomende wedstrijden zie je de datum, het uur, of het thuis of uit is, en de opgave.
+            Bovenaan wissel je tussen <span style={vet}>Aankomend</span> en <span style={vet}>Gespeeld</span>.
+            Tik een wedstrijd aan voor de details: de pronostiek, wie er speelde, de doelpunten en het verslag.
           </p>
           <p>
-            Een gespeelde wedstrijd kan je opentikken. Daar vind je wie gescoord heeft, wie er meespeelde,
-            en soms een wedstrijdverslag. Onderaan elke gespeelde wedstrijd staan ook emoji's — laat er eentje
-            achter om te tonen wat je van de match vond.
+            Onder een gespeelde wedstrijd staan emoji's. Laat er gerust eentje achter.
           </p>
         </Sectie>
 
         <Sectie emoji="🏆" titel="De stand">
           <p>
-            Het klassement wordt volledig automatisch berekend uit de uitslagen: 3 punten voor een winst,
-            1 voor een gelijkspel, 0 voor een verlies. Ook wedstrijden tussen de andere ploegen onderling
-            tellen mee, zodat de stand altijd klopt.
+            Het klassement komt automatisch uit de uitslagen: 3 punten voor winst, 1 voor gelijkspel, 0 voor
+            verlies. Ook de matchen tussen de andere ploegen tellen mee.
           </p>
           <p>
-            Er staat niks manueel ingetikt — zie je iets vreemds, dan zit er een fout in een uitslag.
+            Klopt er iets niet, dan zit de fout in een uitslag.
           </p>
         </Sectie>
 
         <Sectie emoji="⭐" titel="Stats en spelers">
           <p>
-            Bij <span style={vet}>Stats</span> zie je de doelpunten, assists en topscorers van het seizoen.
-            Bij <span style={vet}>Spelers</span> vind je iedereen met zijn foto en cijfers.
-          </p>
-          <p>
-            Alles wordt per seizoen bijgehouden, dus oudere seizoenen blijven bewaard.
+            Bij <span style={vet}>Stats</span> staan de doelpunten, assists en topscorers. Bij
+            <span style={vet}> Spelers</span> vind je iedereen met foto en cijfers. Alles wordt per seizoen
+            bewaard.
           </p>
           <Tip>
-            👑 <span style={vet}>Topscorer en assistenkoning.</span> Wie dit seizoen het meest scoort krijgt overal
-            een glanzend gouden randje rond zijn foto, wie het meest assists geeft een paars randje — allebei met
-            een kroontje. Staan er twee gelijk, dan krijgen ze het allebei.
+            👑 De topscorer krijgt een gouden ring rond zijn foto, de assistenkoning een paarse. Staan er twee
+            gelijk, dan krijgen ze het allebei.
           </Tip>
         </Sectie>
 
         <Sectie emoji="🏅" titel="Badges">
           <p>
-            Tik rechtsonder op de drie puntjes en kies <span style={vet}>Badges</span>. Daar staat je verzameling:
-            wat je al verdiend hebt en wat er nog te halen valt, netjes per categorie —
-            <span style={vet}> brons, zilver, goud, platina</span> en <span style={vet}>legendary</span>. Achter elke
-            categorie staat hoeveel je er daar al van hebt.
+            Te vinden achter de drie puntjes. Per categorie zie je wat je hebt en wat er nog te halen valt.
           </p>
           <p>
-            Er zijn ook badges voor de pronostiek — die verdient élk lid, ook wie nog geen spelersfiche heeft.
-          </p>
-          <p>
-            De meeste badges krijg je automatisch zodra je aan de voorwaarde voldoet: hoeveel wedstrijden je
-            speelde, hoeveel je scoorde, hoeveel assists je gaf en hoe vaak de tegenstander niet scoorde terwijl
-            jij op het veld stond. Een paar worden door de admin toegekend. En er is een categorie
-            <span style={vet}> geheim</span>: die badges blijven met een ❓ verborgen tot er iemand ze krijgt.
+            De meeste krijg je automatisch: gespeelde wedstrijden, goals, assists, de nul houden en de
+            pronostiek. Die laatste verdient elk lid, ook zonder spelersfiche. Een paar badges kent de admin
+            toe, en de geheime blijven verborgen tot iemand ze krijgt.
           </p>
           <Tip>
             👥 De badges van je ploegmaats zie je bij <span style={vet}>Spelers</span>, als je iemand aantikt.
@@ -164,56 +146,50 @@ export default function PWAInfo() {
 
         <Sectie emoji="🔮" titel="Pronostiek">
           <p>
-            Voorspel de score van élke wedstrijd uit het seizoen — ook die van de tegenstanders onderling — en
-            verzamel punten. Je vindt het achter de drie puntjes bij
-            <span style={vet}> Pronostiek</span>, en de invoer staat ook gewoon onder de wedstrijd zelf.
+            Voorspel de score van elke wedstrijd van het seizoen, ook die van de tegenstanders onderling.
+            Invullen doe je op de pagina van de wedstrijd zelf.
           </p>
           <p>
-            <span style={vet}>5 punten</span> voor de exacte score, <span style={vet}>3</span> als het doelsaldo klopt
-            (je zei 4-2, het werd 5-3), <span style={vet}>1</span> als je enkel de juiste afloop had. Ben je de énige
-            met de exacte score, dan komt daar nog een <span style={vet}>durfbonus</span> bovenop.
+            <span style={vet}>5 punten</span> voor de exacte score, <span style={vet}>3</span> als het doelsaldo
+            klopt (je zei 4-2, het werd 5-3), <span style={vet}>1</span> voor de juiste afloop. Als enige de
+            exacte score juist? Dan krijg je er een bonuspunt bij.
           </p>
           <Tip>
-            ⏱️ Voorspellen kan vanaf een week voor de wedstrijd tot een uur voor de aftrap, aanpassen mag zoveel
-            je wil. Zodra je zelf ingevuld hebt, zie je ook wat de rest gokte — afkijken zonder zelf kleur te
-            bekennen gaat dus niet.
+            ⏱️ Van een week voor de wedstrijd tot een uur voor de aftrap, aanpassen mag zoveel je wil. Zodra je
+            zelf invult, zie je wat de rest gokte.
           </Tip>
         </Sectie>
 
         <Sectie emoji="👤" titel="Je profiel en meldingen">
           <p>
-            Onder <span style={vet}>Instellingen</span> — achter de drie puntjes, of gewoon op je profielfoto
-            linksboven tikken — pas je je naam aan en zet je een profielfoto. Die foto zie je
-            terug bij de spelers.
+            Bij <span style={vet}>Instellingen</span> pas je je naam aan en zet je een profielfoto. Je raakt er
+            via de drie puntjes of via je foto linksboven.
           </p>
           <p>
-            Daar kan je ook <span style={vet}>push notificaties</span> aanzetten. Zo krijg je een melding op je
-            telefoon bij nieuws over een wedstrijd, ook als de app dicht staat. Je kan dat op elk moment weer
-            uitzetten.
+            Daar zet je ook <span style={vet}>meldingen</span> aan of uit. Die komen binnen bij nieuws over een
+            wedstrijd, ook als de app dicht staat.
           </p>
         </Sectie>
 
         <Sectie emoji="📲" titel="De app op je telefoon">
           <p>
-            De app werkt enkel als geïnstalleerde app, niet in de gewone browser. Op iPhone doe je dat via
-            Safari → deelknop → <span style={vet}>Zet op beginscherm</span>. Op Android via het menu van Chrome →
+            De app werkt enkel geïnstalleerd, niet in de gewone browser. Op iPhone via Safari, de deelknop en
+            <span style={vet}> Zet op beginscherm</span>. Op Android via het menu van Chrome en
             <span style={vet}> App installeren</span>.
           </p>
           <p>
-            Trek de pagina naar beneden om te verversen. En als er eens iets niet laadt: sluit de app volledig
-            af en open ze opnieuw.
+            Trek de pagina naar beneden om te verversen. Laadt er iets niet, sluit de app dan volledig af en
+            open ze opnieuw.
           </p>
         </Sectie>
 
         <Sectie emoji="🔐" titel="Toegang en accounts">
           <p>
-            De app is enkel voor leden. Wie zich registreert, moet eerst goedgekeurd worden door een admin —
-            tot dan zie je een wachtscherm.
+            De app is enkel voor leden. Een admin keurt nieuwe accounts goed en koppelt ze aan je spelersfiche.
           </p>
           <p>
-            Je account wordt door de admin gekoppeld aan je spelersfiche. Zolang dat niet gebeurd is, kan je je
-            niet opgeven voor een wedstrijd. Zie je die knoppen niet staan terwijl anderen ze wel hebben?
-            Laat het dan even weten.
+            Zolang die koppeling er niet is, kan je je niet opgeven voor een wedstrijd. Zie je de knoppen niet
+            staan terwijl anderen ze wel hebben, laat het dan weten.
           </p>
         </Sectie>
 

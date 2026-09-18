@@ -97,7 +97,7 @@ export default function ShakeEasterEgg() {
       {/* Confetti container */}
       <div ref={confettiRef} style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9998 }} />
 
-      {/* iOS activeer knopje — subtiel in de hoek */}
+      {/* iOS activeer knopje: subtiel in de hoek */}
       {isIOS && !iOSKlaar && (
         <button
           onClick={handleIOSActiveer}
@@ -144,7 +144,7 @@ export default function ShakeEasterEgg() {
               "{quote}"
             </p>
             <p style={{ fontSize: '13px', fontWeight: '600', color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              — Dretze
+              Dretze
             </p>
           </div>
         </div>

@@ -329,7 +329,7 @@ export default function PWALayout({ children }) {
         overflow: 'visible',
       }}>
 
-        {/* Links: profielfoto — gaat rechtstreeks naar je instellingen.
+        {/* Links: profielfoto: gaat rechtstreeks naar je instellingen.
             Badges en Instellingen staan sinds 2026-09-14 in het Meer-menu. */}
         <button
           onClick={() => navigate('/app/account')}
@@ -343,7 +343,7 @@ export default function PWALayout({ children }) {
           <Avatar src={avatarSrc} naam={avatarNaam} size={38} />
         </button>
 
-        {/* Midden: logo in cirkel — animeert mee bij PTR */}
+        {/* Midden: logo in cirkel, animeert mee bij PTR */}
         <div style={{
           position: 'absolute', left: '50%',
           bottom: '-14px',

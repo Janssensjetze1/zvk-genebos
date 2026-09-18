@@ -7,7 +7,7 @@ function randomDuur() {
 }
 
 // Gouden ster boven het logo. Met de hand getekend, geen icoonpakket: een
-// klassieke vijfpuntige ster met facetten — elke punt bestaat uit een lichte
+// klassieke vijfpuntige ster met facetten, elke punt bestaat uit een lichte
 // en een donkere helft, zodat ze gefacetteerd oogt in plaats van vlak.
 // De animaties (opkomst + trage gloed) staan in index.css.
 function Ster({ weg }) {
@@ -44,7 +44,7 @@ function Ster({ weg }) {
 }
 
 export default function PWASplashScreen({ onKlaar }) {
-  // Pull-to-refresh herlaadt de pagina — splash overslaan
+  // Pull-to-refresh herlaadt de pagina, splash overslaan
   if (sessionStorage.getItem('ptr_reload')) {
     sessionStorage.removeItem('ptr_reload')
     sessionStorage.setItem('splash_done', '1')
@@ -120,7 +120,7 @@ export default function PWASplashScreen({ onKlaar }) {
           fontSize: '12px', fontWeight: '600', color: 'rgba(255,255,255,0.35)',
           textTransform: 'uppercase', letterSpacing: '0.08em',
         }}>
-          — {quote.auteur}
+          {quote.auteur}
         </p>
       </div>
 

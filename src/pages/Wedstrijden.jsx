@@ -189,7 +189,7 @@ function AankomendeKaart({ wedstrijd: w }) {
       {/* Opgave */}
       {opgaveIsOpen(w) && (
         <div style={{ borderTop: '1px solid #f1f5f9', background: '#fafafa', padding: '16px 24px' }}>
-          <Opgave wedstrijd={w} variant="desktop" />
+          <Opgave wedstrijd={w} />
         </div>
       )}
 

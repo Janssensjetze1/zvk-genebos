@@ -60,7 +60,7 @@ function LoadingScreen() {
           fontSize: '12px', fontWeight: '600', color: 'rgba(255,255,255,0.35)',
           textTransform: 'uppercase', letterSpacing: '0.08em',
         }}>
-          — {quote.auteur}
+          {quote.auteur}
         </p>
       </div>
 

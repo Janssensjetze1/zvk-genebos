@@ -64,7 +64,7 @@ export default function PWAFeedback() {
     <div style={{ padding: '20px 16px' }}>
       <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>Feedback</h1>
       <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '20px', lineHeight: 1.6 }}>
-        Werkt er iets niet, of heb je een idee om de app beter te maken? Laat het hier achter — het komt
+        Werkt er iets niet, of heb je een idee? Laat het hier achter, het komt
         rechtstreeks bij de beheerders terecht.
       </p>
 

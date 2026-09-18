@@ -187,7 +187,7 @@ export default function TabQuotes() {
           emoji={quotes.length === 0 ? '💬' : '🔍'}
           titel={quotes.length === 0 ? 'Nog geen quotes' : 'Geen quote gevonden'}
           tekst={quotes.length === 0
-            ? 'Voeg de eerste toe — ze verschijnt dan op de laadpagina.'
+            ? 'Voeg de eerste toe. Ze verschijnt op de laadpagina.'
             : 'Pas je zoekterm aan.'}
         />
       ) : (
@@ -212,7 +212,7 @@ export default function TabQuotes() {
                     fontSize: '12px', fontWeight: '600', color: '#94a3b8',
                     marginTop: '6px', marginBottom: 0,
                   }}>
-                    — {q.auteur}
+                    {q.auteur}
                   </p>
                 </div>
 

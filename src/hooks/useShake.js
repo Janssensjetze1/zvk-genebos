@@ -34,7 +34,7 @@ export function useShake(onShake) {
   useEffect(() => {
     // iOS 13+ vereist expliciete toestemming
     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-      // Sla op dat we nog toestemming moeten vragen — wordt gevraagd via ShakeEasterEgg
+      // Sla op dat we nog toestemming moeten vragen, wordt gevraagd via ShakeEasterEgg
       return
     }
 

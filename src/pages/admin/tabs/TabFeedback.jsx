@@ -18,7 +18,7 @@ export default function TabFeedback({ onGelezen }) {
   const [berichten, setBerichten] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('alles')
-  // Welke berichten waren nog ongelezen toen dit tabblad openging — die krijgen
+  // Welke berichten waren nog ongelezen toen dit tabblad openging, die krijgen
   // een "Nieuw"-label zolang je hier blijft, ook nadat ze gemarkeerd zijn.
   const [nieuweIds, setNieuweIds] = useState(new Set())
 

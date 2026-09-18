@@ -133,7 +133,7 @@ export default function PWAAccount() {
         }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '18px', position: 'relative' }}>
-          {/* Avatar — glanzende gouden ring als jij de topscorer bent */}
+          {/* Avatar: glanzende gouden ring als jij de topscorer bent */}
           <div
             className={jouwEer ? RING_KLASSE[jouwEer] : undefined}
             style={{ width: '80px', height: '80px', flexShrink: 0, borderRadius: '50%' }}
@@ -231,7 +231,7 @@ export default function PWAAccount() {
           {!speler && (
             <div style={{ padding: '10px 16px 14px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '13px' }}>ℹ️</span>
-              <span style={{ fontSize: '12px', color: '#94a3b8' }}>Nog niet gekoppeld aan een spelersfiche — een admin doet dit.</span>
+              <span style={{ fontSize: '12px', color: '#94a3b8' }}>Nog niet gekoppeld aan een spelersfiche. Een admin doet dat.</span>
             </div>
           )}
         </div>

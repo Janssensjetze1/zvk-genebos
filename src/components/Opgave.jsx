@@ -2,10 +2,9 @@ import { useState } from 'react'
 import { MAX_MEE, OPGAVE_STATUSSEN, opgaveIsOpen, useOpgave } from '../hooks/useOpgave'
 
 // Opgave voor een aankomende wedstrijd: elke speler duidt zelf aan of hij meedoet.
-// variant: 'pwa' (compacter) of 'desktop'
-export default function Opgave({ wedstrijd, variant = 'pwa' }) {
+// Dezelfde compacte opmaak op mobiel en desktop.
+export default function Opgave({ wedstrijd }) {
   const { perStatus, mijnStatus, zetStatus, loading, bezig, gebruikerId, magMeedoen, aantalMee, vol, fout } = useOpgave(wedstrijd.id)
-  const compact = variant === 'pwa'
   const [toonLijst, setToonLijst] = useState(false)
 
   // De ouder verbergt dit blok al, dit is enkel een vangnet
@@ -54,9 +53,10 @@ export default function Opgave({ wedstrijd, variant = 'pwa' }) {
         }} />
       </div>
 
-      {/* Keuzeknoppen — zonder spelersfiche enkel "Ik kom zien" */}
+      {/* Keuzeknoppen: enkel het icoon, altijd naast elkaar. Zonder
+          spelersfiche blijft enkel "Ik kom zien" over. */}
       {gebruikerId ? (
-        <div style={{ display: 'flex', flexDirection: compact ? 'column' : 'row', gap: '6px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
           {OPGAVE_STATUSSEN.filter(s => magMeedoen || s.id === 'kijken').map(s => {
             const actief = mijnStatus === s.id
             const geblokkeerd = s.id === 'mee' && vol
@@ -66,37 +66,29 @@ export default function Opgave({ wedstrijd, variant = 'pwa' }) {
                 key={s.id}
                 type="button"
                 disabled={uit}
-                title={geblokkeerd ? `Volzet — er kunnen maar ${MAX_MEE} spelers meedoen` : undefined}
+                aria-label={s.label}
+                aria-pressed={actief}
+                title={geblokkeerd ? `Volzet, er kunnen maar ${MAX_MEE} spelers meedoen` : s.label}
                 onClick={e => { e.stopPropagation(); zetStatus(s.id) }}
                 style={{
-                  flex: compact ? 'none' : 1,
-                  width: compact ? '100%' : 'auto',
-                  display: 'flex', alignItems: 'center',
-                  justifyContent: compact ? 'flex-start' : 'center',
-                  gap: '8px',
-                  padding: compact ? '11px 14px' : '10px 12px',
-                  borderRadius: '10px',
+                  flex: 1,
+                  height: '44px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: '12px',
                   border: `1.5px solid ${actief ? s.rand : '#e2e8f0'}`,
                   background: actief ? s.bg : geblokkeerd ? '#f8fafc' : 'white',
-                  color: actief ? s.kleur : geblokkeerd ? '#cbd5e1' : '#64748b',
-                  fontSize: compact ? '12px' : '13px',
-                  fontWeight: actief ? '700' : '500',
+                  boxShadow: actief ? `inset 0 0 0 1px ${s.rand}` : 'none',
                   cursor: uit ? 'not-allowed' : 'pointer',
-                  opacity: bezig ? 0.6 : 1,
-                  transition: 'all 0.15s',
-                  whiteSpace: 'nowrap',
+                  opacity: bezig ? 0.6 : geblokkeerd ? 0.45 : 1,
+                  transition: 'background 0.15s, border-color 0.15s, transform 0.1s',
+                  fontSize: '20px', lineHeight: 1,
+                  filter: actief ? 'none' : 'grayscale(0.55)',
                 }}
+                onPointerDown={e => { if (!uit) e.currentTarget.style.transform = 'scale(0.95)' }}
+                onPointerUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+                onPointerLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
               >
-                <span style={{ fontSize: '14px', opacity: geblokkeerd ? 0.4 : 1 }}>{s.emoji}</span>
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.label}</span>
-                {geblokkeerd && (
-                  <span style={{ marginLeft: compact ? 'auto' : '0', fontSize: '11px', fontWeight: '600' }}>
-                    Volzet
-                  </span>
-                )}
-                {actief && compact && !geblokkeerd && (
-                  <span style={{ marginLeft: 'auto', fontSize: '11px', fontWeight: '700' }}>Jouw keuze</span>
-                )}
+                {s.emoji}
               </button>
             )
           })}
@@ -108,7 +100,7 @@ export default function Opgave({ wedstrijd, variant = 'pwa' }) {
           fontSize: '12px', color: '#94a3b8', background: '#f8fafc',
           border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 12px',
         }}>
-          Je account hangt nog niet aan een spelersfiche, dus meespelen kan nog niet. Vraag een admin om je te koppelen.
+          Je hangt nog niet aan een spelersfiche. Vraag een admin om je te koppelen.
         </div>
       )}
 
@@ -122,7 +114,7 @@ export default function Opgave({ wedstrijd, variant = 'pwa' }) {
         </div>
       )}
 
-      {/* Overzicht per status — uitklapbaar */}
+      {/* Overzicht per status: uitklapbaar */}
       <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
         <button
           type="button"

@@ -267,7 +267,7 @@ button:active:not(:disabled) {
    Goud voor de topscorer, paars voor de assistenkoning. Een draaiende
    conic-gradient onder de inhoud geeft het metaaleffect.
    Gebruik: <div class="topscorer-ring" style="width:44px;height:44px">…</div>
-   De directe kinderen moeten zelf rond zijn — de ring is enkel de padding. */
+   De directe kinderen moeten zelf rond zijn, de ring is enkel de padding. */
 .topscorer-ring,
 .assistkoning-ring {
   position: relative;
@@ -440,7 +440,7 @@ button:active:not(:disabled) {
 /* ─── Gouden ster op het laadscherm ──────────────────────────────────────────
    Opacity en beweging staan bewust in twee aparte animaties: een vervaging
    loopt het mooist lineair, een beweging niet. Zo zit er nergens een knik.
-   De gloed nadien laat de opacity met rust — anders krijg je een dipje op het
+   De gloed nadien laat de opacity met rust, anders krijg je een dipje op het
    moment dat de opkomst eindigt en de gloed begint. */
 @keyframes zvk-ster-fade {
   from { opacity: 0; }

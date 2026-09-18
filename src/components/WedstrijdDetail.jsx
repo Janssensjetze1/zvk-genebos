@@ -171,18 +171,18 @@ export default function WedstrijdDetail({ variant = 'pwa' }) {
         </div>
       </div>
 
-      {/* Pronostiek — op deze pagina meteen open, dat is waarvoor je hier bent */}
+      {/* Pronostiek: op deze pagina meteen open, dat is waarvoor je hier bent */}
       {pronostiekStatus(w) !== 'geen' && (
         <Blok titel="🔮 Pronostiek">
           <Pronostiek wedstrijd={w} standaardOpen />
         </Blok>
       )}
 
-      {/* Opgave — met een regeltje zolang ze nog niet open staat */}
+      {/* Opgave: met een regeltje zolang ze nog niet open staat */}
       {!gespeeld && onze && (
         <Blok titel="✋ Opgave">
           {opgaveIsOpen(w) ? (
-            <Opgave wedstrijd={w} variant={variant} />
+            <Opgave wedstrijd={w} />
           ) : (
             <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
               De opgave opent {opgaveOpentOp(w)?.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })} om 10u.
@@ -222,7 +222,7 @@ export default function WedstrijdDetail({ variant = 'pwa' }) {
         </Blok>
       )}
 
-      {/* Verslag — eigen component, zodat useVerslag de wedstrijd al kent */}
+      {/* Verslag: eigen component, zodat useVerslag de wedstrijd al kent */}
       {gespeeld && onze && (
         <Blok titel="📰 Wedstrijdverslag">
           <VerslagBlok wedstrijd={w} variant={variant} />

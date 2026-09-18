@@ -260,7 +260,7 @@ export default function TabSpelers() {
                     Handmatige badges
                   </p>
                   <p style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '14px' }}>
-                    Deze badges kan een speler niet zelf verdienen — jij kent ze toe.
+                    Deze badges ken jij toe. Een speler kan ze niet zelf verdienen.
                   </p>
 
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>

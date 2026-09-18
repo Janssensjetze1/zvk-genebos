@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useSeason } from '../context/SeasonContext'
 
 /**
- * ArchiefKiezer — een dropdown die enkel verschijnt als er meer dan 1 seizoen is.
+ * ArchiefKiezer: een dropdown die enkel verschijnt als er meer dan 1 seizoen is.
  * Het huidige (nieuwste) seizoen is niet kiesbaar: je klikt gewoon "Archief bekijken"
  * om een oud seizoen te selecteren. De globale ArchiefBanner in Layout toont de rest.
  */

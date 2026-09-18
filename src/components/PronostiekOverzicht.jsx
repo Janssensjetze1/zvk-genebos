@@ -6,7 +6,7 @@ import { useSeason } from '../context/SeasonContext'
 import { isGespeeld } from '../lib/wedstrijd'
 import { usePronostiekKlassement, pronostiekStatus, pronostiekSluit, pronostiekOpent, tijdTotLabel, PUNTEN_UITLEG } from '../hooks/usePronostiek'
 
-// Pronostiekpagina — gedeeld door de PWA en de webapp.
+// Pronostiekpagina: gedeeld door de PWA en de webapp.
 // Bewust een pure lijst: niets klapt hier open, elke regel brengt je naar de
 // detailpagina van die wedstrijd. Daar vul je in en zie je ieders gok.
 // variant: 'pwa' (smallere marges) of 'desktop'
@@ -165,7 +165,7 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
         Pronostiek
       </h1>
       <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0 0 18px' }}>
-        {seizoen?.name} · voorspel elke wedstrijd, verdien punten
+        {seizoen?.name}
       </p>
 
       {/* Jouw stand */}
@@ -240,7 +240,7 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
                     Momenteel niets te voorspellen
                   </div>
                   <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0, lineHeight: 1.6 }}>
-                    De pronostiek van een wedstrijd opent een week op voorhand en sluit een uur voor de aftrap.
+                    Een pronostiek opent een week voor de wedstrijd en sluit een uur voor de aftrap.
                   </p>
                 </div>
               </Kaart>
@@ -290,7 +290,7 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
                 Nog geen punten dit seizoen
               </div>
               <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0, lineHeight: 1.6 }}>
-                Zodra de eerste voorspelde wedstrijd gespeeld is, verschijnt hier het klassement.
+                Het klassement verschijnt zodra de eerste voorspelde wedstrijd gespeeld is.
               </p>
             </div>
           </Kaart>
@@ -346,7 +346,7 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
         )
       )}
 
-      {/* Puntenuitleg — dicht bij het openen */}
+      {/* Puntenuitleg: dicht bij het openen */}
       <Kaart style={{ marginTop: '22px', background: '#f8fafc' }}>
         <div style={{ padding: '14px 16px' }}>
           <div
@@ -376,8 +376,7 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
           </div>
 
           <p style={{ display: uitlegOpen ? 'block' : 'none', fontSize: '11px', color: '#94a3b8', margin: '10px 0 0', lineHeight: 1.5 }}>
-            Enkel het hoogste dat van toepassing is telt. Voorspellen kan van een week voor de wedstrijd tot een uur
-            voor de aftrap, en je mag tot dan zoveel aanpassen als je wil.
+            Enkel het hoogste telt, ze stapelen niet.
           </p>
         </div>
       </Kaart>

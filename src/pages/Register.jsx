@@ -32,7 +32,7 @@ export default function Register() {
         <div style={{ fontSize: '52px', marginBottom: '20px' }}>✅</div>
         <h2 style={{ color: '#0f172a', fontSize: '22px', fontWeight: '700', marginBottom: '10px' }}>Aanvraag verstuurd!</h2>
         <p style={{ color: '#64748b', fontSize: '14px', lineHeight: 1.7, marginBottom: '28px' }}>
-          Uw aanvraag is verstuurd. Wacht even tot een admin u goedkeurt — we laten u weten!
+          Je aanvraag is verstuurd. Een admin keurt ze goed.
         </p>
         <Link to="/login" style={{
           display: 'inline-block', color: '#3b82f6', fontSize: '14px',

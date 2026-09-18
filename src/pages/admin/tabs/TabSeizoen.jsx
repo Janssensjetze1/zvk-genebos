@@ -157,7 +157,7 @@ export default function TabSeizoen() {
                     </div>
                     <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
                       {new Date(s.start_date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'short', year: 'numeric' })}
-                      {' — '}
+                      {' · '}
                       {new Date(s.end_date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </div>
                   </div>

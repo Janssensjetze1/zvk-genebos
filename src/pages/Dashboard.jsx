@@ -40,7 +40,7 @@ export default function Dashboard() {
     const ids = matchIds?.map(m => m.id) ?? []
 
     const queries = [
-      // Aankomende wedstrijden — haal meerdere op en filter client-side op ZVK
+      // Aankomende wedstrijden: haal meerdere op en filter client-side op ZVK
       supabase.from('matches')
         .select('*, home_team:home_team_id(id,name,is_zvk), away_team:away_team_id(id,name,is_zvk), match_players(player_id), goals(id)')
         .eq('season_id', seizoen.id)
@@ -48,7 +48,7 @@ export default function Dashboard() {
         .order('date', { ascending: true })
         .limit(20),
 
-      // Meest recente gespeelde wedstrijden — filter client-side op ZVK
+      // Meest recente gespeelde wedstrijden, filter client-side op ZVK
       // (datum van vandaag zit erbij: die telt mee zodra het blad is ingevuld)
       supabase.from('matches')
         .select('*, home_team:home_team_id(id,name,is_zvk), away_team:away_team_id(id,name,is_zvk), match_players(player_id), goals(id)')
@@ -147,9 +147,9 @@ export default function Dashboard() {
           <div>
             <SectieLabel>Jouw seizoen</SectieLabel>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-              <StatKaart icoon="🏟️" waarde={loading ? '—' : stats?.gespeeld ?? 0} label="Wedstrijden" />
-              <StatKaart icoon="⚽" waarde={loading ? '—' : stats?.goals ?? 0} label="Goals" />
-              <StatKaart icoon="🎯" waarde={loading ? '—' : stats?.assists ?? 0} label="Assists" />
+              <StatKaart icoon="🏟️" waarde={loading ? '-' : stats?.gespeeld ?? 0} label="Wedstrijden" />
+              <StatKaart icoon="⚽" waarde={loading ? '-' : stats?.goals ?? 0} label="Goals" />
+              <StatKaart icoon="🎯" waarde={loading ? '-' : stats?.assists ?? 0} label="Assists" />
             </div>
           </div>
         )}
@@ -197,7 +197,7 @@ function Podium({ spelers, sleutel, label, loading }) {
           const speler = spelers[idx]
           const { hoogte, kleur, bg, label: medaille, ring } = PODIUM[idx]
           const isGoud = idx === 0
-          // Goud = topscorer, paars = assistenkoning — overal hetzelfde
+          // Goud = topscorer, paars = assistenkoning, overal hetzelfde
           const eretitel = eer(speler?.id)
           const isTop = !!eretitel
 

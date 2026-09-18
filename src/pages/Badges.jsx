@@ -143,13 +143,13 @@ export default function Badges() {
             🔗 Nog geen spelersfiche gekoppeld
           </div>
           <p style={{ fontSize: '13px', color: '#3b82f6', margin: 0, lineHeight: 1.55 }}>
-            De badges voor wedstrijden, goals en assists verschijnen zodra een admin je account aan een
-            spelersfiche koppelt. De pronostiekbadges hieronder kan je nu al verdienen.
+            De badges voor wedstrijden, goals en assists komen zodra een admin je koppelt. De pronostiekbadges
+            hieronder kan je nu al verdienen.
           </p>
         </div>
       )}
 
-      {/* Voortgang — enkel tonen als er badges zijn */}
+      {/* Voortgang: enkel tonen als er badges zijn */}
       {totaal > 0 && (
         <div style={{
           background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px',

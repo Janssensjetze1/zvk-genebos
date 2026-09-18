@@ -11,7 +11,7 @@ import { isGespeeld } from '../lib/wedstrijd'
 // Het hoogste dat van toepassing is telt; ze stapelen niet.
 //
 // Venster: open vanaf een week voor de aftrap, dicht vanaf een uur ervoor.
-// Zelfde regel als de trigger in supabase/migrations/pronostiek.sql — pas
+// Zelfde regel als de trigger in supabase/migrations/pronostiek.sql, pas
 // altijd beide aan. De database is de echte bewaker, dit is de UI-kant.
 
 export const OPENT_DAGEN_VOORAF = 7
@@ -90,7 +90,7 @@ export function usePronostiek(wedstrijd) {
   const [bezig, setBezig]     = useState(false)
   const [fout, setFout]       = useState('')
 
-  // Haal enkel op wat deze toestand nodig heeft — deze hook hangt aan élke
+  // Haal enkel op wat deze toestand nodig heeft, deze hook hangt aan élke
   // wedstrijdkaart, dus drie queries per kaart zou zonde zijn.
   const laad = useCallback(async () => {
     if (!matchId) return

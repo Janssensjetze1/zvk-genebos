@@ -42,7 +42,7 @@ function BadgeHex({ emoji, categorie, size = 80, verdiend }) {
   return (
     <div style={{
       position: 'relative', width: size, height: H, flexShrink: 0,
-      // Ook een nog niet verdiende badge houdt de kleur van zijn categorie —
+      // Ook een nog niet verdiende badge houdt de kleur van zijn categorie,
       // het verschil zit in de gloed, de sterretjes en het slotje.
       filter: verdiend
         ? `drop-shadow(0 2px 8px ${sh.glow}) drop-shadow(0 0 16px ${sh.glow})`
@@ -56,7 +56,7 @@ function BadgeHex({ emoji, categorie, size = 80, verdiend }) {
         position: 'absolute', inset: 0, clipPath: HEX, overflow: 'hidden',
         background: verdiend ? sh.outerGrad : stijl.gradient,
       }}>
-        {/* Glans die over de badge glijdt — subtieler zolang je hem niet hebt */}
+        {/* Glans die over de badge glijdt, subtieler zolang je hem niet hebt */}
         <span className="badge-hex-shine" style={{
           background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,${verdiend ? 0.55 : 0.28}) 50%, transparent 100%)`,
         }} />
@@ -155,8 +155,8 @@ export default function PWABadges() {
             🔗 Nog geen spelersfiche
           </div>
           <p style={{ fontSize: '12px', color: '#3b82f6', margin: 0, lineHeight: 1.5 }}>
-            De badges voor wedstrijden, goals en assists verschijnen zodra een admin je account aan een
-            spelersfiche koppelt. De pronostiekbadges hieronder kan je nu al verdienen.
+            De badges voor wedstrijden, goals en assists komen zodra een admin je koppelt. De pronostiekbadges
+            hieronder kan je nu al verdienen.
           </p>
         </div>
       )}
@@ -189,7 +189,7 @@ export default function PWABadges() {
         </div>
       )}
 
-      {/* Per categorie — brons, zilver, goud, platina, legendary */}
+      {/* Per categorie: brons, zilver, goud, platina, legendary */}
       {CATEGORIE_VOLGORDE.map(categorie => {
         const groep = lijst.filter(b => b.categorie === categorie)
         if (groep.length === 0) return null

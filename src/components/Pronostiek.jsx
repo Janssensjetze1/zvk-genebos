@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { usePronostiek, pronostiekSluit, pronostiekOpent, tijdTotLabel } from '../hooks/usePronostiek'
 
-// Pronostiek van één wedstrijd. Standaard ingeklapt tot één regel — het blok
+// Pronostiek van één wedstrijd. Standaard ingeklapt tot één regel, het blok
 // hangt onder elke wedstrijdkaart, dus het mag niet de halve kaart innemen.
 // Tik op de regel om te openen. `standaardOpen` zet hem meteen open (gebruikt
 // op de pronostiekpagina bij wedstrijden die nú te voorspellen zijn).
@@ -212,7 +212,7 @@ export default function Pronostiek({ wedstrijd, standaardOpen = false }) {
             {aantal === 0
               ? 'Nog niemand voorspelde deze wedstrijd.'
               : `${aantal} ${aantal === 1 ? 'lid gokte' : 'leden gokten'} al.`}
-            {!mijn && aantal > 0 ? ' Vul zelf in om te zien wat zij gokten.' : ''}
+            {!mijn && aantal > 0 ? ' Vul in om hun gok te zien.' : ''}
           </p>
         </>
       ) : (
@@ -226,7 +226,7 @@ export default function Pronostiek({ wedstrijd, standaardOpen = false }) {
 
       {uit_geklapt && metPunten && lijst.some(v => v.durfbonus) && (
         <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
-          🎯 durfbonus: als enige de exacte score juist.
+          🎯 als enige de exacte score juist.
         </p>
       )}
     </div>

@@ -33,7 +33,7 @@ export default function Account() {
   const [toonNieuw, setToonNieuw] = useState(false)
   const [toonBevestig, setToonBevestig] = useState(false)
 
-  // Speler maar één keer ophalen — niet opnieuw bij elke profielwijziging (vermijdt race condition)
+  // Speler maar één keer ophalen, niet opnieuw bij elke profielwijziging (vermijdt race condition)
   useEffect(() => {
     if (profile?.player_id) fetchSpeler(profile.player_id)
     else setNaam(profile?.display_name ?? '')
@@ -88,7 +88,7 @@ export default function Account() {
       photo_url = urlData.publicUrl
     }
 
-    // Eerst players updaten (als gekoppeld) — vóór patchProfile om race condition te vermijden
+    // Eerst players updaten (als gekoppeld), vóór patchProfile om race condition te vermijden
     if (speler) {
       const { error: spelerFout } = await supabase
         .from('players')
@@ -154,13 +154,13 @@ export default function Account() {
       <h1 style={{ fontSize: '22px', fontWeight: '600', color: '#0f172a', marginBottom: '4px' }}>Accountinstellingen</h1>
       <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '32px' }}>Beheer je persoonlijke gegevens</p>
 
-      {/* Profiel — naam & foto */}
+      {/* Profiel: naam & foto */}
       <Sectie titel="Profiel" beschrijving="Naam en profielfoto zichtbaar voor andere leden">
         <form onSubmit={handleNaamOpslaan} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
           {/* Foto upload */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            {/* Klikbare avatar — glanzende gouden ring als jij de topscorer bent */}
+            {/* Klikbare avatar: glanzende gouden ring als jij de topscorer bent */}
             <div
               className={jouwEer && !fotoPreview ? RING_KLASSE[jouwEer] : undefined}
               style={{ width: '72px', height: '72px', borderRadius: '50%', flexShrink: 0 }}

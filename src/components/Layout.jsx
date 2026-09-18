@@ -172,7 +172,7 @@ function Sidebar({ onClose }) {
         )}
       </nav>
 
-      {/* Gouden Jaar — tijdelijk verborgen */}
+      {/* Gouden Jaar: tijdelijk verborgen */}
       {false && isAdmin && <GoudenJaarLink onClose={onClose} />}
 
       {/* Profiel */}

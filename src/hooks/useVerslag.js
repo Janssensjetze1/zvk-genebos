@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase'
 // als null bewaard zodat "nog geen verslag" één betekenis houdt.
 // wedstrijd mag null zijn (pagina die nog aan het laden is); de hook doet dan
 // gewoon niets. Let op: de begintoestand komt van de eerste render, dus mount
-// het paneel pas wanneer de wedstrijd er écht is — zie WedstrijdDetail.
+// het paneel pas wanneer de wedstrijd er écht is, zie WedstrijdDetail.
 export function useVerslag(wedstrijd) {
   const [verslag, setVerslag] = useState(wedstrijd?.report ?? null)
   const [genereert, setGenereert] = useState(false)

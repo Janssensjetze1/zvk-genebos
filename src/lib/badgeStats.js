@@ -32,7 +32,7 @@ export function computeStats({ goalsArr, assistsArr, matchesArr, seizoenId, user
       const tegScore = zvkIsThuis ? match.away_score : match.home_score
       return tegScore !== null && tegScore === 0
     }).length,
-    // Pronostiek — komt uit de view pronostiek_stats en hangt aan het account,
+    // Pronostiek: komt uit de view pronostiek_stats en hangt aan het account,
     // niet aan een spelersfiche. Ook leden zonder fiche verdienen deze badges.
     voorspellingen:       pronostiek?.voorspellingen ?? 0,
     exacteVoorspellingen: pronostiek?.exacte ?? 0,

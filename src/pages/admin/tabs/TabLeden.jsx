@@ -19,6 +19,12 @@ function tijdGeleden(isoString) {
   return dan.toLocaleDateString('nl-BE', { day: 'numeric', month: 'short', year: diffDag > 365 ? 'numeric' : undefined })
 }
 
+// Minder dan een kwartier geleden geopend telt als "nu online".
+function isNuOnline(isoString) {
+  if (!isoString) return false
+  return (new Date() - new Date(isoString)) < 15 * 60 * 1000
+}
+
 export default function TabLeden() {
   const [profielen, setProfielen] = useState([])
   const [spelers, setSpelers] = useState([])
@@ -207,7 +213,7 @@ function WachtendKaart({ profiel, spelers, onGoedkeuren, onWeigeren, onKoppelSpe
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
           <span style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>
-            {profiel.display_name || '—'}
+            {profiel.display_name || '-'}
           </span>
           <span style={{ fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '20px', background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa' }}>
             Wachtend
@@ -219,7 +225,7 @@ function WachtendKaart({ profiel, spelers, onGoedkeuren, onWeigeren, onKoppelSpe
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ fontSize: '12px', color: '#94a3b8' }}>Speler:</span>
             <select value={profiel.player_id ?? ''} onChange={e => onKoppelSpeler(e.target.value)} style={selectStyle}>
-              <option value="">— Niet gekoppeld —</option>
+              <option value="">Niet gekoppeld</option>
               {spelers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
@@ -254,7 +260,11 @@ function WachtendKaart({ profiel, spelers, onGoedkeuren, onWeigeren, onKoppelSpe
 // Rij voor actieve leden
 function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
   const [open, setOpen] = useState(false)
-  const lastSeen = tijdGeleden(profiel.last_sign_in_at)
+  // last_seen is wanneer de app laatst geopend werd; de logindatum is enkel
+  // een terugval voor wie nog niet langsgeweest is sinds deze telling bestaat.
+  const online = profiel.last_seen ?? profiel.last_sign_in_at
+  const lastSeen = tijdGeleden(online)
+  const nuOnline = isNuOnline(online)
 
   return (
     <div style={{ borderBottom: isLast ? 'none' : '1px solid #f1f5f9' }}>
@@ -274,7 +284,7 @@ function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
             <span style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {profiel.display_name || '—'}
+              {profiel.display_name || '-'}
             </span>
             <RolBadge role={profiel.role} />
           </div>
@@ -285,18 +295,25 @@ function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
 
         {/* Speler */}
         <div style={{ fontSize: '13px', color: profiel.players ? '#334155' : '#cbd5e1', width: '140px', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'none', ['@media(min-width:900px)']: { display: 'block' } }}>
-          {profiel.players?.name || '—'}
+          {profiel.players?.name || '-'}
         </div>
 
-        {/* Laatste login */}
+        {/* Laatst online */}
         <div style={{ flexShrink: 0, textAlign: 'right', minWidth: '110px' }}>
           {lastSeen ? (
             <div style={{ fontSize: '12px', color: '#64748b' }}>
-              <span style={{ display: 'block', fontSize: '10px', color: '#cbd5e1', fontWeight: '500', marginBottom: '1px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Ingelogd</span>
-              {lastSeen}
+              <span style={{ display: 'block', fontSize: '10px', color: '#cbd5e1', fontWeight: '500', marginBottom: '1px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Laatst online
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                {nuOnline && (
+                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
+                )}
+                {nuOnline ? 'Nu online' : lastSeen}
+              </span>
             </div>
           ) : (
-            <span style={{ fontSize: '12px', color: '#e2e8f0' }}>Nog niet ingelogd</span>
+            <span style={{ fontSize: '12px', color: '#e2e8f0' }}>Nooit</span>
           )}
         </div>
 
@@ -312,7 +329,7 @@ function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>Speler:</span>
             <select value={profiel.player_id ?? ''} onChange={e => onKoppelSpeler(e.target.value)} style={selectStyle}>
-              <option value="">— Niet gekoppeld —</option>
+              <option value="">Niet gekoppeld</option>
               {spelers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>

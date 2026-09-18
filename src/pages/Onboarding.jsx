@@ -17,7 +17,7 @@ export default function Onboarding() {
   const [fout, setFout] = useState('')
   const fotoInputRef = useRef(null)
 
-  // Stap 2 is altijd zichtbaar — voor spelers wordt naam/foto ook naar players geschreven
+  // Stap 2 is altijd zichtbaar, voor spelers wordt naam/foto ook naar players geschreven
   const heeftSpeler = !!profile?.player_id
 
   function handleFotoKiezen(e) {
@@ -59,7 +59,7 @@ export default function Onboarding() {
     if (photo_url) profileUpdate.avatar_url = photo_url
     patchProfile(profileUpdate)
 
-    // Navigeer meteen — DB-schrijf loopt op de achtergrond
+    // Navigeer meteen: DB-schrijf loopt op de achtergrond
     setOpslaan(false)
     navigate('/', { replace: true })
 
@@ -123,7 +123,7 @@ export default function Onboarding() {
             })}
           </div>
 
-          {/* Stap 1 — Welkom */}
+          {/* Stap 1: Welkom */}
           {stap === 1 && (
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '40px', marginBottom: '16px' }}>👋</div>
@@ -139,13 +139,13 @@ export default function Onboarding() {
             </div>
           )}
 
-          {/* Stap 2 — Profiel */}
+          {/* Stap 2: Profiel */}
           {stap === 2 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
                 <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>Jouw profiel</h2>
                 <p style={{ fontSize: '13px', color: '#94a3b8' }}>
-                  {heeftSpeler ? 'Dit is zichtbaar voor je teamgenoten.' : 'Optioneel — je kunt dit ook later aanpassen via je account.'}
+                  {heeftSpeler ? 'Dit is zichtbaar voor je teamgenoten.' : 'Kan later ook nog via je account.'}
                 </p>
               </div>
 

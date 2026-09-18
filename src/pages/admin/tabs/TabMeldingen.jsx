@@ -65,7 +65,7 @@ export default function TabMeldingen() {
       }
     }
 
-    // Deactiveer alle andere meldingen — maar 1 actief tegelijk
+    // Deactiveer alle andere meldingen, maar 1 actief tegelijk
     await supabase.from('announcements').update({ is_active: false }).neq('id', '00000000-0000-0000-0000-000000000000').then()
     await supabase.from('announcements').insert({
       emoji, title: titel.trim(), message: bericht.trim(), is_active: true, image_url,

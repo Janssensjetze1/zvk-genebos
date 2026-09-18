@@ -224,7 +224,7 @@ function GloriePodium({ spelers, stat, accentKleur }) {
           const mKleur    = medalKleuren[oi]   ?? '#94a3b8'
           const avSize    = avatarSizes[oi]    ?? 42
           const waarde    = speler[stat]
-          // Goud = topscorer, paars = assistenkoning — overal hetzelfde
+          // Goud = topscorer, paars = assistenkoning, overal hetzelfde
           const eretitel  = eer(speler.id)
           const isTop     = !!eretitel
 
@@ -240,7 +240,7 @@ function GloriePodium({ spelers, stat, accentKleur }) {
                 />
               )}
 
-              {/* Avatar — de topscorer krijgt de glanzende gouden ring */}
+              {/* Avatar: de topscorer krijgt de glanzende gouden ring */}
               <div
                 className={eretitel ? RING_KLASSE[eretitel] : undefined}
                 style={{

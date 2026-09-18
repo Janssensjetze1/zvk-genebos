@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 // De "Quote of the day" op de laadpagina.
 //
 // De quotes staan in de tabel `quotes` (beheer → Quotes). De laadpagina mag
-// daar niet op wachten — ze verschijnt voor er data is — dus tonen we een quote
+// daar niet op wachten, ze verschijnt voor er data is, dus tonen we een quote
 // uit de cache van de vorige keer, en wordt die cache op de achtergrond
 // ververst zodra het profiel geladen is. Zolang er nog geen cache is (eerste
 // keer, uitgelogd, geen netwerk) valt ze terug op de lijst hieronder.

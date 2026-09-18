@@ -80,7 +80,7 @@ export default function TabTeams() {
     <>
     {ConfirmUI}
     <div>
-      {/* ZVK team — naam bewerkbaar, niet verwijderbaar */}
+      {/* ZVK team: naam bewerkbaar, niet verwijderbaar */}
       {zvkTeam && (
         <div style={{ marginBottom: '28px' }}>
           <TabKop titel="Eigen team" subtitel="De ploeg waar het klassement en de stats op slaan" />

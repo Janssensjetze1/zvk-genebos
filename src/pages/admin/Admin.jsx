@@ -122,7 +122,7 @@ function AandachtStrook({ tellers, ga }) {
         fontSize: '13px', color: '#15803d', fontWeight: '500',
       }}>
         <span style={{ fontSize: '16px' }}>✓</span>
-        Alles is bij — niets dat op je wacht.
+        Alles is bij.
       </div>
     )
   }

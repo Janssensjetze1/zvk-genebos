@@ -63,7 +63,7 @@ export default function Invullen() {
 
   return (
     <div style={{ background: '#f8fafc', paddingBottom: '32px', minHeight: isPWA ? 'auto' : '100vh' }}>
-      {/* Header — enkel buiten PWA tonen, PWALayout heeft al een header */}
+      {/* Header: enkel buiten PWA tonen, PWALayout heeft al een header */}
       {!isPWA && (
         <div style={{
           background: 'white', borderBottom: '1px solid #e2e8f0',
@@ -376,14 +376,14 @@ function WedstrijdInvullen({ wedstrijd: w, zvkTeam, spelers, onTerug, onOpgeslag
                       <div>
                         <label style={labelStijl}>Scorer *</label>
                         <select value={d.scorerId} onChange={e => setDoelpunten(prev => prev.map((x, i) => i === idx ? { ...x, scorerId: e.target.value } : x))} style={selectStijl}>
-                          <option value="">— Kies speler —</option>
+                          <option value="">Kies speler</option>
                           {(aanwezigeLijst.length > 0 ? aanwezigeLijst : spelers).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                         </select>
                       </div>
                       <div>
                         <label style={labelStijl}>Assist (optioneel)</label>
                         <select value={d.assistId} onChange={e => setDoelpunten(prev => prev.map((x, i) => i === idx ? { ...x, assistId: e.target.value } : x))} style={selectStijl}>
-                          <option value="">— Geen assist —</option>
+                          <option value="">Geen assist</option>
                           {(aanwezigeLijst.length > 0 ? aanwezigeLijst : spelers).filter(s => s.id !== d.scorerId).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                         </select>
                       </div>

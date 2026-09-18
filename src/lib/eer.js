@@ -2,7 +2,7 @@
 // assistenkoning. De waarde komt uit useTopscorer().eer(spelerId):
 // 'topscorer' | 'assistkoning' | 'beide' | null
 //
-// Is iemand allebei, dan blijft de ring goud en krijgt hij twee kroontjes —
+// Is iemand allebei, dan blijft de ring goud en krijgt hij twee kroontjes,
 // het eerste met een gouden gloed, het tweede met een paarse.
 
 export const RING_KLASSE = {

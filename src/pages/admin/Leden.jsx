@@ -168,7 +168,7 @@ function ProfielKaart({ profiel, spelers, onGoedkeuren, onWeigeren, onKoppelSpel
             onChange={e => onKoppelSpeler(e.target.value)}
             className="text-sm border border-gray-200 rounded-lg px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">— Niet gekoppeld —</option>
+            <option value="">Niet gekoppeld</option>
             {spelers.map(s => (
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}

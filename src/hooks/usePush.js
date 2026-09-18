@@ -44,7 +44,7 @@ export function usePush() {
           .maybeSingle()
 
         if (!data) {
-          // Lokale subscription bestaat maar niet in DB — hersync
+          // Lokale subscription bestaat maar niet in DB, hersync
           const subJson = sub.toJSON()
           const { error } = await supabase.from('push_subscriptions').upsert({
             user_id:      user.id,
@@ -98,7 +98,7 @@ export function usePush() {
         throw new Error(`Browser push fout: ${e.message ?? String(e)}`)
       }
 
-      // 4. Sla op in Supabase — controleer fout expliciet
+      // 4. Sla op in Supabase, controleer fout expliciet
       const subJson = sub.toJSON()
       const { error: dbFout } = await supabase.from('push_subscriptions').upsert({
         user_id:      user.id,
