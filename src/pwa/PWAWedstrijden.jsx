@@ -5,8 +5,8 @@ import { useSeason } from '../context/SeasonContext'
 import { useAuth } from '../context/AuthContext'
 import Opgave from '../components/Opgave'
 import { opgaveIsOpen } from '../hooks/useOpgave'
-import { isGespeeld, weekendWedstrijden, andereUitslagen } from '../lib/wedstrijd'
-import WedstrijdenPerDag from '../components/WedstrijdenPerDag'
+import { isGespeeld, weekendWedstrijden } from '../lib/wedstrijd'
+import WedstrijdenPerDag, { DagLabel, WedstrijdRijen } from '../components/WedstrijdenPerDag'
 
 const REACTIE_EMOJIS = ['💪', '❤️', '🎯', '😭']
 
@@ -17,7 +17,7 @@ const TYPE_COLORS = {
 }
 const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
 
-const TABS = [['aankomend', 'Aankomend'], ['gespeeld', 'Gespeeld'], ['andere', 'Andere ploegen']]
+const TABS = [['aankomend', 'Aankomend'], ['gespeeld', 'Gespeeld']]
 
 function Tussenkop({ children }) {
   return (
@@ -66,9 +66,18 @@ export default function PWAWedstrijden() {
 
   const zvkWedstrijden = wedstrijden.filter(w => w.home_team?.is_zvk || w.away_team?.is_zvk)
   const aankomend = zvkWedstrijden.filter(w => !isGespeeld(w))
-  const gespeeld = zvkWedstrijden.filter(w => isGespeeld(w)).reverse()
   const weekend = weekendWedstrijden(wedstrijden)
-  const andere = andereUitslagen(wedstrijden)
+
+  // Gespeeld: alle uitslagen per dag, nieuwste eerst. Onze match krijgt de
+  // grote kaart, die van de andere ploegen staan er compact onder.
+  const gespeeldPerDag = []
+  for (const w of wedstrijden.filter(w => isGespeeld(w)).reverse()) {
+    let dag = gespeeldPerDag[gespeeldPerDag.length - 1]
+    if (dag?.datum !== w.date) gespeeldPerDag.push(dag = { datum: w.date, onze: [], andere: [] })
+    if (w.home_team?.is_zvk || w.away_team?.is_zvk) dag.onze.push(w)
+    else dag.andere.push(w)
+  }
+  for (const dag of gespeeldPerDag) dag.andere.sort((a, b) => (a.time ?? '99').localeCompare(b.time ?? '99'))
 
   return (
     <div style={{ padding: '20px 16px' }}>
@@ -78,8 +87,7 @@ export default function PWAWedstrijden() {
       <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '10px', padding: '3px', marginBottom: '20px' }}>
         {TABS.map(([id, label]) => (
           <button key={id} onClick={() => setTab(id)} style={{
-            flex: '1 1 auto', padding: '8px 6px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-            whiteSpace: 'nowrap',
+            flex: 1, padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer',
             fontSize: '13px', fontWeight: tab === id ? '700' : '500',
             background: tab === id ? 'white' : 'transparent',
             color: tab === id ? '#0f172a' : '#64748b',
@@ -90,28 +98,34 @@ export default function PWAWedstrijden() {
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '48px', color: '#94a3b8' }}>Laden...</div>
-      ) : tab === 'andere' ? (
-        andere.length === 0
-          ? <Leeg>Nog geen uitslagen van de andere ploegen.</Leeg>
-          : <WedstrijdenPerDag wedstrijden={andere} variant="pwa" />
+      ) : tab === 'gespeeld' ? (
+        gespeeldPerDag.length === 0 ? <Leeg>Geen wedstrijden gevonden.</Leeg> : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            {gespeeldPerDag.map(dag => (
+              <div key={dag.datum}>
+                <DagLabel datum={dag.datum} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {dag.onze.map(w => <WedstrijdKaart key={w.id} wedstrijd={w} />)}
+                  {dag.andere.length > 0 && <WedstrijdRijen wedstrijden={dag.andere} variant="pwa" />}
+                </div>
+              </div>
+            ))}
+          </div>
+        )
       ) : (
         <>
           {/* Het programma van het weekend, met alle ploegen */}
-          {tab === 'aankomend' && weekend.lijst.length > 0 && (
+          {weekend.lijst.length > 0 && (
             <div style={{ marginBottom: '24px' }}>
               <Tussenkop>{weekend.titel}</Tussenkop>
               <WedstrijdenPerDag wedstrijden={weekend.lijst} variant="pwa" />
             </div>
           )}
 
-          {tab === 'aankomend' && weekend.lijst.length > 0 && <Tussenkop>Onze wedstrijden</Tussenkop>}
+          {weekend.lijst.length > 0 && <Tussenkop>Onze wedstrijden</Tussenkop>}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {(tab === 'aankomend' ? aankomend : gespeeld).map(w => (
-              <WedstrijdKaart key={w.id} wedstrijd={w} />
-            ))}
-            {(tab === 'aankomend' ? aankomend : gespeeld).length === 0 && (
-              <Leeg>Geen wedstrijden gevonden.</Leeg>
-            )}
+            {aankomend.map(w => <WedstrijdKaart key={w.id} wedstrijd={w} />)}
+            {aankomend.length === 0 && <Leeg>Geen wedstrijden gevonden.</Leeg>}
           </div>
         </>
       )}

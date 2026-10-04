@@ -4,7 +4,7 @@ import { isGespeeld } from '../lib/wedstrijd'
 // Compacte lijst van wedstrijden, gegroepeerd per dag. Bedoeld voor alles wat
 // niet enkel over ZVK gaat: het weekendprogramma en de uitslagen van de andere
 // ploegen. De volgorde van de lijst blijft behouden, elke regel opent de
-// detailpagina.
+// detailpagina. DagLabel en WedstrijdRijen zijn ook los te gebruiken.
 // variant: 'pwa' of 'desktop' (bepaalt enkel de route)
 
 const TYPE_LABELS = { beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
@@ -80,9 +80,33 @@ function Rij({ w, laatste, onOpen }) {
   )
 }
 
-export default function WedstrijdenPerDag({ wedstrijden, variant = 'pwa' }) {
-  const navigate = useNavigate()
+export function DagLabel({ datum }) {
+  return (
+    <div style={{
+      fontSize: '11px', fontWeight: '700', color: '#94a3b8',
+      textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 2px 6px',
+    }}>{dagLabel(datum)}</div>
+  )
+}
 
+// Eén kaart met een regel per wedstrijd, zonder daglabel.
+export function WedstrijdRijen({ wedstrijden, variant = 'pwa' }) {
+  const navigate = useNavigate()
+  return (
+    <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px', overflow: 'hidden' }}>
+      {wedstrijden.map((w, i) => (
+        <Rij
+          key={w.id}
+          w={w}
+          laatste={i === wedstrijden.length - 1}
+          onOpen={() => navigate(`${variant === 'pwa' ? '/app' : ''}/wedstrijd/${w.id}`)}
+        />
+      ))}
+    </div>
+  )
+}
+
+export default function WedstrijdenPerDag({ wedstrijden, variant = 'pwa' }) {
   const dagen = []
   for (const w of wedstrijden ?? []) {
     const vorige = dagen[dagen.length - 1]
@@ -94,20 +118,8 @@ export default function WedstrijdenPerDag({ wedstrijden, variant = 'pwa' }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {dagen.map(dag => (
         <div key={dag.datum}>
-          <div style={{
-            fontSize: '11px', fontWeight: '700', color: '#94a3b8',
-            textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 2px 6px',
-          }}>{dagLabel(dag.datum)}</div>
-          <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px', overflow: 'hidden' }}>
-            {dag.lijst.map((w, i) => (
-              <Rij
-                key={w.id}
-                w={w}
-                laatste={i === dag.lijst.length - 1}
-                onOpen={() => navigate(`${variant === 'pwa' ? '/app' : ''}/wedstrijd/${w.id}`)}
-              />
-            ))}
-          </div>
+          <DagLabel datum={dag.datum} />
+          <WedstrijdRijen wedstrijden={dag.lijst} variant={variant} />
         </div>
       ))}
     </div>

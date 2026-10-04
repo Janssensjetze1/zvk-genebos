@@ -100,13 +100,12 @@ export default function PWAInfo() {
 
         <Sectie emoji="📅" titel="Wedstrijden">
           <p>
-            Bovenaan wissel je tussen <span style={vet}>Aankomend</span>, <span style={vet}>Gespeeld</span> en
-            <span style={vet}> Andere ploegen</span>. Tik een wedstrijd aan voor de details: de pronostiek, wie
-            er speelde, de doelpunten en het verslag.
+            Bovenaan wissel je tussen <span style={vet}>Aankomend</span> en <span style={vet}>Gespeeld</span>.
+            Tik een wedstrijd aan voor de details: de pronostiek, wie er speelde, de doelpunten en het verslag.
           </p>
           <p>
-            Bij Aankomend staat eerst het weekend, met alle matchen van vrijdag tot zondag. Bij Andere ploegen
-            vind je de uitslagen van de rest.
+            Bij Aankomend staat eerst het weekend, met alle matchen van vrijdag tot zondag. Bij Gespeeld
+            vind je alle uitslagen, ook die van de andere ploegen.
           </p>
           <p>
             Onder een gespeelde wedstrijd staan emoji's. Laat er gerust eentje achter.
