@@ -15,3 +15,18 @@ comment on column public.profiles.last_seen is
 
 create index if not exists idx_profiles_last_seen
   on public.profiles (last_seen desc nulls last);
+
+-- De app schrijft niet rechtstreeks in profiles: dat zou een update-policy op
+-- de hele tabel vragen, en dan kan een lid net zo goed zijn eigen role of
+-- approved aanpassen. Deze functie raakt enkel last_seen aan.
+create or replace function public.markeer_online()
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.profiles set last_seen = now() where id = auth.uid();
+$$;
+
+revoke all on function public.markeer_online() from public, anon;
+grant execute on function public.markeer_online() to authenticated;

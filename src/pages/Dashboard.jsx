@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
 import { supabase } from '../lib/supabase'
-import { isGespeeld, vandaagISO } from '../lib/wedstrijd'
+import { isGespeeld, vandaagISO, weekendBereik, weekendWedstrijden } from '../lib/wedstrijd'
+import WedstrijdenPerDag from '../components/WedstrijdenPerDag'
 import { useTopscorer } from '../context/TopscorerContext'
 import EerKronen from '../components/EerKronen'
 import { RING_KLASSE } from '../lib/eer'
@@ -19,6 +20,7 @@ export default function Dashboard() {
   const { actief: seizoen } = useSeason()
   const [volgende, setVolgende] = useState(null)
   const [vorige, setVorige] = useState(null)
+  const [weekend, setWeekend] = useState({ titel: '', lijst: [] })
   const [stats, setStats] = useState(null)
   const [topscorers, setTopscorers] = useState([])
   const [topassists, setTopassists] = useState([])
@@ -31,6 +33,7 @@ export default function Dashboard() {
   async function fetchData() {
     setLoading(true)
     const vandaag = vandaagISO()
+    const { van, tot } = weekendBereik()
 
     // Haal seizoen match-ids op
     const { data: matchIds } = await supabase
@@ -63,9 +66,17 @@ export default function Dashboard() {
             .select('scorer_id, assist_id, scorer:scorer_id(id, name, photo_url), assist:assist_id(id, name, photo_url)')
             .in('match_id', ids)
         : Promise.resolve({ data: [] }),
+
+      // Alle wedstrijden van het weekend, ook die van de andere ploegen
+      supabase.from('matches')
+        .select('*, home_team:home_team_id(id,name,is_zvk), away_team:away_team_id(id,name,is_zvk), match_players(player_id), goals(id)')
+        .eq('season_id', seizoen.id)
+        .gte('date', van)
+        .lte('date', tot),
     ]
 
-    const [{ data: volgendeData }, { data: vorigeData }, { data: goalsData }] = await Promise.all(queries)
+    const [{ data: volgendeData }, { data: vorigeData }, { data: goalsData }, { data: weekendData }] = await Promise.all(queries)
+    setWeekend(weekendWedstrijden(weekendData))
 
     // Bepaal volgende en vorige ZVK-wedstrijd
     const aankomendZVK = (volgendeData ?? []).filter(w => (w.home_team?.is_zvk || w.away_team?.is_zvk) && !isGespeeld(w))
@@ -142,15 +153,25 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Persoonlijke stats */}
-        {profile?.player_id && (
-          <div>
-            <SectieLabel>Jouw seizoen</SectieLabel>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-              <StatKaart icoon="🏟️" waarde={loading ? '-' : stats?.gespeeld ?? 0} label="Wedstrijden" />
-              <StatKaart icoon="⚽" waarde={loading ? '-' : stats?.goals ?? 0} label="Goals" />
-              <StatKaart icoon="🎯" waarde={loading ? '-' : stats?.assists ?? 0} label="Assists" />
-            </div>
+        {/* Persoonlijke stats + het weekendprogramma */}
+        {(profile?.player_id || weekend.lijst.length > 0) && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {profile?.player_id && (
+              <div>
+                <SectieLabel>Jouw seizoen</SectieLabel>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                  <StatKaart icoon="🏟️" waarde={loading ? '-' : stats?.gespeeld ?? 0} label="Wedstrijden" />
+                  <StatKaart icoon="⚽" waarde={loading ? '-' : stats?.goals ?? 0} label="Goals" />
+                  <StatKaart icoon="🎯" waarde={loading ? '-' : stats?.assists ?? 0} label="Assists" />
+                </div>
+              </div>
+            )}
+            {weekend.lijst.length > 0 && (
+              <div>
+                <SectieLabel>{weekend.titel}</SectieLabel>
+                <WedstrijdenPerDag wedstrijden={weekend.lijst} variant="desktop" />
+              </div>
+            )}
           </div>
         )}
       </div>

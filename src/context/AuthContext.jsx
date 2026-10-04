@@ -13,13 +13,16 @@ const ONLINE_INTERVAL = 15 * 60 * 1000
 async function markeerOnline(userId) {
   if (!userId) return
   try {
-    const vorige = Number(localStorage.getItem('last_seen_geschreven') ?? 0)
+    // Sleutel per gebruiker: delen twee accounts één browser, dan houdt de
+    // ene de andere niet tegen.
+    const sleutel = `last_seen_${userId}`
+    const vorige = Number(localStorage.getItem(sleutel) ?? 0)
     if (Date.now() - vorige < ONLINE_INTERVAL) return
-    localStorage.setItem('last_seen_geschreven', String(Date.now()))
+    localStorage.setItem(sleutel, String(Date.now()))
   } catch {
     // Privémodus zonder localStorage: dan schrijven we gewoon elke keer
   }
-  await supabase.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', userId)
+  await supabase.rpc('markeer_online')
 }
 
 export function AuthProvider({ children }) {

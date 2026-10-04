@@ -5,7 +5,8 @@ import { useSeason } from '../context/SeasonContext'
 import { useAuth } from '../context/AuthContext'
 import Opgave from '../components/Opgave'
 import { opgaveIsOpen } from '../hooks/useOpgave'
-import { isGespeeld } from '../lib/wedstrijd'
+import { isGespeeld, andereUitslagen, andereProgramma } from '../lib/wedstrijd'
+import WedstrijdenPerDag from '../components/WedstrijdenPerDag'
 
 const REACTIE_EMOJIS = ['💪', '❤️', '🎯', '😭']
 
@@ -42,7 +43,8 @@ export default function Wedstrijden() {
   }
 
   const zvkWedstrijden = wedstrijden.filter(w => w.home_team?.is_zvk || w.away_team?.is_zvk)
-  const andereWedstrijden = wedstrijden.filter(w => !w.home_team?.is_zvk && !w.away_team?.is_zvk)
+  const andereGespeeld = andereUitslagen(wedstrijden)
+  const andereAankomend = andereProgramma(wedstrijden)
 
   const aankomend = zvkWedstrijden.filter(w => !isGespeeld(w)).reverse() // chronologisch
   const gespeeld = zvkWedstrijden.filter(w => isGespeeld(w)) // meest recent eerst
@@ -88,12 +90,16 @@ export default function Wedstrijden() {
             )}
           </Sectie>
 
-          {/* Andere wedstrijden */}
-          {andereWedstrijden.length > 0 && (
-            <Sectie titel="Andere wedstrijden" subtitel="Wedstrijden van andere teams in de competitie">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {andereWedstrijden.map(w => <AndereKaart key={w.id} wedstrijd={w} />)}
-              </div>
+          {/* Andere ploegen: uitslagen en wat er nog komt */}
+          {andereGespeeld.length > 0 && (
+            <Sectie titel="Uitslagen andere ploegen">
+              <WedstrijdenPerDag wedstrijden={andereGespeeld} variant="desktop" />
+            </Sectie>
+          )}
+
+          {andereAankomend.length > 0 && (
+            <Sectie titel="Programma andere ploegen">
+              <WedstrijdenPerDag wedstrijden={andereAankomend} variant="desktop" />
             </Sectie>
           )}
 
@@ -341,37 +347,6 @@ function GespeeldeKaart({ wedstrijd: w }) {
         })}
       </div>
 
-    </div>
-  )
-}
-
-// ── Andere wedstrijd kaart ───────────────────────────────────────────────────
-
-function AndereKaart({ wedstrijd: w }) {
-  const datum = new Date(w.date)
-  const typeKleur = TYPE_COLORS[w.type] ?? TYPE_COLORS.competitie
-
-  return (
-    <div style={{
-      background: 'white', border: '1px solid #e2e8f0', borderRadius: '10px',
-      padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '14px',
-    }}>
-      <span style={{ fontSize: '12px', color: '#94a3b8', flexShrink: 0, width: '80px' }}>
-        {datum.toLocaleDateString('nl-BE', { day: 'numeric', month: 'short' })}
-      </span>
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-        <span style={{ fontSize: '13px', color: '#334155', fontWeight: '500' }}>{w.home_team?.name}</span>
-        <span style={{
-          fontSize: '13px', fontWeight: '700', color: '#0f172a',
-          background: '#f1f5f9', padding: '2px 8px', borderRadius: '5px', flexShrink: 0,
-        }}>
-          {w.home_score} – {w.away_score}
-        </span>
-        <span style={{ fontSize: '13px', color: '#334155', fontWeight: '500' }}>{w.away_team?.name}</span>
-      </div>
-      <span style={{ fontSize: '11px', fontWeight: '600', padding: '2px 7px', borderRadius: '5px', background: typeKleur.bg, color: typeKleur.color, flexShrink: 0 }}>
-        {TYPE_LABELS[w.type]}
-      </span>
     </div>
   )
 }
