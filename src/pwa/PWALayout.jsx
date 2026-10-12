@@ -1,97 +1,25 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { useSeason } from '../context/SeasonContext'
-import { useMatchdayCountdown } from '../hooks/useMatchdayCountdown'
 import { AnnouncementPopup } from '../components/AnnouncementPopup'
 import PWASplashScreen from './PWASplashScreen'
+import WedstrijdFormulier from '../components/WedstrijdFormulier'
+import { Avatar, Icoon } from '../ui'
 
-const ICON_SIZE = 20
-
-const tabs = [
-  {
-    path: '/app',
-    label: 'Wedstrijden',
-    icon: (
-      <svg width={ICON_SIZE} height={ICON_SIZE} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
-  },
-  {
-    path: '/app/klassement',
-    label: 'Stand',
-    icon: (
-      <svg width={ICON_SIZE} height={ICON_SIZE} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>
-    ),
-  },
-  {
-    path: '/app/stats',
-    label: 'Stats',
-    icon: (
-      <svg width={ICON_SIZE} height={ICON_SIZE} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-      </svg>
-    ),
-  },
-  {
-    path: '/app/spelers',
-    label: 'Spelers',
-    icon: (
-      <svg width={ICON_SIZE} height={ICON_SIZE} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-  },
+const TABS = [
+  { path: '/app', label: 'Wedstrijden', icoon: 'kalender' },
+  { path: '/app/klassement', label: 'Stand', icoon: 'klassement' },
+  { path: '/app/stats', label: 'Stats', icoon: 'ster' },
+  { path: '/app/spelers', label: 'Spelers', icoon: 'spelers' },
 ]
 
-// Meer-tab (geen path, triggert menu)
-const MEER_TAB = {
-  label: 'Meer',
-  icon: (
-    <svg width={ICON_SIZE} height={ICON_SIZE} fill="currentColor" viewBox="0 0 24 24">
-      <circle cx="5" cy="12" r="2" />
-      <circle cx="12" cy="12" r="2" />
-      <circle cx="19" cy="12" r="2" />
-    </svg>
-  ),
-}
-
-function MatchdayBadge({ seizoenId }) {
-  const { wedstrijd, restTijd } = useMatchdayCountdown(seizoenId)
-
-  // Niet tonen als er geen wedstrijd is, of als de aftrap al geweest is
-  if (!wedstrijd || restTijd === null || restTijd === false) return null
-
-  const thuisNaam = wedstrijd.home_team?.name ?? '?'
-  const uitNaam = wedstrijd.away_team?.name ?? '?'
-  const tijdLabel = wedstrijd.time?.slice(0, 5)
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-      <div style={{
-        background: 'rgba(59,130,246,0.15)',
-        border: '1px solid rgba(59,130,246,0.3)',
-        borderRadius: '10px',
-        padding: '5px 10px',
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        gap: '1px',
-      }}>
-        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>
-          {thuisNaam} – {uitNaam}
-        </span>
-        <span className="pulse-soft" style={{
-          fontSize: '12px', fontWeight: '800', color: '#93c5fd', lineHeight: 1,
-          letterSpacing: '-0.3px',
-        }}>
-          ⚽ {tijdLabel} · nog {restTijd}
-        </span>
-      </div>
-    </div>
-  )
-}
+const MEER_ITEMS = [
+  { label: 'Pronostiek', icoon: 'pronostiek', path: '/app/pronostiek' },
+  { label: 'Badges', icoon: 'badge', path: '/app/badges' },
+  { label: 'Info', icoon: 'info', path: '/app/info' },
+  { label: 'Feedback', icoon: 'chat', path: '/app/feedback' },
+  { label: 'Instellingen', icoon: 'beheer', path: '/app/account' },
+]
 
 const PULL_THRESHOLD = 72
 
@@ -167,144 +95,79 @@ function usePullToRefresh(mainRef) {
   return { pullDist, refreshing }
 }
 
-// ─── Profielfoto avatar met initialen fallback ────────────────────────────────
-function Avatar({ src, naam, size = 38 }) {
-  const initialen = (naam ?? '?').trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2)
-  const [imgFout, setImgFout] = useState(false)
-
-  if (src && !imgFout) {
-    return (
-      <img
-        src={src}
-        alt={naam}
-        onError={() => setImgFout(true)}
-        style={{
-          width: size, height: size, borderRadius: '50%',
-          objectFit: 'cover', border: '2px solid rgba(255,255,255,0.25)',
-          display: 'block',
-        }}
-      />
-    )
-  }
-  return (
-    <div style={{
-      width: size, height: size, borderRadius: '50%',
-      background: 'linear-gradient(135deg, #6366f1, #22d3ee)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.36, fontWeight: '700', color: 'white',
-      border: '2px solid rgba(255,255,255,0.25)',
-      flexShrink: 0,
-    }}>
-      {initialen}
-    </div>
-  )
-}
-
-// ─── Secundaire nav (drie puntjes) ────────────────────────────────────────────
-const MEER_ITEMS = [
-  { label: 'Pronostiek', icon: '🔮', path: '/app/pronostiek' },
-  { label: 'Badges', icon: '🏅', path: '/app/badges' },
-  { label: 'Info', icon: 'ℹ️', path: '/app/info' },
-  { label: 'Feedback', icon: '💬', path: '/app/feedback' },
-  { label: 'Instellingen', icon: '⚙️', path: '/app/account' },
-]
-
-function MeerMenu({ open, onClose, isAdmin }) {
+// ─── Meer: bottom sheet met de secundaire schermen ───────────────────────────
+function MeerMenu({ open, onClose, isAdmin, onNieuweWedstrijd }) {
   const navigate = useNavigate()
   if (!open) return null
 
+  function ga(pad) {
+    onClose()
+    navigate(pad)
+  }
+
   return (
     <>
-      {/* Dimmed overlay */}
-      <div
-        onClick={onClose}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 200,
-          background: 'rgba(0,0,0,0.55)',
-          backdropFilter: 'blur(4px)',
-        }}
-      />
-      {/* Side panel vanuit rechts */}
-      <div style={{
-        position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 201,
-        width: '280px',
-        background: 'rgba(12,12,24,0.98)',
-        borderLeft: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: '-16px 0 48px rgba(0,0,0,0.5)',
-        display: 'flex', flexDirection: 'column',
-        paddingTop: 'calc(env(safe-area-inset-top) + 20px)',
-        paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)',
-      }}>
-        {/* Header paneel */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '0 20px 20px',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
-        }}>
-          <span style={{ fontSize: '16px', fontWeight: '700', color: 'white' }}>Meer</span>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'rgba(255,255,255,0.08)', border: 'none',
-              borderRadius: '8px', width: '32px', height: '32px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'rgba(255,255,255,0.6)', fontSize: '18px',
-            }}
-          >×</button>
-        </div>
+      <div className="z-sheet-achter" onClick={onClose} />
+      <div className="z-sheet" role="dialog" aria-label="Meer">
+        <div className="z-sheet-greep" />
 
-        {/* Menu items */}
-        <div style={{ flex: 1, padding: '12px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {isAdmin && (
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+            <button
+              type="button"
+              className="z-knop z-knop-primair"
+              onClick={() => { onClose(); onNieuweWedstrijd() }}
+              style={{ flex: 1, height: '48px', fontSize: '15px' }}
+            >
+              <Icoon naam="plus" grootte={18} dikte={2.2} />
+              Wedstrijd
+            </button>
+            <button
+              type="button"
+              className="z-knop"
+              onClick={() => ga('/app/invullen')}
+              style={{ flex: 1, height: '48px', fontSize: '15px' }}
+            >
+              <Icoon naam="invullen" grootte={18} dikte={2} />
+              Uitslag invullen
+            </button>
+          </div>
+        )}
+
+        <div className="z-kaart z-lijst" style={{ overflow: 'hidden' }}>
           {MEER_ITEMS.map(item => (
-            <button
-              key={item.label}
-              onClick={() => { onClose(); if (item.path) navigate(item.path) }}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '12px',
-                padding: '14px 16px', borderRadius: '12px',
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: 'rgba(255,255,255,0.8)', fontSize: '14px', fontWeight: '500',
-                textAlign: 'left', width: '100%',
-                transition: 'background 0.12s',
-              }}
-              onPointerEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
-              onPointerLeave={e => (e.currentTarget.style.background = 'none')}
+            <div
+              key={item.path}
+              className="z-rij z-rij-klik"
+              onClick={() => ga(item.path)}
+              style={{ padding: '10px 16px', minHeight: '52px' }}
             >
-              <span style={{ fontSize: '20px', width: '24px', textAlign: 'center' }}>{item.icon}</span>
-              {item.label}
-            </button>
+              <span className="z-icoonvak"><Icoon naam={item.icoon} grootte={18} /></span>
+              <span style={{ flex: 1, fontSize: '15px', fontWeight: 500, color: 'var(--z-tekst)' }}>{item.label}</span>
+              <Icoon naam="chevron" grootte={16} dikte={2} className="z-chevron" />
+            </div>
           ))}
-
-          {/* Admin: invullen knop */}
-          {isAdmin && (
-            <button
-              onClick={() => { onClose(); navigate('/app/invullen') }}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '12px',
-                padding: '14px 16px', borderRadius: '12px',
-                background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)',
-                cursor: 'pointer', color: '#93c5fd', fontSize: '14px', fontWeight: '600',
-                textAlign: 'left', width: '100%', marginTop: '8px',
-              }}
-            >
-              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              Invullen
-            </button>
-          )}
         </div>
+
+        <button
+          type="button"
+          className="z-knop"
+          onClick={onClose}
+          style={{ width: '100%', height: '48px', fontSize: '15px', marginTop: '12px' }}
+        >
+          Sluiten
+        </button>
       </div>
     </>
   )
 }
 
 export default function PWALayout({ children }) {
-  const location = useLocation()
+  const { pathname } = useLocation()
   const { isAdmin, profile } = useAuth()
-  const { actief: seizoen } = useSeason()
   const [splashKlaar, setSplashKlaar] = useState(() => !!sessionStorage.getItem('splash_done'))
   const [meerOpen, setMeerOpen] = useState(false)
+  const [nieuweWedstrijd, setNieuweWedstrijd] = useState(false)
   const navigate = useNavigate()
 
   const mainRef = useRef(null)
@@ -312,56 +175,43 @@ export default function PWALayout({ children }) {
   const pulling = pullDist > 0 || refreshing
   const progress = Math.min(pullDist / PULL_THRESHOLD, 1)
 
-  const avatarSrc = profile?.avatar_url ?? null
-  const avatarNaam = profile?.display_name ?? profile?.email ?? '?'
+  // Meer-tab oplichten op de schermen die je via Meer bereikt
+  const viaMeer = MEER_ITEMS.some(i => pathname.startsWith(i.path)) || pathname.startsWith('/app/invullen')
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f8fafc' }}>
+    <div className="z-app">
       {!splashKlaar && <PWASplashScreen onKlaar={() => { sessionStorage.setItem('splash_done', '1'); setSplashKlaar(true) }} />}
 
-      {/* Top header */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        background: 'rgba(10,10,20,0.97)',
-        padding: '0 20px',
-        height: '62px', display: 'flex', alignItems: 'center',
-        justifyContent: 'space-between',
-        overflow: 'visible',
-      }}>
-
-        {/* Links: profielfoto: gaat rechtstreeks naar je instellingen.
-            Badges en Instellingen staan sinds 2026-09-14 in het Meer-menu. */}
+      <header className="z-app-balk">
+        {/* Links: profielfoto, rechtstreeks naar je instellingen */}
         <button
           onClick={() => navigate('/app/account')}
           aria-label="Instellingen"
-          title="Instellingen"
-          style={{
-            background: 'none', border: 'none', padding: 0,
-            cursor: 'pointer', flexShrink: 0, lineHeight: 0,
-          }}
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', lineHeight: 0 }}
         >
-          <Avatar src={avatarSrc} naam={avatarNaam} size={38} />
+          <Avatar
+            naam={profile?.display_name ?? profile?.email}
+            foto={profile?.avatar_url}
+            grootte={34}
+            style={{ background: 'rgba(127,162,255,0.2)', color: '#c7d6ff', boxShadow: '0 0 0 2px rgba(255,255,255,0.15)' }}
+          />
         </button>
 
-        {/* Midden: logo in cirkel, animeert mee bij PTR */}
+        {/* Midden: logo dat uitsteekt onder de balk en meebeweegt bij pull-to-refresh */}
         <div style={{
-          position: 'absolute', left: '50%',
-          bottom: '-14px',
-          transform: `translateX(-50%) scale(${pulling ? 1 + progress * 0.55 : 1})`,
-          transition: refreshing ? 'transform 0.3s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.3s' : 'transform 0.2s ease',
-          width: '58px', height: '58px',
-          borderRadius: '50%',
-          background: 'rgba(10,10,20,0.97)',
-          border: '2.5px solid rgba(255,255,255,0.18)',
+          position: 'absolute', left: '50%', bottom: '-16px',
+          transform: `translateX(-50%) scale(${pulling ? 1 + progress * 0.5 : 1})`,
+          transition: refreshing ? 'transform 0.3s cubic-bezier(0.34,1.4,0.64,1)' : 'transform 0.2s ease',
+          width: '56px', height: '56px', borderRadius: '50%',
+          background: 'var(--z-navy)',
           boxShadow: pulling
-            ? `0 0 0 ${progress * 4}px rgba(99,102,241,${progress * 0.3}), 0 0 ${8 + progress * 28}px rgba(99,102,241,${0.15 + progress * 0.4}), 0 4px 20px rgba(0,0,0,0.6)`
-            : '0 0 0 1px rgba(99,102,241,0.3), 0 4px 20px rgba(0,0,0,0.6), 0 0 24px rgba(99,102,241,0.18)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 2,
+            ? `0 0 0 ${2 + progress * 3}px rgba(127,162,255,${0.25 + progress * 0.35}), 0 6px 18px rgba(12,26,61,0.35)`
+            : '0 0 0 2px rgba(255,255,255,0.12), 0 6px 18px rgba(12,26,61,0.35)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2,
         }}>
           <img
             src="/logo.png"
-            alt="ZVK"
+            alt="ZVK Genebos"
             style={{
               width: '38px', height: '38px', objectFit: 'contain',
               transform: pulling && !refreshing ? `rotate(${progress * 360}deg)` : undefined,
@@ -370,109 +220,58 @@ export default function PWALayout({ children }) {
           />
         </div>
 
-        {/* Rechts: placeholder zodat logo exact gecentreerd blijft */}
-        <div style={{ width: 38, flexShrink: 0 }} />
+        {/* Rechts: admin kan meteen invullen, anders een lege plek zodat het logo centraal blijft */}
+        {isAdmin ? (
+          <button
+            onClick={() => navigate('/app/invullen')}
+            aria-label="Wedstrijden invullen"
+            style={{
+              width: '34px', height: '34px', borderRadius: '50%', border: 'none', cursor: 'pointer',
+              background: 'rgba(255,255,255,0.1)', color: 'white',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <Icoon naam="invullen" grootte={17} dikte={2} />
+          </button>
+        ) : <div style={{ width: 34 }} />}
       </header>
 
-      {/* Profiel popover */}
-      {/* Meer menu */}
-      <MeerMenu open={meerOpen} onClose={() => setMeerOpen(false)} isAdmin={isAdmin} />
+      <MeerMenu open={meerOpen} onClose={() => setMeerOpen(false)} isAdmin={isAdmin} onNieuweWedstrijd={() => setNieuweWedstrijd(true)} />
+      {nieuweWedstrijd && (
+        <WedstrijdFormulier
+          onSluiten={() => setNieuweWedstrijd(false)}
+          onOpgeslagen={() => window.dispatchEvent(new Event('zvk:wedstrijden-gewijzigd'))}
+        />
+      )}
 
-      {/* Page content */}
-      <main ref={mainRef} style={{ flex: 1, overflowY: 'auto', paddingBottom: '110px' }}>
+      <main ref={mainRef} className="z-app-inhoud">
         {children}
       </main>
 
       <AnnouncementPopup />
 
-      {/* Bottom nav */}
-      <nav style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
-        paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)',
-        paddingTop: '10px',
-        paddingLeft: '16px', paddingRight: '16px',
-        pointerEvents: 'none',
-      }}>
-        <div style={{
-          background: 'rgba(22,22,38,0.97)',
-          borderRadius: '100px',
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '6px',
-          gap: '2px',
-          pointerEvents: 'all',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-        }}>
-          <span style={{
-            position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom) + 4px)', right: '24px',
-            fontSize: '9px', color: 'rgba(255,255,255,0.1)', pointerEvents: 'none',
-          }}>v0.1</span>
-
-          {tabs.map(tab => {
-            const active = tab.path === '/app'
-              ? location.pathname === '/app'
-              : location.pathname.startsWith(tab.path)
+      {/* Zwevende navigatiepil */}
+      <nav className="z-pilnav">
+        <div className="z-pilnav-balk">
+          {TABS.map(tab => {
+            const actief = tab.path === '/app'
+              ? pathname === '/app' || pathname.startsWith('/app/wedstrijd/')
+              : pathname.startsWith(tab.path)
             return (
-              <Link
-                key={tab.path}
-                to={tab.path}
-                style={{
-                  flex: active ? '0 0 auto' : 1,
-                  display: 'flex',
-                  alignItems: 'center', justifyContent: 'center',
-                  gap: '7px',
-                  padding: active ? '12px 20px' : '12px 0',
-                  textDecoration: 'none',
-                  borderRadius: '100px',
-                  background: active ? 'rgba(255,255,255,0.92)' : 'transparent',
-                  boxShadow: active ? '0 2px 12px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,1)' : 'none',
-                  color: active ? '#0f172a' : 'rgba(255,255,255,0.45)',
-                  transition: 'all 0.25s cubic-bezier(0.34,1.2,0.64,1)',
-                  whiteSpace: 'nowrap',
-                  minWidth: active ? 'auto' : 0,
-                }}
-              >
-                <div style={{ flexShrink: 0, display: 'flex' }}>
-                  {tab.icon}
-                </div>
-                {active && (
-                  <span style={{ fontSize: '13px', fontWeight: '700', letterSpacing: '-0.01em' }}>
-                    {tab.label}
-                  </span>
-                )}
+              <Link key={tab.path} to={tab.path} className="z-pil" aria-current={actief && !meerOpen ? 'page' : undefined}>
+                <Icoon naam={tab.icoon} grootte={20} />
+                <span className="z-pil-label">{tab.label}</span>
               </Link>
             )
           })}
-
-          {/* Meer-tab (drie puntjes) */}
           <button
+            type="button"
+            className="z-pil"
             onClick={() => setMeerOpen(v => !v)}
-            style={{
-              flex: meerOpen ? '0 0 auto' : 1,
-              display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
-              gap: '7px',
-              padding: meerOpen ? '12px 20px' : '12px 0',
-              borderRadius: '100px',
-              background: meerOpen ? 'rgba(255,255,255,0.92)' : 'transparent',
-              boxShadow: meerOpen ? '0 2px 12px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,1)' : 'none',
-              color: meerOpen ? '#0f172a' : 'rgba(255,255,255,0.45)',
-              border: 'none', cursor: 'pointer',
-              transition: 'all 0.25s cubic-bezier(0.34,1.2,0.64,1)',
-              whiteSpace: 'nowrap',
-            }}
+            aria-current={meerOpen || viaMeer ? 'page' : undefined}
           >
-            <div style={{ flexShrink: 0, display: 'flex' }}>
-              {MEER_TAB.icon}
-            </div>
-            {meerOpen && (
-              <span style={{ fontSize: '13px', fontWeight: '700', letterSpacing: '-0.01em' }}>
-                {MEER_TAB.label}
-              </span>
-            )}
+            <Icoon naam="meer" grootte={20} dikte={3} />
+            <span className="z-pil-label">Meer</span>
           </button>
         </div>
       </nav>

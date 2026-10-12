@@ -133,7 +133,7 @@ export default function TabSpelers() {
     fetchSpelers()
   }
 
-  if (loading) return <p style={{ fontSize: '14px', color: '#94a3b8' }}>Laden...</p>
+  if (loading) return <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Laden...</p>
 
   return (
     <>
@@ -141,13 +141,13 @@ export default function TabSpelers() {
     <div>
       {/* Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <p style={{ fontSize: '14px', color: '#94a3b8' }}>{spelers.length} speler{spelers.length !== 1 ? 's' : ''} in de selectie</p>
+        <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>{spelers.length} speler{spelers.length !== 1 ? 's' : ''} in de selectie</p>
         <button
           onClick={() => { setToonFormulier(v => !v); setFout('') }}
           style={{
-            background: toonFormulier ? 'white' : '#0f172a',
-            color: toonFormulier ? '#64748b' : 'white',
-            border: toonFormulier ? '1px solid #e2e8f0' : 'none',
+            background: toonFormulier ? 'white' : 'var(--z-tekst)',
+            color: toonFormulier ? 'var(--z-tekst-3)' : 'white',
+            border: toonFormulier ? '1px solid var(--z-lijn)' : 'none',
             borderRadius: '8px', padding: '8px 16px',
             fontSize: '13px', fontWeight: '600', cursor: 'pointer',
           }}
@@ -159,21 +159,21 @@ export default function TabSpelers() {
       {/* Nieuw speler formulier */}
       {toonFormulier && (
         <form onSubmit={handleToevoegen} style={{
-          background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px',
+          background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)', borderRadius: '12px',
           padding: '20px', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '16px',
         }}>
-          <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a' }}>Nieuwe speler</h3>
-          {fout && <p style={{ fontSize: '13px', color: '#ef4444' }}>{fout}</p>}
+          <h3 style={{ fontSize: '15px', fontWeight: '600', color: 'var(--z-tekst)' }}>Nieuwe speler</h3>
+          {fout && <p style={{ fontSize: '13px', color: 'var(--z-verlies)' }}>{fout}</p>}
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '6px' }}>Naam *</label>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: 'var(--z-tekst-2)', marginBottom: '6px' }}>Naam *</label>
             <input type="text" value={naam} onChange={e => setNaam(e.target.value)} required placeholder="Voor- en achternaam"
-              style={{ width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '9px 14px', fontSize: '14px', color: '#0f172a', outline: 'none', background: 'white' }} />
+              style={{ width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px', padding: '9px 14px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'white' }} />
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '6px' }}>Profielfoto (optioneel)</label>
-            <input type="file" accept="image/*" onChange={e => setFotoBestand(e.target.files[0])} style={{ fontSize: '13px', color: '#475569' }} />
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: 'var(--z-tekst-2)', marginBottom: '6px' }}>Profielfoto (optioneel)</label>
+            <input type="file" accept="image/*" onChange={e => setFotoBestand(e.target.files[0])} style={{ fontSize: '13px', color: 'var(--z-tekst-2)' }} />
           </div>
-          <button type="submit" disabled={opslaan} style={{ background: '#0f172a', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', alignSelf: 'flex-start', opacity: opslaan ? 0.6 : 1 }}>
+          <button type="submit" disabled={opslaan} style={{ background: 'var(--z-tekst)', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', alignSelf: 'flex-start', opacity: opslaan ? 0.6 : 1 }}>
             {opslaan ? 'Opslaan...' : 'Toevoegen'}
           </button>
         </form>
@@ -181,8 +181,8 @@ export default function TabSpelers() {
 
       {/* Spelerslijst */}
       {spelers.length === 0 ? (
-        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
-          <p style={{ fontSize: '14px', color: '#94a3b8' }}>Nog geen spelers. Voeg de eerste toe!</p>
+        <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
+          <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Nog geen spelers. Voeg de eerste toe!</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -190,7 +190,7 @@ export default function TabSpelers() {
             <div key={speler.id}>
               {/* Speler rij */}
               <div style={{
-                background: 'white', border: `1px solid ${bewerkId === speler.id ? '#93c5fd' : '#e2e8f0'}`,
+                background: 'white', border: `1px solid ${bewerkId === speler.id ? '#93c5fd' : 'var(--z-lijn)'}`,
                 borderRadius: (bewerkId === speler.id || badgePaneel === speler.id) ? '10px 10px 0 0' : '10px',
                 padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px',
               }}>
@@ -203,7 +203,7 @@ export default function TabSpelers() {
                   letterGrootte={14}
                 />
 
-                <span style={{ flex: 1, fontSize: '14px', fontWeight: '500', color: '#0f172a' }}>{speler.name}</span>
+                <span style={{ flex: 1, fontSize: '14px', fontWeight: '500', color: 'var(--z-tekst)' }}>{speler.name}</span>
 
                 <div style={{ display: 'flex', gap: '6px' }}>
                   <button
@@ -211,10 +211,10 @@ export default function TabSpelers() {
                     title="Handmatige badges toekennen"
                     style={{
                       display: 'flex', alignItems: 'center', gap: '5px',
-                      background: badgePaneel === speler.id ? '#f1f5f9' : 'white',
-                      border: '1px solid #e2e8f0', borderRadius: '6px',
+                      background: badgePaneel === speler.id ? 'var(--z-lijn-zacht)' : 'white',
+                      border: '1px solid var(--z-lijn)', borderRadius: '6px',
                       padding: '5px 12px', fontSize: '13px', fontWeight: '500',
-                      color: '#475569', cursor: 'pointer',
+                      color: 'var(--z-tekst-2)', cursor: 'pointer',
                     }}
                   >
                     🏅 Badges
@@ -222,7 +222,7 @@ export default function TabSpelers() {
                       <span style={{
                         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                         minWidth: '17px', height: '17px', padding: '0 4px', borderRadius: '9px',
-                        background: '#0f172a', color: 'white', fontSize: '10px', fontWeight: '700',
+                        background: 'var(--z-tekst)', color: 'white', fontSize: '10px', fontWeight: '700',
                       }}>
                         {toegekend[speler.id].size}
                       </span>
@@ -231,19 +231,19 @@ export default function TabSpelers() {
                   <button
                     onClick={() => bewerkId === speler.id ? stopBewerken() : startBewerken(speler)}
                     style={{
-                      background: bewerkId === speler.id ? '#f1f5f9' : 'white',
-                      border: '1px solid #e2e8f0', borderRadius: '6px',
+                      background: bewerkId === speler.id ? 'var(--z-lijn-zacht)' : 'white',
+                      border: '1px solid var(--z-lijn)', borderRadius: '6px',
                       padding: '5px 12px', fontSize: '13px', fontWeight: '500',
-                      color: '#475569', cursor: 'pointer',
+                      color: 'var(--z-tekst-2)', cursor: 'pointer',
                     }}
                   >
                     {bewerkId === speler.id ? 'Annuleren' : 'Bewerken'}
                   </button>
                   <button
                     onClick={() => handleVerwijder(speler)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: '#cbd5e1', padding: '5px 8px', borderRadius: '6px' }}
-                    onMouseEnter={e => e.target.style.color = '#ef4444'}
-                    onMouseLeave={e => e.target.style.color = '#cbd5e1'}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: 'var(--z-lijn-sterk)', padding: '5px 8px', borderRadius: '6px' }}
+                    onMouseEnter={e => e.target.style.color = 'var(--z-verlies)'}
+                    onMouseLeave={e => e.target.style.color = 'var(--z-lijn-sterk)'}
                   >
                     Verwijderen
                   </button>
@@ -253,13 +253,13 @@ export default function TabSpelers() {
               {/* Badgepaneel */}
               {badgePaneel === speler.id && (
                 <div style={{
-                  background: '#f8fafc', border: '1px solid #e2e8f0', borderTop: 'none',
+                  background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)', borderTop: 'none',
                   borderRadius: '0 0 10px 10px', padding: '16px 20px',
                 }}>
-                  <p style={{ fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <p style={{ fontSize: '12px', fontWeight: '600', color: 'var(--z-tekst-3)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Handmatige badges
                   </p>
-                  <p style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '14px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--z-tekst-4)', marginBottom: '14px' }}>
                     Deze badges ken jij toe. Een speler kan ze niet zelf verdienen.
                   </p>
 
@@ -278,9 +278,9 @@ export default function TabSpelers() {
                           style={{
                             display: 'flex', alignItems: 'center', gap: '9px',
                             padding: '9px 14px', borderRadius: '10px',
-                            border: `1.5px solid ${heeft ? c.lbo : '#e2e8f0'}`,
+                            border: `1.5px solid ${heeft ? c.lbo : 'var(--z-lijn)'}`,
                             background: heeft ? c.lb : 'white',
-                            color: heeft ? c.lc : '#64748b',
+                            color: heeft ? c.lc : 'var(--z-tekst-3)',
                             fontSize: '13px', fontWeight: heeft ? '700' : '500',
                             cursor: bezig ? 'wait' : 'pointer',
                             opacity: bezig ? 0.6 : 1,
@@ -291,7 +291,7 @@ export default function TabSpelers() {
                           {badge.naam}
                           <span style={{
                             fontSize: '11px', fontWeight: '600',
-                            color: heeft ? c.lc : '#cbd5e1',
+                            color: heeft ? c.lc : 'var(--z-lijn-sterk)',
                           }}>
                             {heeft ? '✓ toegekend' : '+ toekennen'}
                           </span>
@@ -299,7 +299,7 @@ export default function TabSpelers() {
                       )
                     })}
                     {HANDMATIGE_BADGES.length === 0 && (
-                      <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+                      <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)' }}>
                         Er zijn nog geen handmatige badges gedefinieerd.
                       </p>
                     )}
@@ -310,27 +310,27 @@ export default function TabSpelers() {
               {/* Inline bewerkformulier */}
               {bewerkId === speler.id && (
                 <form onSubmit={e => handleBewerken(e, speler)} style={{
-                  background: '#f8fafc', border: '1px solid #93c5fd', borderTop: 'none',
+                  background: 'var(--z-vlak)', border: '1px solid #93c5fd', borderTop: 'none',
                   borderRadius: '0 0 10px 10px', padding: '16px 20px',
                   display: 'flex', flexDirection: 'column', gap: '14px',
                 }}>
-                  {bewerkFout && <p style={{ fontSize: '13px', color: '#ef4444' }}>{bewerkFout}</p>}
+                  {bewerkFout && <p style={{ fontSize: '13px', color: 'var(--z-verlies)' }}>{bewerkFout}</p>}
 
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                     <div style={{ flex: 1, minWidth: '200px' }}>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#64748b', marginBottom: '5px' }}>Naam</label>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-3)', marginBottom: '5px' }}>Naam</label>
                       <input type="text" value={bewerkNaam} onChange={e => setBewerkNaam(e.target.value)} required
-                        style={{ width: '100%', border: '1px solid #e2e8f0', borderRadius: '7px', padding: '8px 12px', fontSize: '14px', color: '#0f172a', outline: 'none', background: 'white' }} />
+                        style={{ width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '7px', padding: '8px 12px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'white' }} />
                     </div>
                     <div style={{ flex: 1, minWidth: '200px' }}>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#64748b', marginBottom: '5px' }}>Nieuwe foto (optioneel)</label>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-3)', marginBottom: '5px' }}>Nieuwe foto (optioneel)</label>
                       <input type="file" accept="image/*" onChange={e => setBewerkFoto(e.target.files[0])}
-                        style={{ fontSize: '13px', color: '#475569', paddingTop: '4px' }} />
+                        style={{ fontSize: '13px', color: 'var(--z-tekst-2)', paddingTop: '4px' }} />
                     </div>
                   </div>
 
                   <button type="submit" disabled={bewerkOpslaan} style={{
-                    background: '#0f172a', color: 'white', border: 'none', borderRadius: '7px',
+                    background: 'var(--z-tekst)', color: 'white', border: 'none', borderRadius: '7px',
                     padding: '8px 18px', fontSize: '13px', fontWeight: '600',
                     cursor: 'pointer', alignSelf: 'flex-start', opacity: bewerkOpslaan ? 0.6 : 1,
                   }}>

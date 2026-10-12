@@ -5,6 +5,7 @@ import { usePush } from '../hooks/usePush'
 import { useTopscorer } from '../context/TopscorerContext'
 import EerKronen from '../components/EerKronen'
 import { RING_KLASSE } from '../lib/eer'
+import { Icoon } from '../ui'
 
 // ── Hoofd component ─────────────────────────────────────────────────────────
 export default function PWAAccount() {
@@ -110,27 +111,14 @@ export default function PWAAccount() {
   const initiaal     = weergaveNaam.charAt(0).toUpperCase()
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', paddingBottom: '120px' }}>
+    <div style={{ paddingBottom: '24px' }}>
 
       {/* ── Profiel hero ── */}
       <div style={{
-        background: 'linear-gradient(160deg, #0f172a 0%, #1e3a5f 100%)',
-        padding: '32px 20px 28px',
+        background: 'radial-gradient(120% 140% at 100% 0%, #2a4fb8 0%, #13234d 50%, #0c1a3d 100%)',
+        padding: '40px 20px 28px',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Decoratieve cirkel */}
-        <div style={{
-          position: 'absolute', top: '-40px', right: '-40px',
-          width: '180px', height: '180px', borderRadius: '50%',
-          background: 'rgba(59,130,246,0.08)',
-          pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '-20px', left: '-20px',
-          width: '120px', height: '120px', borderRadius: '50%',
-          background: 'rgba(99,102,241,0.06)',
-          pointerEvents: 'none',
-        }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '18px', position: 'relative' }}>
           {/* Avatar: glanzende gouden ring als jij de topscorer bent */}
@@ -142,27 +130,27 @@ export default function PWAAccount() {
             onClick={() => fotoInputRef.current?.click()}
             style={{
               width: '100%', height: '100%', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #1e3a5f, #1e40af)',
+              background: '#1f3266',
               border: jouwEer ? 'none' : '3px solid rgba(255,255,255,0.15)',
               boxSizing: 'border-box',
-              overflow: 'hidden', cursor: 'pointer', position: 'relative',
+              cursor: 'pointer', position: 'relative',
               boxShadow: jouwEer ? undefined : '0 4px 20px rgba(0,0,0,0.3)',
             }}
           >
             {fotoSrc
-              ? <img src={fotoSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', fontSize: '30px', fontWeight: '800', color: '#93c5fd' }}>
+              ? <img src={fotoSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+              : <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', fontSize: '30px', fontWeight: '800', color: '#c7d6ff' }}>
                   {initiaal}
                 </span>
             }
             {/* Camera overlay */}
             <div style={{
-              position: 'absolute', inset: 0,
-              background: 'rgba(0,0,0,0.45)',
+              position: 'absolute', right: '-2px', bottom: '-2px',
+              width: '28px', height: '28px', borderRadius: '50%',
+              background: 'var(--z-blauw)', border: '2px solid #13234d',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              borderRadius: '50%',
             }}>
-              <svg width="18" height="18" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
+              <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
@@ -201,7 +189,7 @@ export default function PWAAccount() {
         <SectieLabel>Profiel</SectieLabel>
         <div style={kaartStijl}>
           <FormRij
-            icon="👤"
+            icon="gebruiker"
             label="Naam"
           >
             <input
@@ -212,7 +200,7 @@ export default function PWAAccount() {
             />
           </FormRij>
           <Divider />
-          <FormRij icon="⚡" label="Bijnaam">
+          <FormRij icon="tag" label="Bijnaam">
             <input
               type="text" value={bijnaam}
               onChange={e => { setBijnaam(e.target.value); setBericht(null) }}
@@ -221,7 +209,7 @@ export default function PWAAccount() {
             />
           </FormRij>
           <Divider />
-          <FormRij icon="🎂" label="Geboortedatum">
+          <FormRij icon="taart" label="Geboortedatum">
             <input
               type="date" value={gebdatum}
               onChange={e => { setGebdatum(e.target.value); setBericht(null) }}
@@ -231,7 +219,7 @@ export default function PWAAccount() {
           {!speler && (
             <div style={{ padding: '10px 16px 14px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '13px' }}>ℹ️</span>
-              <span style={{ fontSize: '12px', color: '#94a3b8' }}>Nog niet gekoppeld aan een spelersfiche. Een admin doet dat.</span>
+              <span style={{ fontSize: '12px', color: 'var(--z-tekst-4)' }}>Nog niet gekoppeld aan een spelersfiche. Een admin doet dat.</span>
             </div>
           )}
         </div>
@@ -239,7 +227,7 @@ export default function PWAAccount() {
         {/* Account sectie */}
         <SectieLabel>Account</SectieLabel>
         <div style={kaartStijl}>
-          <FormRij icon="✉️" label="E-mail">
+          <FormRij icon="mail" label="E-mail">
             <input
               type="email" value={email}
               onChange={e => { setEmail(e.target.value); setBericht(null) }}
@@ -247,12 +235,12 @@ export default function PWAAccount() {
             />
           </FormRij>
           <Divider />
-          <FormRij icon="🔑" label="Wachtwoord">
+          <FormRij icon="slot" label="Wachtwoord">
             <button
               onClick={() => setPwExpanded(v => !v)}
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginLeft: 'auto',
-                fontSize: '13px', color: pwDirty ? '#1d4ed8' : '#3b82f6', fontWeight: '600',
+                fontSize: '13px', color: pwDirty ? 'var(--z-blauw)' : 'var(--z-blauw-500)', fontWeight: '600',
                 display: 'flex', alignItems: 'center', gap: '4px',
               }}
             >
@@ -263,7 +251,7 @@ export default function PWAAccount() {
             </button>
           </FormRij>
           {pwExpanded && (
-            <div style={{ borderTop: '1px solid #f1f5f9', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ borderTop: '1px solid var(--z-lijn-zacht)', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <PwVeld
                 label="Nieuw wachtwoord" value={nieuwPw}
                 onChange={e => { setNieuwPw(e.target.value); setBericht(null) }}
@@ -288,20 +276,15 @@ export default function PWAAccount() {
             <SectieLabel>Meldingen</SectieLabel>
             <div style={kaartStijl}>
               <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <div style={{
-                  width: '38px', height: '38px', borderRadius: '10px',
-                  background: pushStatus === 'subscribed' ? '#eff6ff' : '#f1f5f9',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0, fontSize: '18px',
-                }}>
-                  🔔
-                </div>
+                <span className="z-icoonvak" style={pushStatus === 'subscribed' ? undefined : { background: 'var(--z-lijn-zacht)', color: 'var(--z-tekst-3)' }}>
+                  <Icoon naam="bel" grootte={17} />
+                </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a' }}>Push notificaties</div>
-                  <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
-                    {pushStatus === 'subscribed' && <span style={{ color: '#16a34a' }}>✓ Ingeschakeld</span>}
-                    {pushStatus === 'idle'       && (pushFout ? <span style={{ color: '#ef4444' }}>{pushFout}</span> : 'Ontvang meldingen over wedstrijden.')}
-                    {pushStatus === 'denied'     && <span style={{ color: '#f59e0b' }}>Geblokkeerd in browserinstellingen</span>}
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--z-tekst)' }}>Push notificaties</div>
+                  <div style={{ fontSize: '12px', color: 'var(--z-tekst-4)', marginTop: '2px' }}>
+                    {pushStatus === 'subscribed' && <span style={{ color: 'var(--z-winst)' }}>✓ Ingeschakeld</span>}
+                    {pushStatus === 'idle'       && (pushFout ? <span style={{ color: 'var(--z-verlies)' }}>{pushFout}</span> : 'Ontvang meldingen over wedstrijden.')}
+                    {pushStatus === 'denied'     && <span style={{ color: 'var(--z-gelijk)' }}>Geblokkeerd in browserinstellingen</span>}
                     {pushStatus === 'loading'    && 'Laden...'}
                   </div>
                 </div>
@@ -311,7 +294,7 @@ export default function PWAAccount() {
                     onClick={pushStatus === 'subscribed' ? pushUnsubscribe : pushSubscribe}
                     style={{
                       width: '50px', height: '28px', borderRadius: '14px', border: 'none',
-                      background: pushStatus === 'subscribed' ? '#3b82f6' : '#cbd5e1',
+                      background: pushStatus === 'subscribed' ? 'var(--z-blauw)' : 'var(--z-lijn-sterk)',
                       cursor: 'pointer', position: 'relative', flexShrink: 0,
                       transition: 'background 0.2s',
                     }}
@@ -326,10 +309,10 @@ export default function PWAAccount() {
                   </button>
                 )}
                 {pushStatus === 'denied' && (
-                  <span style={{ fontSize: '20px', flexShrink: 0 }}>🔒</span>
+                  <Icoon naam="slot" grootte={18} style={{ color: 'var(--z-tekst-4)', flexShrink: 0 }} />
                 )}
                 {pushStatus === 'loading' && (
-                  <div style={{ width: '20px', height: '20px', border: '2px solid #e2e8f0', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
+                  <div style={{ width: '20px', height: '20px', border: '2px solid var(--z-lijn)', borderTopColor: 'var(--z-blauw-500)', borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
                 )}
               </div>
             </div>
@@ -337,13 +320,12 @@ export default function PWAAccount() {
         )}
 
         {/* Afmelden */}
-        <SectieLabel>Account acties</SectieLabel>
-        <button
+                <button
           onClick={signOut}
           style={{
             width: '100%', padding: '15px 16px',
-            background: 'white', border: '1px solid #fee2e2', borderRadius: '16px',
-            fontSize: '14px', fontWeight: '700', color: '#ef4444', cursor: 'pointer',
+            background: 'white', border: '1px solid var(--z-lijn)', borderRadius: 'var(--z-r)',
+            fontSize: '15px', fontWeight: '600', color: 'var(--z-verlies)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
           }}
@@ -359,7 +341,7 @@ export default function PWAAccount() {
       {isDirty && (
         <div style={{
           position: 'fixed', bottom: '90px', left: '16px', right: '16px', zIndex: 100,
-          background: '#0f172a', borderRadius: '18px',
+          background: 'var(--z-tekst)', borderRadius: '18px',
           padding: '13px 16px', display: 'flex', alignItems: 'center', gap: '14px',
           boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
         }}>
@@ -375,7 +357,7 @@ export default function PWAAccount() {
           <button
             onClick={handleOpslaan} disabled={bezig}
             style={{
-              background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+              background: 'linear-gradient(135deg, var(--z-blauw-500), #2563eb)',
               color: 'white', border: 'none',
               borderRadius: '12px', padding: '0 20px', height: '38px',
               fontSize: '14px', fontWeight: '700',
@@ -395,36 +377,30 @@ export default function PWAAccount() {
 // ── Hulpcomponenten ─────────────────────────────────────────────────────────
 const kaartStijl = {
   background: 'white',
-  border: '1px solid #f1f5f9',
-  borderRadius: '16px',
+  border: '1px solid var(--z-lijn)',
+  borderRadius: 'var(--z-r)',
   overflow: 'hidden',
-  marginBottom: '24px',
-  boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+  marginBottom: '28px',
+  boxShadow: 'var(--z-schaduw-s)',
 }
 
 function SectieLabel({ children }) {
   return (
-    <div style={{ fontSize: '11px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
+    <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--z-tekst)', marginBottom: '12px' }}>
       {children}
     </div>
   )
 }
 
 function Divider() {
-  return <div style={{ height: '1px', background: '#f8fafc', marginLeft: '52px' }} />
+  return <div style={{ height: '1px', background: 'var(--z-lijn-zacht)', marginLeft: '60px' }} />
 }
 
 function FormRij({ icon, label, children }) {
   return (
     <div style={{ padding: '13px 16px', display: 'flex', alignItems: 'center', gap: '12px', minHeight: '52px' }}>
-      <div style={{
-        width: '28px', height: '28px', borderRadius: '8px', background: '#f8fafc',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '15px', flexShrink: 0,
-      }}>
-        {icon}
-      </div>
-      <span style={{ fontSize: '14px', color: '#475569', flexShrink: 0, width: '100px', fontWeight: '500' }}>{label}</span>
+      <span className="z-icoonvak"><Icoon naam={icon} grootte={17} /></span>
+      <span style={{ fontSize: '14px', color: 'var(--z-tekst-2)', flexShrink: 0, width: '100px', fontWeight: '500' }}>{label}</span>
       <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
         {children}
       </div>
@@ -435,7 +411,7 @@ function FormRij({ icon, label, children }) {
 const inputStijl = (dirty) => ({
   flex: 1, border: 'none', outline: 'none',
   fontSize: '14px', background: 'transparent',
-  color: dirty ? '#1d4ed8' : '#64748b',
+  color: dirty ? 'var(--z-blauw)' : 'var(--z-tekst-3)',
   fontWeight: dirty ? '600' : '400',
   padding: '0', textAlign: 'right', fontFamily: 'inherit',
 })
@@ -443,16 +419,16 @@ const inputStijl = (dirty) => ({
 function PwVeld({ label, value, onChange, toon, onToggle, placeholder, dirty }) {
   return (
     <div>
-      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#94a3b8', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</label>
+      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--z-tekst-4)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</label>
       <div style={{ position: 'relative' }}>
         <input
           type={toon ? 'text' : 'password'}
           value={value} onChange={onChange} placeholder={placeholder}
           style={{
-            width: '100%', border: `1.5px solid ${dirty ? '#3b82f6' : '#e2e8f0'}`,
+            width: '100%', border: `1.5px solid ${dirty ? 'var(--z-blauw-500)' : 'var(--z-lijn)'}`,
             borderRadius: '12px', padding: '0 44px 0 14px', fontSize: '14px',
-            color: '#0f172a', outline: 'none',
-            background: dirty ? '#eff6ff' : '#fafafa',
+            color: 'var(--z-tekst)', outline: 'none',
+            background: dirty ? 'var(--z-blauw-50)' : '#fafafa',
             boxSizing: 'border-box', height: '44px', fontFamily: 'inherit',
             transition: 'border-color 0.15s, background 0.15s',
           }}
@@ -462,7 +438,7 @@ function PwVeld({ label, value, onChange, toon, onToggle, placeholder, dirty }) 
           style={{
             position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
             background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-            color: toon ? '#475569' : '#94a3b8', lineHeight: 0,
+            color: toon ? 'var(--z-tekst-2)' : 'var(--z-tekst-4)', lineHeight: 0,
           }}
         >
           <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

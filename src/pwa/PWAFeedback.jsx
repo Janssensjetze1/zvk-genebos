@@ -3,9 +3,9 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 
 export const CATEGORIEEN = [
-  { id: 'bug', label: 'Er is iets kapot', emoji: '🐞', kleur: '#ef4444', bg: '#fef2f2', rand: '#fecaca' },
-  { id: 'idee', label: 'Ik heb een idee', emoji: '💡', kleur: '#d97706', bg: '#fffbeb', rand: '#fde68a' },
-  { id: 'andere', label: 'Iets anders', emoji: '💬', kleur: '#3b82f6', bg: '#eff6ff', rand: '#bfdbfe' },
+  { id: 'bug', label: 'Er is iets kapot', emoji: '🐞', kleur: 'var(--z-verlies)', bg: 'var(--z-verlies-bg)', rand: 'var(--z-verlies-rand)' },
+  { id: 'idee', label: 'Ik heb een idee', emoji: '💡', kleur: '#d97706', bg: 'var(--z-gelijk-bg)', rand: 'var(--z-gelijk-rand)' },
+  { id: 'andere', label: 'Iets anders', emoji: '💬', kleur: 'var(--z-blauw-500)', bg: 'var(--z-blauw-50)', rand: 'var(--z-blauw-200)' },
 ]
 
 const MAX_TEKENS = 2000
@@ -61,29 +61,29 @@ export default function PWAFeedback() {
   const teLang = bericht.length > MAX_TEKENS
 
   return (
-    <div style={{ padding: '20px 16px' }}>
-      <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>Feedback</h1>
-      <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '20px', lineHeight: 1.6 }}>
+    <div style={{ padding: '28px 16px 24px' }}>
+      <h1 className="z-app-titel" style={{ marginBottom: '6px' }}>Feedback</h1>
+      <p className="z-ondertitel" style={{ marginBottom: '24px', lineHeight: 1.55 }}>
         Werkt er iets niet, of heb je een idee? Laat het hier achter, het komt
         rechtstreeks bij de beheerders terecht.
       </p>
 
       {verzonden ? (
         <div style={{
-          background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: '16px',
+          background: 'var(--z-winst-bg)', border: '1.5px solid var(--z-winst-rand)', borderRadius: '16px',
           padding: '24px 20px', textAlign: 'center', marginBottom: '24px',
         }}>
           <div style={{ fontSize: '32px', marginBottom: '8px' }}>✅</div>
-          <div style={{ fontSize: '15px', fontWeight: '700', color: '#15803d', marginBottom: '4px' }}>
+          <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--z-winst)', marginBottom: '4px' }}>
             Bedankt!
           </div>
-          <p style={{ fontSize: '13px', color: '#16a34a', lineHeight: 1.6, marginBottom: '16px' }}>
+          <p style={{ fontSize: '13px', color: 'var(--z-winst)', lineHeight: 1.6, marginBottom: '16px' }}>
             Je bericht is verstuurd.
           </p>
           <button
             onClick={() => setVerzonden(false)}
             style={{
-              background: 'white', border: '1.5px solid #bbf7d0', color: '#15803d',
+              background: 'white', border: '1.5px solid var(--z-winst-rand)', color: 'var(--z-winst)',
               borderRadius: '10px', padding: '9px 16px',
               fontSize: '13px', fontWeight: '600', cursor: 'pointer',
             }}
@@ -93,14 +93,14 @@ export default function PWAFeedback() {
         </div>
       ) : (
         <div style={{
-          background: 'white', borderRadius: '16px', border: '1.5px solid #e2e8f0',
+          background: 'white', borderRadius: '16px', border: '1.5px solid var(--z-lijn)',
           boxShadow: '0 1px 4px rgba(0,0,0,0.04)', padding: '16px', marginBottom: '24px',
           display: 'flex', flexDirection: 'column', gap: '14px',
         }}>
           {/* Categorie */}
           <div>
             <div style={{
-              fontSize: '11px', fontWeight: '700', color: '#94a3b8',
+              fontSize: '11px', fontWeight: '700', color: 'var(--z-tekst-4)',
               textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px',
             }}>
               Waarover gaat het?
@@ -116,9 +116,9 @@ export default function PWAFeedback() {
                     style={{
                       display: 'flex', alignItems: 'center', gap: '10px',
                       padding: '11px 14px', borderRadius: '10px',
-                      border: `1.5px solid ${actief ? c.rand : '#e2e8f0'}`,
+                      border: `1.5px solid ${actief ? c.rand : 'var(--z-lijn)'}`,
                       background: actief ? c.bg : 'white',
-                      color: actief ? c.kleur : '#64748b',
+                      color: actief ? c.kleur : 'var(--z-tekst-3)',
                       fontSize: '13px', fontWeight: actief ? '700' : '500',
                       cursor: 'pointer', textAlign: 'left', width: '100%',
                       transition: 'all 0.15s',
@@ -139,12 +139,12 @@ export default function PWAFeedback() {
               marginBottom: '8px',
             }}>
               <span style={{
-                fontSize: '11px', fontWeight: '700', color: '#94a3b8',
+                fontSize: '11px', fontWeight: '700', color: 'var(--z-tekst-4)',
                 textTransform: 'uppercase', letterSpacing: '0.05em',
               }}>
                 Je bericht
               </span>
-              <span style={{ fontSize: '11px', color: teLang ? '#ef4444' : '#cbd5e1' }}>
+              <span style={{ fontSize: '11px', color: teLang ? 'var(--z-verlies)' : 'var(--z-lijn-sterk)' }}>
                 {bericht.length}/{MAX_TEKENS}
               </span>
             </div>
@@ -161,8 +161,8 @@ export default function PWAFeedback() {
               }
               style={{
                 width: '100%', boxSizing: 'border-box',
-                border: '1.5px solid #e2e8f0', borderRadius: '10px',
-                padding: '12px', fontSize: '14px', color: '#0f172a',
+                border: '1.5px solid var(--z-lijn)', borderRadius: '10px',
+                padding: '12px', fontSize: '14px', color: 'var(--z-tekst)',
                 fontFamily: 'inherit', lineHeight: 1.6, resize: 'vertical',
                 outline: 'none', background: '#fafafa',
               }}
@@ -171,8 +171,8 @@ export default function PWAFeedback() {
 
           {fout && (
             <div style={{
-              fontSize: '12px', color: '#b91c1c', background: '#fef2f2',
-              border: '1px solid #fecaca', borderRadius: '10px', padding: '8px 12px',
+              fontSize: '12px', color: '#b91c1c', background: 'var(--z-verlies-bg)',
+              border: '1px solid var(--z-verlies-rand)', borderRadius: '10px', padding: '8px 12px',
             }}>
               {fout}
             </div>
@@ -184,8 +184,8 @@ export default function PWAFeedback() {
             style={{
               width: '100%', padding: '13px',
               borderRadius: '12px', border: 'none',
-              background: !bericht.trim() || teLang ? '#e2e8f0' : '#0f172a',
-              color: !bericht.trim() || teLang ? '#94a3b8' : 'white',
+              background: !bericht.trim() || teLang ? 'var(--z-lijn)' : 'var(--z-tekst)',
+              color: !bericht.trim() || teLang ? 'var(--z-tekst-4)' : 'white',
               fontSize: '14px', fontWeight: '700',
               cursor: !bericht.trim() || teLang || versturen ? 'not-allowed' : 'pointer',
               opacity: versturen ? 0.7 : 1,
@@ -194,7 +194,7 @@ export default function PWAFeedback() {
             {versturen ? 'Versturen...' : `${gekozen?.emoji ?? ''} Versturen`}
           </button>
 
-          <p style={{ fontSize: '11px', color: '#cbd5e1', textAlign: 'center', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '11px', color: 'var(--z-lijn-sterk)', textAlign: 'center', lineHeight: 1.5 }}>
             Je bericht wordt op naam verstuurd, zodat de beheerders kunnen terugkoppelen.
           </p>
         </div>
@@ -204,7 +204,7 @@ export default function PWAFeedback() {
       {eigen.length > 0 && (
         <div>
           <div style={{
-            fontSize: '11px', fontWeight: '700', color: '#94a3b8',
+            fontSize: '11px', fontWeight: '700', color: 'var(--z-tekst-4)',
             textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px',
           }}>
             Wat jij al doorgaf
@@ -214,7 +214,7 @@ export default function PWAFeedback() {
               const cat = CATEGORIEEN.find(c => c.id === f.categorie) ?? CATEGORIEEN[2]
               return (
                 <div key={f.id} style={{
-                  background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px',
+                  background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px',
                   padding: '12px 14px',
                 }}>
                   <div style={{
@@ -226,12 +226,12 @@ export default function PWAFeedback() {
                     }}>
                       {cat.emoji} {cat.label}
                     </span>
-                    <span style={{ fontSize: '11px', color: '#cbd5e1' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--z-lijn-sterk)' }}>
                       {new Date(f.created_at).toLocaleDateString('nl-BE', { day: 'numeric', month: 'short' })}
                     </span>
                   </div>
                   <p style={{
-                    fontSize: '13px', color: '#475569', lineHeight: 1.6,
+                    fontSize: '13px', color: 'var(--z-tekst-2)', lineHeight: 1.6,
                     whiteSpace: 'pre-wrap', margin: 0,
                   }}>
                     {f.bericht}

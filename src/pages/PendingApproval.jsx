@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useConfirm } from '../components/ConfirmDialog'
+import { Icoon } from '../ui'
 
 export default function PendingApproval() {
   const { signOut } = useAuth()
@@ -18,7 +19,7 @@ export default function PendingApproval() {
       {ConfirmUI}
       <div style={{
         position: 'fixed', inset: 0,
-        background: '#0a0a14',
+        background: 'radial-gradient(120% 80% at 50% 0%, #1b3a8f 0%, #13234d 45%, #0c1a3d 100%)',
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
         padding: '40px 24px',
@@ -43,12 +44,12 @@ export default function PendingApproval() {
           {/* Icoon */}
           <div style={{
             width: '64px', height: '64px', borderRadius: '50%',
-            background: 'rgba(234,179,8,0.12)',
-            border: '1.5px solid rgba(234,179,8,0.3)',
+            background: 'rgba(127,162,255,0.14)',
+            border: '1px solid rgba(127,162,255,0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '28px', margin: '0 auto 20px',
+            color: '#c7d6ff', margin: '0 auto 20px',
           }}>
-            ⏳
+            <Icoon naam="klok" grootte={28} />
           </div>
 
           <h2 style={{
@@ -75,7 +76,7 @@ export default function PendingApproval() {
             {[0, 1, 2].map(i => (
               <div key={i} style={{
                 width: '7px', height: '7px', borderRadius: '50%',
-                background: 'rgba(234,179,8,0.6)',
+                background: 'rgba(199,214,255,0.7)',
                 animation: `pulse-soft 1.4s ${i * 0.22}s ease-in-out infinite`,
               }} />
             ))}

@@ -74,7 +74,7 @@ export default function TabTeams() {
   const zvkTeam = teams.find(t => t.is_zvk)
   const tegenstanders = teams.filter(t => !t.is_zvk)
 
-  if (loading) return <p style={{ fontSize: '14px', color: '#94a3b8' }}>Laden...</p>
+  if (loading) return <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Laden...</p>
 
   return (
     <>
@@ -87,27 +87,27 @@ export default function TabTeams() {
           <div>
             <div style={{
               background: 'white',
-              border: `1px solid ${bewerkId === zvkTeam.id ? '#93c5fd' : '#e2e8f0'}`,
+              border: `1px solid ${bewerkId === zvkTeam.id ? '#93c5fd' : 'var(--z-lijn)'}`,
               borderRadius: bewerkId === zvkTeam.id ? '10px 10px 0 0' : '10px',
               padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px',
             }}>
               <div style={{
                 width: '32px', height: '32px', borderRadius: '8px',
-                background: '#eff6ff', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', fontSize: '13px', fontWeight: '700', color: '#1d4ed8',
+                background: 'var(--z-blauw-50)', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', fontSize: '13px', fontWeight: '700', color: 'var(--z-blauw)',
               }}>{zvkTeam.name.charAt(0).toUpperCase()}</div>
-              <span style={{ flex: 1, fontSize: '14px', fontWeight: '600', color: '#0f172a' }}>{zvkTeam.name}</span>
+              <span style={{ flex: 1, fontSize: '14px', fontWeight: '600', color: 'var(--z-tekst)' }}>{zvkTeam.name}</span>
               <span style={{
                 fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '20px',
-                background: '#eff6ff', color: '#1d4ed8', marginRight: '8px',
+                background: 'var(--z-blauw-50)', color: 'var(--z-blauw)', marginRight: '8px',
               }}>Eigen team</span>
               <button
                 onClick={() => bewerkId === zvkTeam.id ? stopBewerken() : startBewerken(zvkTeam)}
                 style={{
-                  background: bewerkId === zvkTeam.id ? '#f1f5f9' : 'white',
-                  border: '1px solid #e2e8f0', borderRadius: '6px',
+                  background: bewerkId === zvkTeam.id ? 'var(--z-lijn-zacht)' : 'white',
+                  border: '1px solid var(--z-lijn)', borderRadius: '6px',
                   padding: '5px 12px', fontSize: '13px', fontWeight: '500',
-                  color: '#475569', cursor: 'pointer',
+                  color: 'var(--z-tekst-2)', cursor: 'pointer',
                 }}
               >
                 {bewerkId === zvkTeam.id ? 'Annuleren' : 'Bewerken'}
@@ -116,12 +116,12 @@ export default function TabTeams() {
 
             {bewerkId === zvkTeam.id && (
               <form onSubmit={e => handleBewerken(e, zvkTeam)} style={{
-                background: '#f8fafc', border: '1px solid #93c5fd', borderTop: 'none',
+                background: 'var(--z-vlak)', border: '1px solid #93c5fd', borderTop: 'none',
                 borderRadius: '0 0 10px 10px', padding: '14px 16px',
                 display: 'flex', gap: '12px', alignItems: 'flex-end',
               }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#64748b', marginBottom: '5px' }}>Naam</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-3)', marginBottom: '5px' }}>Naam</label>
                   <input
                     type="text"
                     value={bewerkNaam}
@@ -158,11 +158,11 @@ export default function TabTeams() {
         {/* Nieuw team formulier */}
         {toonFormulier && (
           <form onSubmit={handleToevoegen} style={{
-            background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px',
+            background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)', borderRadius: '12px',
             padding: '20px', marginBottom: '16px', display: 'flex', gap: '12px', alignItems: 'flex-end',
           }}>
             <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: 'var(--z-tekst-2)', marginBottom: '6px' }}>
                 Teamnaam *
               </label>
               <input
@@ -191,38 +191,38 @@ export default function TabTeams() {
               <div key={team.id}>
                 <div style={{
                   background: 'white',
-                  border: `1px solid ${bewerkId === team.id ? '#93c5fd' : '#e2e8f0'}`,
+                  border: `1px solid ${bewerkId === team.id ? '#93c5fd' : 'var(--z-lijn)'}`,
                   borderRadius: bewerkId === team.id ? '10px 10px 0 0' : '10px',
                   padding: '11px 16px', display: 'flex', alignItems: 'center', gap: '12px',
                 }}>
                   {/* Initiaal */}
                   <div style={{
                     width: '32px', height: '32px', borderRadius: '8px', flexShrink: 0,
-                    background: '#f1f5f9', display: 'flex', alignItems: 'center',
-                    justifyContent: 'center', fontSize: '13px', fontWeight: '700', color: '#64748b',
+                    background: 'var(--z-lijn-zacht)', display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', fontSize: '13px', fontWeight: '700', color: 'var(--z-tekst-3)',
                   }}>
                     {team.name.charAt(0).toUpperCase()}
                   </div>
 
-                  <span style={{ flex: 1, fontSize: '14px', fontWeight: '500', color: '#0f172a' }}>{team.name}</span>
+                  <span style={{ flex: 1, fontSize: '14px', fontWeight: '500', color: 'var(--z-tekst)' }}>{team.name}</span>
 
                   <div style={{ display: 'flex', gap: '6px' }}>
                     <button
                       onClick={() => bewerkId === team.id ? stopBewerken() : startBewerken(team)}
                       style={{
-                        background: bewerkId === team.id ? '#f1f5f9' : 'white',
-                        border: '1px solid #e2e8f0', borderRadius: '6px',
+                        background: bewerkId === team.id ? 'var(--z-lijn-zacht)' : 'white',
+                        border: '1px solid var(--z-lijn)', borderRadius: '6px',
                         padding: '5px 12px', fontSize: '13px', fontWeight: '500',
-                        color: '#475569', cursor: 'pointer',
+                        color: 'var(--z-tekst-2)', cursor: 'pointer',
                       }}
                     >
                       {bewerkId === team.id ? 'Annuleren' : 'Bewerken'}
                     </button>
                     <button
                       onClick={() => handleVerwijder(team)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: '#cbd5e1', padding: '5px 8px', borderRadius: '6px' }}
-                      onMouseEnter={e => e.target.style.color = '#ef4444'}
-                      onMouseLeave={e => e.target.style.color = '#cbd5e1'}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: 'var(--z-lijn-sterk)', padding: '5px 8px', borderRadius: '6px' }}
+                      onMouseEnter={e => e.target.style.color = 'var(--z-verlies)'}
+                      onMouseLeave={e => e.target.style.color = 'var(--z-lijn-sterk)'}
                     >
                       Verwijderen
                     </button>
@@ -232,12 +232,12 @@ export default function TabTeams() {
                 {/* Inline bewerkformulier */}
                 {bewerkId === team.id && (
                   <form onSubmit={e => handleBewerken(e, team)} style={{
-                    background: '#f8fafc', border: '1px solid #93c5fd', borderTop: 'none',
+                    background: 'var(--z-vlak)', border: '1px solid #93c5fd', borderTop: 'none',
                     borderRadius: '0 0 10px 10px', padding: '14px 16px',
                     display: 'flex', gap: '12px', alignItems: 'flex-end',
                   }}>
                     <div style={{ flex: 1 }}>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#64748b', marginBottom: '5px' }}>Naam</label>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-3)', marginBottom: '5px' }}>Naam</label>
                       <input
                         type="text"
                         value={bewerkNaam}

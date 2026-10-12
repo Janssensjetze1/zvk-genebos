@@ -4,7 +4,7 @@ export default function MobileGate() {
 
   return (
     <div style={{
-      minHeight: '100vh', background: '#0f172a',
+      minHeight: '100vh', background: 'radial-gradient(120% 80% at 50% 0%, #1b3a8f 0%, #13234d 45%, #0c1a3d 100%)',
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
       padding: '32px 24px', textAlign: 'center',
@@ -77,7 +77,7 @@ function Stap({ nr, tekst }) {
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', textAlign: 'left' }}>
       <div style={{
         width: '26px', height: '26px', borderRadius: '50%', flexShrink: 0,
-        background: '#3b82f6', color: 'white',
+        background: 'var(--z-blauw)', color: 'white',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: '12px', fontWeight: '700',
       }}>{nr}</div>

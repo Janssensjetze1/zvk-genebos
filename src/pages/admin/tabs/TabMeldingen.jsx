@@ -125,11 +125,11 @@ export default function TabMeldingen() {
       {/* ── Push notificaties ── */}
       <div style={{ marginBottom: '36px' }}>
         <div style={{ marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a' }}>📲 Push notificatie</h2>
-          <p style={{ fontSize: '13px', color: '#94a3b8', marginTop: '2px' }}>Stuur een directe melding naar alle abonnees op hun toestel.</p>
+          <h2 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--z-tekst)' }}>📲 Push notificatie</h2>
+          <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)', marginTop: '2px' }}>Stuur een directe melding naar alle abonnees op hun toestel.</p>
         </div>
 
-        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
+        <div style={{ background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '20px' }}>
           <div style={{ marginBottom: '12px' }}>
             <label style={labelStijl}>Titel</label>
             <input
@@ -154,9 +154,9 @@ export default function TabMeldingen() {
           {pushResultaat && (
             <div style={{
               padding: '10px 14px', borderRadius: '8px', marginBottom: '12px', fontSize: '13px',
-              background: pushResultaat.error || pushResultaat.failed > 0 ? '#fef2f2' : '#f0fdf4',
-              color:      pushResultaat.error || pushResultaat.failed > 0 ? '#dc2626'  : '#16a34a',
-              border:     `1px solid ${pushResultaat.error || pushResultaat.failed > 0 ? '#fecaca' : '#bbf7d0'}`,
+              background: pushResultaat.error || pushResultaat.failed > 0 ? 'var(--z-verlies-bg)' : 'var(--z-winst-bg)',
+              color:      pushResultaat.error || pushResultaat.failed > 0 ? 'var(--z-verlies)'  : 'var(--z-winst)',
+              border:     `1px solid ${pushResultaat.error || pushResultaat.failed > 0 ? 'var(--z-verlies-rand)' : 'var(--z-winst-rand)'}`,
             }}>
               {pushResultaat.error
                 ? `❌ Fout: ${pushResultaat.error}`
@@ -175,7 +175,7 @@ export default function TabMeldingen() {
               onClick={stuurPush}
               disabled={pushBezig || !pushTitel.trim() || !pushBericht.trim()}
               style={{
-                background: '#0f172a', color: 'white', border: 'none',
+                background: 'var(--z-tekst)', color: 'white', border: 'none',
                 borderRadius: '8px', padding: '9px 20px',
                 fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                 opacity: (pushBezig || !pushTitel.trim() || !pushBericht.trim()) ? 0.5 : 1,
@@ -190,12 +190,12 @@ export default function TabMeldingen() {
       {/* ── Pop-up meldingen ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div>
-          <h2 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a' }}>Pop-up meldingen</h2>
-          <p style={{ fontSize: '13px', color: '#94a3b8', marginTop: '2px' }}>Gebruikers zien de actieve melding één keer.</p>
+          <h2 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--z-tekst)' }}>Pop-up meldingen</h2>
+          <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)', marginTop: '2px' }}>Gebruikers zien de actieve melding één keer.</p>
         </div>
         <button
           onClick={() => setFormulier(f => !f)}
-          style={{ background: '#0f172a', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
+          style={{ background: 'var(--z-tekst)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
         >
           + Nieuwe melding
         </button>
@@ -203,8 +203,8 @@ export default function TabMeldingen() {
 
       {/* Formulier */}
       {formulier && (
-        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a', marginBottom: '16px' }}>Nieuwe melding</h3>
+        <div style={{ background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--z-tekst)', marginBottom: '16px' }}>Nieuwe melding</h3>
 
           {/* Emoji kiezer */}
           <div style={{ marginBottom: '14px' }}>
@@ -214,7 +214,7 @@ export default function TabMeldingen() {
                 <button key={e} onClick={() => setEmoji(e)} style={{
                   width: '40px', height: '40px', borderRadius: '8px', border: 'none',
                   fontSize: '20px', cursor: 'pointer',
-                  background: emoji === e ? '#0f172a' : '#e2e8f0',
+                  background: emoji === e ? 'var(--z-tekst)' : 'var(--z-lijn)',
                   transition: 'background 0.15s',
                 }}>{e}</button>
               ))}
@@ -243,8 +243,8 @@ export default function TabMeldingen() {
                 onClick={() => fotoRef.current?.click()}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
-                  background: 'white', border: '1.5px dashed #cbd5e1', borderRadius: '10px',
-                  padding: '10px 16px', cursor: 'pointer', fontSize: '13px', color: '#64748b',
+                  background: 'white', border: '1.5px dashed var(--z-lijn-sterk)', borderRadius: '10px',
+                  padding: '10px 16px', cursor: 'pointer', fontSize: '13px', color: 'var(--z-tekst-3)',
                 }}
               >
                 <span>📷</span> Foto kiezen
@@ -276,13 +276,13 @@ export default function TabMeldingen() {
           </div>
 
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-            <button onClick={resetFormulier} style={{ background: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: '8px', padding: '9px 16px', fontSize: '13px', cursor: 'pointer' }}>
+            <button onClick={resetFormulier} style={{ background: 'var(--z-lijn-zacht)', color: 'var(--z-tekst-3)', border: 'none', borderRadius: '8px', padding: '9px 16px', fontSize: '13px', cursor: 'pointer' }}>
               Annuleren
             </button>
             <button
               onClick={handleOpslaan}
               disabled={opslaan || !titel.trim() || !bericht.trim()}
-              style={{ background: '#0f172a', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', opacity: opslaan ? 0.6 : 1 }}
+              style={{ background: 'var(--z-tekst)', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', opacity: opslaan ? 0.6 : 1 }}
             >
               {opslaan ? 'Uploaden...' : 'Opslaan & activeren'}
             </button>
@@ -292,16 +292,16 @@ export default function TabMeldingen() {
 
       {/* Lijst */}
       {loading ? (
-        <p style={{ fontSize: '14px', color: '#94a3b8' }}>Laden...</p>
+        <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Laden...</p>
       ) : meldingen.length === 0 ? (
-        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
-          <p style={{ color: '#94a3b8', fontSize: '14px' }}>Nog geen meldingen aangemaakt.</p>
+        <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
+          <p style={{ color: 'var(--z-tekst-4)', fontSize: '14px' }}>Nog geen meldingen aangemaakt.</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {meldingen.map(m => (
             <div key={m.id} style={{
-              background: 'white', border: `1px solid ${m.is_active ? '#bfdbfe' : '#e2e8f0'}`,
+              background: 'white', border: `1px solid ${m.is_active ? 'var(--z-blauw-200)' : 'var(--z-lijn)'}`,
               borderRadius: '12px', padding: '16px',
               display: 'flex', alignItems: 'center', gap: '14px',
               boxShadow: m.is_active ? '0 0 0 3px rgba(59,130,246,0.08)' : 'none',
@@ -314,21 +314,21 @@ export default function TabMeldingen() {
               )}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                  <span style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{m.title}</span>
+                  <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--z-tekst)' }}>{m.title}</span>
                   {m.is_active && (
-                    <span style={{ fontSize: '10px', fontWeight: '700', background: '#dbeafe', color: '#1d4ed8', padding: '2px 8px', borderRadius: '20px' }}>ACTIEF</span>
+                    <span style={{ fontSize: '10px', fontWeight: '700', background: '#dbeafe', color: 'var(--z-blauw)', padding: '2px 8px', borderRadius: '20px' }}>ACTIEF</span>
                   )}
                 </div>
-                <p style={{ fontSize: '13px', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.message}</p>
+                <p style={{ fontSize: '13px', color: 'var(--z-tekst-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.message}</p>
               </div>
               <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                 <button
                   onClick={() => toggleActief(m)}
-                  style={{ background: m.is_active ? '#fef3c7' : '#f0fdf4', color: m.is_active ? '#b45309' : '#16a34a', border: 'none', borderRadius: '8px', padding: '7px 12px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
+                  style={{ background: m.is_active ? '#fef3c7' : 'var(--z-winst-bg)', color: m.is_active ? 'var(--z-gelijk)' : 'var(--z-winst)', border: 'none', borderRadius: '8px', padding: '7px 12px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
                 >
                   {m.is_active ? 'Deactiveren' : 'Activeren'}
                 </button>
-                <button onClick={() => verwijder(m.id)} style={{ background: '#fef2f2', color: '#ef4444', border: 'none', borderRadius: '8px', padding: '7px 10px', fontSize: '13px', cursor: 'pointer' }}>
+                <button onClick={() => verwijder(m.id)} style={{ background: 'var(--z-verlies-bg)', color: 'var(--z-verlies)', border: 'none', borderRadius: '8px', padding: '7px 10px', fontSize: '13px', cursor: 'pointer' }}>
                   🗑
                 </button>
               </div>
@@ -341,5 +341,5 @@ export default function TabMeldingen() {
   )
 }
 
-const labelStijl = { fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }
-const inputStijl = { width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '9px 12px', fontSize: '14px', boxSizing: 'border-box', outline: 'none', background: 'white' }
+const labelStijl = { fontSize: '12px', fontWeight: '600', color: 'var(--z-tekst-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }
+const inputStijl = { width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px', padding: '9px 12px', fontSize: '14px', boxSizing: 'border-box', outline: 'none', background: 'white' }

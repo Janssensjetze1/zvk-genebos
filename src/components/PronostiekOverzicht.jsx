@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
 import { isGespeeld } from '../lib/wedstrijd'
+import { Laden, PaginaKop, Segment } from '../ui'
 import { usePronostiekKlassement, pronostiekStatus, pronostiekSluit, pronostiekOpent, tijdTotLabel, PUNTEN_UITLEG } from '../hooks/usePronostiek'
 
 // Pronostiekpagina: gedeeld door de PWA en de webapp.
@@ -11,13 +12,13 @@ import { usePronostiekKlassement, pronostiekStatus, pronostiekSluit, pronostiekO
 // detailpagina van die wedstrijd. Daar vul je in en zie je ieders gok.
 // variant: 'pwa' (smallere marges) of 'desktop'
 
-const ACCENT = '#6366f1'
+const ACCENT = 'var(--z-blauw)'
 
 function Kaart({ children, style }) {
   return (
     <div style={{
-      background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px',
-      overflow: 'hidden', ...style,
+      background: 'white', border: '1px solid var(--z-lijn)', borderRadius: 'var(--z-r)',
+      boxShadow: 'var(--z-schaduw-s)', overflow: 'hidden', ...style,
     }}>{children}</div>
   )
 }
@@ -44,30 +45,30 @@ function WedstrijdRij({ w, chip, onOpen, laatste }) {
       style={{
         display: 'flex', alignItems: 'center', gap: '12px',
         padding: '12px 14px', cursor: 'pointer',
-        borderBottom: laatste ? 'none' : '1px solid #f8fafc',
+        borderBottom: laatste ? 'none' : '1px solid var(--z-vlak)',
       }}
     >
       <div style={{
         width: '40px', flexShrink: 0, textAlign: 'center',
-        background: '#f8fafc', borderRadius: '9px', padding: '4px 0',
+        background: 'var(--z-vlak)', borderRadius: '9px', padding: '4px 0',
       }}>
-        <div style={{ fontSize: '14px', fontWeight: '800', color: '#0f172a', lineHeight: 1.1 }}>{datum.getDate()}</div>
-        <div style={{ fontSize: '9px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '700' }}>
+        <div style={{ fontSize: '14px', fontWeight: '800', color: 'var(--z-tekst)', lineHeight: 1.1 }}>{datum.getDate()}</div>
+        <div style={{ fontSize: '9px', color: 'var(--z-tekst-4)', textTransform: 'uppercase', fontWeight: '700' }}>
           {datum.toLocaleDateString('nl-BE', { month: 'short' })}
         </div>
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontSize: '13px', fontWeight: '700', color: '#0f172a',
+          fontSize: '13px', fontWeight: '700', color: 'var(--z-tekst)',
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
           {w.home_team?.name} – {w.away_team?.name}
         </div>
-        <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px', display: 'flex', gap: '6px', alignItems: 'center' }}>
-          {gespeeld ? <span style={{ fontWeight: '700', color: '#475569' }}>{w.home_score}–{w.away_score}</span> : null}
+        <div style={{ fontSize: '11px', color: 'var(--z-tekst-4)', marginTop: '2px', display: 'flex', gap: '6px', alignItems: 'center' }}>
+          {gespeeld ? <span style={{ fontWeight: '700', color: 'var(--z-tekst-2)' }}>{w.home_score}–{w.away_score}</span> : null}
           {w.time ? <span>{w.time.slice(0, 5)}</span> : null}
-          {onze && <span style={{ color: '#1d4ed8', fontWeight: '700' }}>onze match</span>}
+          {onze && <span style={{ color: 'var(--z-blauw)', fontWeight: '700' }}>onze match</span>}
         </div>
       </div>
 
@@ -84,8 +85,7 @@ function Sectie({ titel, children }) {
   return (
     <section>
       <h2 style={{
-        fontSize: '12px', fontWeight: '800', color: '#0f172a',
-        textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 10px',
+        fontSize: '15px', fontWeight: '600', color: 'var(--z-tekst)', margin: '0 0 12px',
       }}>{titel}</h2>
       <Kaart>{children}</Kaart>
     </section>
@@ -144,29 +144,44 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
     const gok = mijnGok[w.id]
     const tijd = tijdTotLabel(pronostiekSluit(w))
     return gok
-      ? { tekst: `${gok.home_score}–${gok.away_score}`, kleur: '#16a34a', bg: '#f0fdf4', rand: '#bbf7d0' }
-      : { tekst: tijd, kleur: '#d97706', bg: '#fffbeb', rand: '#fde68a' }
+      ? { tekst: `${gok.home_score}–${gok.away_score}`, kleur: 'var(--z-winst)', bg: 'var(--z-winst-bg)', rand: 'var(--z-winst-rand)' }
+      : { tekst: tijd, kleur: '#d97706', bg: 'var(--z-gelijk-bg)', rand: 'var(--z-gelijk-rand)' }
   }
 
   function chipVoorAfgelopen(w) {
     const score = mijnPunten[w.id]
-    if (!score) return { tekst: 'niet gegokt', kleur: '#cbd5e1', bg: '#f8fafc', rand: '#f1f5f9' }
+    if (!score) return { tekst: 'niet gegokt', kleur: 'var(--z-lijn-sterk)', bg: 'var(--z-vlak)', rand: 'var(--z-lijn-zacht)' }
     return {
       tekst: `+${score.punten}${score.durfbonus ? ' 🎯' : ''}`,
-      kleur: score.punten > 0 ? '#16a34a' : '#94a3b8',
-      bg: score.punten > 0 ? '#f0fdf4' : '#f8fafc',
-      rand: score.punten > 0 ? '#bbf7d0' : '#e2e8f0',
+      kleur: score.punten > 0 ? 'var(--z-winst)' : 'var(--z-tekst-4)',
+      bg: score.punten > 0 ? 'var(--z-winst-bg)' : 'var(--z-vlak)',
+      rand: score.punten > 0 ? 'var(--z-winst-rand)' : 'var(--z-lijn)',
     }
   }
 
   return (
-    <div style={{ padding: compact ? '20px 16px 100px' : '0', maxWidth: compact ? 'none' : '760px' }}>
-      <h1 style={{ fontSize: compact ? '20px' : '24px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px' }}>
-        Pronostiek
-      </h1>
-      <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0 0 18px' }}>
-        {seizoen?.name}
-      </p>
+    <div style={{ padding: compact ? '28px 16px 24px' : '0', maxWidth: compact ? 'none' : '760px' }}>
+      {compact ? (
+        <>
+          {seizoen && <div className="z-bovenlabel">Seizoen {seizoen.name}</div>}
+          <h1 className="z-app-titel" style={{ marginBottom: '20px' }}>Pronostiek</h1>
+        </>
+      ) : (
+        <PaginaKop
+          bovenlabel={seizoen ? `Seizoen ${seizoen.name}` : null}
+          titel="Pronostiek"
+          ondertitel="Voorspel de uitslag en klim in het klassement"
+        >
+          <Segment
+            waarde={tab}
+            onChange={setTab}
+            opties={[
+              { waarde: 'wedstrijden', label: `Wedstrijden${open.length ? ` (${open.length})` : ''}` },
+              { waarde: 'klassement', label: 'Klassement' },
+            ]}
+          />
+        </PaginaKop>
+      )}
 
       {/* Jouw stand */}
       {mijnRij && (
@@ -196,30 +211,28 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
       )}
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '6px', marginBottom: '16px' }}>
-        {[['wedstrijden', `Wedstrijden${open.length ? ` (${open.length})` : ''}`], ['klassement', 'Klassement']].map(([id, label]) => (
-          <button
-            key={id}
-            onClick={() => setTab(id)}
-            style={{
-              flex: compact ? 1 : '0 0 auto',
-              padding: compact ? '10px 8px' : '9px 18px',
-              borderRadius: '10px', cursor: 'pointer',
-              border: `1px solid ${tab === id ? ACCENT : '#e2e8f0'}`,
-              background: tab === id ? ACCENT : 'white',
-              color: tab === id ? 'white' : '#64748b',
-              fontSize: '13px', fontWeight: '700',
-            }}
-          >{label}</button>
-        ))}
-      </div>
+      {compact && (
+        <div style={{ marginBottom: '20px' }}>
+          <Segment
+            vol
+            waarde={tab}
+            onChange={setTab}
+            opties={[
+              { waarde: 'wedstrijden', label: `Wedstrijden${open.length ? ` (${open.length})` : ''}` },
+              { waarde: 'klassement', label: 'Klassement' },
+            ]}
+          />
+        </div>
+      )}
 
       {/* ── Tab: wedstrijden ───────────────────────────────────────────────── */}
       {tab === 'wedstrijden' && (
         laden ? (
-          <div style={{ textAlign: 'center', padding: '48px', color: '#94a3b8' }}>Laden...</div>
+          compact
+            ? <div style={{ textAlign: 'center', padding: '48px', color: 'var(--z-tekst-4)' }}>Laden...</div>
+            : <Laden regels={5} />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? '22px' : '32px' }}>
 
             {open.length > 0 ? (
               <Sectie titel="Nu te voorspellen">
@@ -236,10 +249,10 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
               <Kaart>
                 <div style={{ padding: '30px 24px', textAlign: 'center' }}>
                   <div style={{ fontSize: '30px', marginBottom: '8px' }}>🔮</div>
-                  <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', marginBottom: '5px' }}>
+                  <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--z-tekst)', marginBottom: '5px' }}>
                     Momenteel niets te voorspellen
                   </div>
-                  <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0, lineHeight: 1.6 }}>
+                  <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)', margin: 0, lineHeight: 1.6 }}>
                     Een pronostiek opent een week voor de wedstrijd en sluit een uur voor de aftrap.
                   </p>
                 </div>
@@ -253,7 +266,7 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
                     key={w.id} w={w}
                     chip={{
                       tekst: tijdTotLabel(pronostiekOpent(w)).replace('nog ', 'over '),
-                      kleur: '#94a3b8', bg: '#f8fafc', rand: '#e2e8f0',
+                      kleur: 'var(--z-tekst-4)', bg: 'var(--z-vlak)', rand: 'var(--z-lijn)',
                     }}
                     onOpen={() => naarDetail(w)}
                     laatste={i === arr.length - 1}
@@ -281,15 +294,15 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
       {/* ── Tab: klassement ────────────────────────────────────────────────── */}
       {tab === 'klassement' && (
         klassementBezig ? (
-          <div style={{ textAlign: 'center', padding: '48px', color: '#94a3b8' }}>Laden...</div>
+          <div style={{ textAlign: 'center', padding: '48px', color: 'var(--z-tekst-4)' }}>Laden...</div>
         ) : rijen.length === 0 ? (
           <Kaart>
             <div style={{ padding: '30px 24px', textAlign: 'center' }}>
               <div style={{ fontSize: '30px', marginBottom: '8px' }}>🏆</div>
-              <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', marginBottom: '5px' }}>
+              <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--z-tekst)', marginBottom: '5px' }}>
                 Nog geen punten dit seizoen
               </div>
-              <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0, lineHeight: 1.6 }}>
+              <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)', margin: 0, lineHeight: 1.6 }}>
                 Het klassement verschijnt zodra de eerste voorspelde wedstrijd gespeeld is.
               </p>
             </div>
@@ -298,15 +311,15 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
           <Kaart>
             <div style={{
               display: 'grid', gridTemplateColumns: '28px 1fr 30px 30px 40px',
-              padding: '10px 14px', borderBottom: '1px solid #f1f5f9',
-              fontSize: '11px', fontWeight: '600', color: '#94a3b8',
+              padding: '10px 14px', borderBottom: '1px solid var(--z-lijn-zacht)',
+              fontSize: '11px', fontWeight: '600', color: 'var(--z-tekst-4)',
               textTransform: 'uppercase', letterSpacing: '0.05em',
             }}>
               <span>#</span>
               <span>Naam</span>
               <span style={{ textAlign: 'center' }} title="Aantal voorspellingen">V</span>
               <span style={{ textAlign: 'center' }} title="Exacte scores">Ex</span>
-              <span style={{ textAlign: 'center', fontWeight: '700', color: '#64748b' }}>Pnt</span>
+              <span style={{ textAlign: 'center', fontWeight: '700', color: 'var(--z-tekst-3)' }}>Pnt</span>
             </div>
 
             {rijen.map((r, i) => {
@@ -316,29 +329,29 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
                 <div key={r.user_id} style={{
                   display: 'grid', gridTemplateColumns: '28px 1fr 30px 30px 40px',
                   padding: '13px 14px', alignItems: 'center',
-                  borderBottom: i < rijen.length - 1 ? '1px solid #f8fafc' : 'none',
-                  background: ikzelf ? '#eef2ff' : 'white',
+                  borderBottom: i < rijen.length - 1 ? '1px solid var(--z-vlak)' : 'none',
+                  background: ikzelf ? 'var(--z-blauw-50)' : 'white',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     {top3 ? (
                       <span style={{
                         width: '22px', height: '22px', borderRadius: '50%',
-                        background: i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : '#b45309',
+                        background: i === 0 ? '#fbbf24' : i === 1 ? 'var(--z-tekst-4)' : 'var(--z-gelijk)',
                         color: 'white', fontSize: '11px', fontWeight: '700',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>{i + 1}</span>
                     ) : (
-                      <span style={{ fontSize: '13px', color: '#94a3b8', paddingLeft: '3px' }}>{i + 1}</span>
+                      <span style={{ fontSize: '13px', color: 'var(--z-tekst-4)', paddingLeft: '3px' }}>{i + 1}</span>
                     )}
                   </div>
                   <span style={{
                     fontSize: '14px', fontWeight: ikzelf ? '700' : '500',
-                    color: ikzelf ? ACCENT : '#0f172a',
+                    color: ikzelf ? ACCENT : 'var(--z-tekst)',
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>{r.naam}{ikzelf ? ' (jij)' : ''}</span>
-                  <span style={{ textAlign: 'center', fontSize: '13px', color: '#64748b' }}>{r.voorspellingen}</span>
-                  <span style={{ textAlign: 'center', fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>{r.exacte}</span>
-                  <span style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: '#0f172a' }}>{r.punten}</span>
+                  <span style={{ textAlign: 'center', fontSize: '13px', color: 'var(--z-tekst-3)' }}>{r.voorspellingen}</span>
+                  <span style={{ textAlign: 'center', fontSize: '13px', color: 'var(--z-winst)', fontWeight: '600' }}>{r.exacte}</span>
+                  <span style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: 'var(--z-tekst)' }}>{r.punten}</span>
                 </div>
               )
             })}
@@ -347,13 +360,13 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
       )}
 
       {/* Puntenuitleg: dicht bij het openen */}
-      <Kaart style={{ marginTop: '22px', background: '#f8fafc' }}>
+      <Kaart style={{ marginTop: '22px', background: 'var(--z-vlak)' }}>
         <div style={{ padding: '14px 16px' }}>
           <div
             onClick={() => setUitlegOpen(o => !o)}
             style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}
           >
-            <span style={{ flex: 1, fontSize: '11px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <span style={{ flex: 1, fontSize: '11px', fontWeight: '800', color: 'var(--z-tekst-4)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               Hoe worden de punten geteld?
             </span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="3"
@@ -368,14 +381,14 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
                 <span style={{
                   flexShrink: 0, width: '30px', textAlign: 'center',
                   fontSize: '12px', fontWeight: '800', color: ACCENT,
-                  background: 'white', border: '1px solid #e2e8f0', borderRadius: '7px', padding: '2px 0',
+                  background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '7px', padding: '2px 0',
                 }}>{p.punten}</span>
-                <span style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.4 }}>{p.tekst}</span>
+                <span style={{ fontSize: '12px', color: 'var(--z-tekst-3)', lineHeight: 1.4 }}>{p.tekst}</span>
               </div>
             ))}
           </div>
 
-          <p style={{ display: uitlegOpen ? 'block' : 'none', fontSize: '11px', color: '#94a3b8', margin: '10px 0 0', lineHeight: 1.5 }}>
+          <p style={{ display: uitlegOpen ? 'block' : 'none', fontSize: '11px', color: 'var(--z-tekst-4)', margin: '10px 0 0', lineHeight: 1.5 }}>
             Enkel het hoogste telt, ze stapelen niet.
           </p>
         </div>

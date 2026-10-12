@@ -14,7 +14,7 @@ const DRETZE_QUOTES = [
   "Den bal wou ni binnen.",
 ]
 
-const ZVK_KLEUREN = ['#1d4ed8', '#3b82f6', '#93c5fd', '#ffffff', '#dbeafe', '#fbbf24']
+const ZVK_KLEUREN = ['var(--z-blauw)', 'var(--z-blauw-500)', '#93c5fd', '#ffffff', '#dbeafe', '#fbbf24']
 
 function maakConfettiDeeltje(container) {
   const el = document.createElement('div')
@@ -143,7 +143,7 @@ export default function ShakeEasterEgg() {
             }}>
               "{quote}"
             </p>
-            <p style={{ fontSize: '13px', fontWeight: '600', color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--z-blauw-500)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Dretze
             </p>
           </div>

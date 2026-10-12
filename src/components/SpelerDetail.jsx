@@ -75,7 +75,7 @@ function StatChip({ waarde, label, kleur, tekstkleur }) {
   return (
     <div style={{ flex: 1, textAlign: 'center', padding: '14px 8px', background: kleur, borderRadius: '14px' }}>
       <div style={{ fontSize: '24px', fontWeight: '800', color: tekstkleur, lineHeight: 1 }}>{waarde}</div>
-      <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '5px', fontWeight: '500' }}>{label}</div>
+      <div style={{ fontSize: '11px', color: 'var(--z-tekst-4)', marginTop: '5px', fontWeight: '500' }}>{label}</div>
     </div>
   )
 }
@@ -85,7 +85,7 @@ function StatsTab({ stats }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       <div>
-        <div style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>
+        <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--z-tekst-4)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>
           Dit seizoen
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -94,9 +94,9 @@ function StatsTab({ stats }) {
           <StatChip waarde={stats.seizoenMatches} label="Matchen" kleur="#f8fafc" tekstkleur="#475569" />
         </div>
       </div>
-      <div style={{ height: '1px', background: '#f1f5f9' }} />
+      <div style={{ height: '1px', background: 'var(--z-lijn-zacht)' }} />
       <div>
-        <div style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>
+        <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--z-tekst-4)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>
           All-time
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -113,7 +113,7 @@ function StatsTab({ stats }) {
           <span style={{ fontSize: '22px', flexShrink: 0 }}>🔥</span>
           <div>
             <div style={{ fontSize: '14px', fontWeight: '700', color: '#c2410c' }}>{stats.hattricks}× Hattrick</div>
-            <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>3+ goals in één wedstrijd</div>
+            <div style={{ fontSize: '12px', color: 'var(--z-tekst-4)', marginTop: '2px' }}>3+ goals in één wedstrijd</div>
           </div>
         </div>
       )}
@@ -129,15 +129,15 @@ function BadgesTab({ badgesMetStatus, geselecteerdeBadge, setGeselecteerdeBadge 
     <div>
       {/* Voortgang */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-        <div style={{ flex: 1, height: '5px', background: '#f1f5f9', borderRadius: '99px', overflow: 'hidden' }}>
+        <div style={{ flex: 1, height: '5px', background: 'var(--z-lijn-zacht)', borderRadius: '99px', overflow: 'hidden' }}>
           <div style={{
             height: '100%',
             width: `${(aantalVerdiend / BADGES.length) * 100}%`,
-            background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
+            background: 'linear-gradient(90deg, var(--z-blauw-500), #8b5cf6)',
             borderRadius: '99px', transition: 'width 0.6s',
           }} />
         </div>
-        <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600', flexShrink: 0 }}>
+        <span style={{ fontSize: '11px', color: 'var(--z-tekst-4)', fontWeight: '600', flexShrink: 0 }}>
           {aantalVerdiend}/{BADGES.length}
         </span>
       </div>
@@ -159,7 +159,7 @@ function BadgesTab({ badgesMetStatus, geselecteerdeBadge, setGeselecteerdeBadge 
                 {catInfo.label}
               </span>
               <div style={{ flex: 1, height: '1px', background: catInfo.lbo }} />
-              <span style={{ fontSize: '10px', color: '#94a3b8', flexShrink: 0, fontWeight: '600' }}>
+              <span style={{ fontSize: '10px', color: 'var(--z-tekst-4)', flexShrink: 0, fontWeight: '600' }}>
                 {verdiendInGroep}/{groep.length}
               </span>
             </div>
@@ -175,7 +175,7 @@ function BadgesTab({ badgesMetStatus, geselecteerdeBadge, setGeselecteerdeBadge 
                     onClick={() => setGeselecteerdeBadge(isSelected ? null : badge)}
                     style={{
                       background: 'white',
-                      border: `1.5px solid ${isSelected ? c.lc : badge.verdiend ? c.lbo : '#e2e8f0'}`,
+                      border: `1.5px solid ${isSelected ? c.lc : badge.verdiend ? c.lbo : 'var(--z-lijn)'}`,
                       borderRadius: '11px', padding: '9px 5px 7px',
                       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
                       cursor: 'pointer',
@@ -188,17 +188,17 @@ function BadgesTab({ badgesMetStatus, geselecteerdeBadge, setGeselecteerdeBadge 
                     <div style={{
                       position: 'absolute', top: '5px', right: '5px',
                       width: '13px', height: '13px', borderRadius: '50%',
-                      background: badge.verdiend ? '#dcfce7' : '#f1f5f9',
-                      border: `1px solid ${badge.verdiend ? '#86efac' : '#e2e8f0'}`,
+                      background: badge.verdiend ? '#dcfce7' : 'var(--z-lijn-zacht)',
+                      border: `1px solid ${badge.verdiend ? '#86efac' : 'var(--z-lijn)'}`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '7px', color: badge.verdiend ? '#16a34a' : undefined,
+                      fontSize: '7px', color: badge.verdiend ? 'var(--z-winst)' : undefined,
                     }}>
                       {badge.verdiend ? '✓' : '🔒'}
                     </div>
                     <BadgeHex emoji={badge.emoji} categorie={badge.categorie} size={42} verdiend={badge.verdiend} />
                     <div style={{
                       fontSize: '10px', fontWeight: '700', textAlign: 'center',
-                      color: badge.verdiend ? '#0f172a' : '#94a3b8', lineHeight: 1.3,
+                      color: badge.verdiend ? 'var(--z-tekst)' : 'var(--z-tekst-4)', lineHeight: 1.3,
                     }}>
                       {isGeheim ? '???' : badge.naam}
                     </div>
@@ -273,16 +273,16 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
       <SpelerAvatar speler={speler} size={68} letterGrootte={26} />
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', marginBottom: speler.nickname ? '2px' : 0 }}>
+        <div style={{ fontSize: '18px', fontWeight: '700', color: 'var(--z-tekst)', marginBottom: speler.nickname ? '2px' : 0 }}>
           {speler.name}
         </div>
         {speler.nickname && (
-          <div style={{ fontSize: '13px', color: '#64748b', fontStyle: 'italic', marginBottom: '2px' }}>
+          <div style={{ fontSize: '13px', color: 'var(--z-tekst-3)', fontStyle: 'italic', marginBottom: '2px' }}>
             "{speler.nickname}"
           </div>
         )}
         {speler.position && (
-          <div style={{ fontSize: '12px', color: '#94a3b8' }}>{speler.position}</div>
+          <div style={{ fontSize: '12px', color: 'var(--z-tekst-4)' }}>{speler.position}</div>
         )}
       </div>
     </div>
@@ -291,7 +291,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
   const tabBar = (
     <div style={{
       display: 'flex', gap: '4px',
-      background: '#f1f5f9', borderRadius: '12px', padding: '4px',
+      background: 'var(--z-lijn-zacht)', borderRadius: '12px', padding: '4px',
       marginTop: '18px',
     }}>
       {[
@@ -304,7 +304,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
           style={{
             flex: 1, padding: '9px', borderRadius: '9px', border: 'none',
             background: tab === t.id ? 'white' : 'transparent',
-            color: tab === t.id ? '#0f172a' : '#64748b',
+            color: tab === t.id ? 'var(--z-tekst)' : 'var(--z-tekst-3)',
             fontSize: '13px', fontWeight: tab === t.id ? '700' : '500',
             cursor: 'pointer',
             boxShadow: tab === t.id ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
@@ -319,8 +319,8 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
 
   const inhoud = loading ? (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 0', gap: '12px' }}>
-      <div style={{ width: '22px', height: '22px', border: '2.5px solid #e2e8f0', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-      <span style={{ fontSize: '13px', color: '#94a3b8' }}>Stats laden...</span>
+      <div style={{ width: '22px', height: '22px', border: '2.5px solid var(--z-lijn)', borderTopColor: 'var(--z-blauw-500)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+      <span style={{ fontSize: '13px', color: 'var(--z-tekst-4)' }}>Stats laden...</span>
     </div>
   ) : tab === 'stats' ? (
     <StatsTab stats={rawStats} />
@@ -361,16 +361,16 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
             style={{
               position: 'absolute', top: '16px', right: '16px',
               width: '32px', height: '32px', borderRadius: '50%',
-              background: '#f1f5f9', border: 'none', cursor: 'pointer',
+              background: 'var(--z-lijn-zacht)', border: 'none', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '16px', color: '#64748b',
+              fontSize: '16px', color: 'var(--z-tekst-3)',
             }}
           >×</button>
 
           <BadgeHex emoji={b.emoji} categorie={b.categorie} size={96} verdiend={b.verdiend} />
 
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>{verborgen(b) ? '???' : b.naam}</div>
+            <div style={{ fontSize: '20px', fontWeight: '800', color: 'var(--z-tekst)', marginBottom: '6px' }}>{verborgen(b) ? '???' : b.naam}</div>
             <span style={{
               fontSize: '12px', fontWeight: '600',
               padding: '4px 12px', borderRadius: '99px',
@@ -380,16 +380,16 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
             </span>
           </div>
 
-          <p style={{ fontSize: '14px', color: '#475569', textAlign: 'center', lineHeight: 1.65, margin: 0 }}>
+          <p style={{ fontSize: '14px', color: 'var(--z-tekst-2)', textAlign: 'center', lineHeight: 1.65, margin: 0 }}>
             {(verborgen(b) ? '' : b.beschrijving) || 'Deze badge is nog geheim.'}
           </p>
 
           <button
             onClick={() => setGeselecteerdeBadge(null)}
             style={{
-              width: '100%', background: '#f1f5f9', border: 'none',
+              width: '100%', background: 'var(--z-lijn-zacht)', border: 'none',
               borderRadius: '14px', padding: '14px', fontSize: '14px',
-              fontWeight: '600', color: '#475569', cursor: 'pointer',
+              fontWeight: '600', color: 'var(--z-tekst-2)', cursor: 'pointer',
             }}
           >Sluiten</button>
         </div>
@@ -409,7 +409,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
           boxShadow: '0 -12px 48px rgba(0,0,0,0.25)',
         }}>
           <div style={{ padding: '12px 24px 0', flexShrink: 0 }}>
-            <div style={{ width: '36px', height: '4px', background: '#e2e8f0', borderRadius: '2px', margin: '0 auto 20px' }} />
+            <div style={{ width: '36px', height: '4px', background: 'var(--z-lijn)', borderRadius: '2px', margin: '0 auto 20px' }} />
             {spelerHeader}
             {tabBar}
             <div style={{ height: '20px' }} />
@@ -443,12 +443,12 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
           style={{
             position: 'absolute', top: '16px', right: '16px', zIndex: 1,
             width: '34px', height: '34px', borderRadius: '50%',
-            background: '#f1f5f9', border: 'none', cursor: 'pointer',
+            background: 'var(--z-lijn-zacht)', border: 'none', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '16px', color: '#64748b', transition: 'background 0.15s',
+            fontSize: '16px', color: 'var(--z-tekst-3)', transition: 'background 0.15s',
           }}
-          onMouseEnter={e => (e.currentTarget.style.background = '#e2e8f0')}
-          onMouseLeave={e => (e.currentTarget.style.background = '#f1f5f9')}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--z-lijn)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'var(--z-lijn-zacht)')}
         >✕</button>
         <div style={{ padding: '28px 28px 0', flexShrink: 0 }}>
           {spelerHeader}

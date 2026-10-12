@@ -79,7 +79,7 @@ export default function Onboarding() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+      background: 'linear-gradient(135deg, var(--z-tekst) 0%, #1e293b 100%)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '24px',
     }}>
@@ -104,19 +104,19 @@ export default function Onboarding() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div style={{
                       width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0,
-                      background: klaar ? '#0f172a' : actief ? '#0f172a' : '#e2e8f0',
-                      color: klaar || actief ? 'white' : '#94a3b8',
+                      background: klaar ? 'var(--z-tekst)' : actief ? 'var(--z-tekst)' : 'var(--z-lijn)',
+                      color: klaar || actief ? 'white' : 'var(--z-tekst-4)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: '12px', fontWeight: '700',
                     }}>
                       {klaar ? '✓' : nr}
                     </div>
-                    <span style={{ fontSize: '13px', fontWeight: actief ? '600' : '400', color: actief ? '#0f172a' : '#94a3b8' }}>
+                    <span style={{ fontSize: '13px', fontWeight: actief ? '600' : '400', color: actief ? 'var(--z-tekst)' : 'var(--z-tekst-4)' }}>
                       {label}
                     </span>
                   </div>
                   {i === 0 && (
-                    <div style={{ flex: 1, height: '1px', background: stap > 1 ? '#0f172a' : '#e2e8f0', margin: '0 12px' }} />
+                    <div style={{ flex: 1, height: '1px', background: stap > 1 ? 'var(--z-tekst)' : 'var(--z-lijn)', margin: '0 12px' }} />
                   )}
                 </div>
               )
@@ -127,10 +127,10 @@ export default function Onboarding() {
           {stap === 1 && (
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '40px', marginBottom: '16px' }}>👋</div>
-              <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', marginBottom: '10px' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--z-tekst)', marginBottom: '10px' }}>
                 Welkom bij ZVK Genebos!
               </h2>
-              <p style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.6, marginBottom: '28px' }}>
+              <p style={{ fontSize: '14px', color: 'var(--z-tekst-3)', lineHeight: 1.6, marginBottom: '28px' }}>
                 Fijn dat je erbij bent. Stel eerst je profiel in zodat je herkend wordt binnen de app.
               </p>
               <button onClick={() => setStap(2)} style={knopStijl}>
@@ -143,8 +143,8 @@ export default function Onboarding() {
           {stap === 2 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>Jouw profiel</h2>
-                <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--z-tekst)', marginBottom: '4px' }}>Jouw profiel</h2>
+                <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)' }}>
                   {heeftSpeler ? 'Dit is zichtbaar voor je teamgenoten.' : 'Kan later ook nog via je account.'}
                 </p>
               </div>
@@ -155,8 +155,8 @@ export default function Onboarding() {
                   onClick={() => fotoInputRef.current?.click()}
                   style={{
                     width: '96px', height: '96px', borderRadius: '50%',
-                    background: fotoPreview ? 'transparent' : '#eff6ff',
-                    border: fotoPreview ? '3px solid #3b82f6' : '2px dashed #93c5fd',
+                    background: fotoPreview ? 'transparent' : 'var(--z-blauw-50)',
+                    border: fotoPreview ? '3px solid var(--z-blauw-500)' : '2px dashed #93c5fd',
                     overflow: 'hidden', cursor: 'pointer', flexShrink: 0,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     position: 'relative',
@@ -175,7 +175,7 @@ export default function Onboarding() {
                   <button
                     type="button"
                     onClick={() => { setFotoBestand(null); setFotoPreview(null); fotoInputRef.current.value = '' }}
-                    style={{ fontSize: '12px', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer' }}
+                    style={{ fontSize: '12px', color: 'var(--z-tekst-4)', background: 'none', border: 'none', cursor: 'pointer' }}
                   >
                     Andere foto kiezen
                   </button>
@@ -198,7 +198,7 @@ export default function Onboarding() {
               {/* Bijnaam */}
               <div>
                 <label style={labelStijl}>
-                  Bijnaam <span style={{ color: '#94a3b8', fontWeight: '400' }}>(optioneel)</span>
+                  Bijnaam <span style={{ color: 'var(--z-tekst-4)', fontWeight: '400' }}>(optioneel)</span>
                 </label>
                 <input
                   type="text"
@@ -212,7 +212,7 @@ export default function Onboarding() {
               {/* Geboortedatum */}
               <div>
                 <label style={labelStijl}>
-                  Geboortedatum <span style={{ color: '#94a3b8', fontWeight: '400' }}>(optioneel)</span>
+                  Geboortedatum <span style={{ color: 'var(--z-tekst-4)', fontWeight: '400' }}>(optioneel)</span>
                 </label>
                 <input
                   type="date"
@@ -222,12 +222,12 @@ export default function Onboarding() {
                 />
               </div>
 
-              {fout && <p style={{ fontSize: '13px', color: '#ef4444' }}>{fout}</p>}
+              {fout && <p style={{ fontSize: '13px', color: 'var(--z-verlies)' }}>{fout}</p>}
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button
                   onClick={() => setStap(1)}
-                  style={{ flex: 1, background: '#f1f5f9', color: '#475569', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}
+                  style={{ flex: 1, background: 'var(--z-lijn-zacht)', color: 'var(--z-tekst-2)', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}
                 >
                   ← Vorige
                 </button>
@@ -248,17 +248,17 @@ export default function Onboarding() {
 }
 
 const knopStijl = {
-  width: '100%', background: '#0f172a', color: 'white', border: 'none',
+  width: '100%', background: 'var(--z-tekst)', color: 'white', border: 'none',
   borderRadius: '8px', padding: '12px', fontSize: '14px', fontWeight: '600',
   cursor: 'pointer',
 }
 
 const labelStijl = {
-  display: 'block', fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '6px',
+  display: 'block', fontSize: '13px', fontWeight: '500', color: 'var(--z-tekst-2)', marginBottom: '6px',
 }
 
 const inputStijl = {
-  width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px',
-  padding: '10px 14px', fontSize: '14px', color: '#0f172a',
+  width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px',
+  padding: '10px 14px', fontSize: '14px', color: 'var(--z-tekst)',
   outline: 'none', background: 'white', boxSizing: 'border-box',
 }

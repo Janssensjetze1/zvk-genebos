@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
-import { ArchiefKiezer } from '../components/ArchiefKiezer'
 import SpelerDetail from '../components/SpelerDetail'
 import { useTopscorer } from '../context/TopscorerContext'
 import EerKronen from '../components/EerKronen'
 import { VLAK_KLASSE } from '../lib/eer'
+import { Icoon, Kaart, LegeStaat, PaginaKop } from '../ui'
 
 export default function Spelers() {
-  const { actief: seizoen, seizoenen, switchSeizoen } = useSeason()
+  const { actief: seizoen } = useSeason()
   const { eer } = useTopscorer()
   const [spelers, setSpelers] = useState([])
   const [stats, setStats] = useState({})
@@ -61,66 +61,49 @@ export default function Spelers() {
 
   return (
     <div>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '28px', flexWrap: 'wrap' }}>
-        <div>
-          <h1 style={{ fontSize: '22px', fontWeight: '700', color: '#0f172a', marginBottom: '2px' }}>Spelers</h1>
-          <p style={{ fontSize: '14px', color: '#94a3b8' }}>{spelers.length} spelers in de selectie</p>
+      <PaginaKop
+        bovenlabel={seizoen ? `Seizoen ${seizoen.name}` : null}
+        titel="Spelers"
+        ondertitel={`${spelers.length} spelers in de selectie · gesorteerd op doelpunten`}
+      >
+        <div style={{ position: 'relative', width: '260px' }}>
+          <Icoon naam="zoek" grootte={16} dikte={2} style={{
+            position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--z-tekst-4)',
+          }} />
+          <input
+            type="text"
+            placeholder="Zoek speler"
+            value={zoek}
+            onChange={e => setZoek(e.target.value)}
+            style={{ width: '100%', paddingLeft: '36px' }}
+          />
         </div>
-
-        {/* Archief kiezer */}
-        <ArchiefKiezer />
-      </div>
-
-      {/* Zoekbalk */}
-      <div style={{ position: 'relative', marginBottom: '20px', maxWidth: '320px' }}>
-        <svg style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#94a3b8' }}
-          fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <input
-          type="text"
-          placeholder="Zoek speler…"
-          value={zoek}
-          onChange={e => setZoek(e.target.value)}
-          style={{
-            width: '100%', padding: '9px 14px 9px 36px', fontSize: '14px',
-            border: '1px solid #e2e8f0', borderRadius: '10px',
-            background: 'white', outline: 'none', color: '#0f172a',
-            boxSizing: 'border-box',
-          }}
-        />
-      </div>
+      </PaginaKop>
 
       {loading ? (
-        <p style={{ fontSize: '14px', color: '#94a3b8' }}>Laden...</p>
-      ) : gesorteerd.length === 0 ? (
-        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '48px', textAlign: 'center' }}>
-          <p style={{ fontSize: '14px', color: '#94a3b8' }}>Geen spelers gevonden.</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: '16px' }}>
+          {Array.from({ length: 8 }, (_, i) => <div key={i} className="z-skelet" style={{ height: '250px', borderRadius: 'var(--z-r)' }} />)}
         </div>
+      ) : gesorteerd.length === 0 ? (
+        <LegeStaat tekst={zoek ? `Geen speler gevonden voor "${zoek}".` : 'Nog geen spelers.'} icoon="spelers" />
       ) : (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-          gap: '14px',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
+          gap: '16px',
         }}>
-          {gesorteerd.map(speler => {
-            const s = stats[speler.id] ?? { goals: 0, assists: 0, matches: 0 }
-            const eretitel = eer(speler.id)
-            return (
-              <SpelerKaart
-                key={speler.id}
-                speler={speler}
-                stats={s}
-                eretitel={eretitel}
-                onClick={() => setGeselecteerdeSpeler(speler)}
-              />
-            )
-          })}
+          {gesorteerd.map(speler => (
+            <SpelerKaart
+              key={speler.id}
+              speler={speler}
+              stats={stats[speler.id] ?? { goals: 0, assists: 0, matches: 0 }}
+              eretitel={eer(speler.id)}
+              onClick={() => setGeselecteerdeSpeler(speler)}
+            />
+          ))}
         </div>
       )}
 
-      {/* Speler detail modal */}
       {geselecteerdeSpeler && (
         <SpelerDetail
           speler={geselecteerdeSpeler}
@@ -133,95 +116,63 @@ export default function Spelers() {
   )
 }
 
-function SpelerKaart({ speler, stats, eretitel, onClick }) {
-  const [hover, setHover] = useState(false)
+const EER_LABEL = { topscorer: 'Topscorer', assistkoning: 'Assistenkoning', beide: 'Topscorer & assists' }
 
+function SpelerKaart({ speler, stats, eretitel, onClick }) {
   return (
-    <div
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onClick={onClick}
-      style={{
-        background: 'white',
-        border: `1px solid ${hover ? '#bfdbfe' : '#e2e8f0'}`,
-        borderRadius: '16px',
-        overflow: 'hidden',
-        transition: 'all 0.2s',
-        boxShadow: hover ? '0 4px 20px rgba(59,130,246,0.1)' : '0 1px 3px rgba(0,0,0,0.04)',
-        cursor: 'pointer',
-      }}
-    >
-      {/* Foto sectie */}
+    <Kaart onClick={onClick} style={{ overflow: 'hidden' }}>
       <div
         className={eretitel ? VLAK_KLASSE[eretitel] : undefined}
         style={{
-          height: '140px',
-          background: speler.photo_url ? 'transparent' : 'linear-gradient(135deg, #dbeafe, #eff6ff)',
-          position: 'relative',
-          overflow: 'hidden',
+          position: 'relative', aspectRatio: '1 / 1', overflow: 'hidden',
+          background: 'linear-gradient(160deg, var(--z-blauw-100), var(--z-blauw-50))',
         }}
       >
         {speler.photo_url ? (
-          <img
-            src={speler.photo_url}
-            alt={speler.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+          <img src={speler.photo_url} alt={speler.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
-          <div style={{
-            width: '100%', height: '100%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <span style={{ fontSize: '48px', fontWeight: '800', color: '#93c5fd', opacity: 0.7 }}>
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: '56px', fontWeight: 700, color: 'var(--z-blauw-200)' }}>
               {speler.name.charAt(0).toUpperCase()}
             </span>
           </div>
         )}
 
-        {/* Ereteken */}
         {eretitel && (
-          <div style={{
-            position: 'absolute', top: '10px', right: '10px',
-            display: 'flex', alignItems: 'center', gap: '5px',
-            background: eretitel === 'assistkoning' ? '#7c3aed' : '#f59e0b',
-            color: 'white', fontSize: '10px', fontWeight: '700',
-            padding: '3px 8px', borderRadius: '20px',
+          <span style={{
+            position: 'absolute', left: '10px', bottom: '10px',
+            display: 'inline-flex', alignItems: 'center', gap: '4px',
+            height: '22px', padding: '0 8px', borderRadius: '99px',
+            background: 'rgba(12,26,61,0.78)', backdropFilter: 'blur(6px)',
+            color: 'white', fontSize: '11px', fontWeight: 600,
           }}>
-            👑 {eretitel === 'assistkoning' ? 'Assistenkoning' : eretitel === 'beide' ? 'Top & assists' : 'Topscorer'}
-          </div>
+            <EerKronen eer={eretitel} grootte={11} /> {EER_LABEL[eretitel]}
+          </span>
         )}
       </div>
 
-      {/* Info sectie */}
-      <div style={{ padding: '14px' }}>
-        <p style={{
-          fontSize: '14px', fontWeight: '700', color: '#0f172a',
-          marginBottom: '10px',
+      <div style={{ padding: '14px 16px 16px' }}>
+        <div style={{
+          fontSize: '14px', fontWeight: 600, color: 'var(--z-tekst)',
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
           {speler.name}
-          {eretitel && <EerKronen eer={eretitel} grootte={13} style={{ marginLeft: '5px', verticalAlign: 'middle' }} />}
-        </p>
-
-        {/* Stats */}
-        <div style={{ display: 'flex', gap: '0', borderRadius: '8px', overflow: 'hidden', border: '1px solid #f1f5f9' }}>
-          <StatPil icoon="⚽" waarde={stats.goals} label="Goals" kleur="#eff6ff" tekstkleur="#1d4ed8" />
-          <StatPil icoon="🎯" waarde={stats.assists} label="Assists" kleur="#f0fdf4" tekstkleur="#15803d" grens />
-          <StatPil icoon="🏟️" waarde={stats.matches} label="Matchen" kleur="#fafafa" tekstkleur="#475569" grens />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', marginTop: '12px' }}>
+          <StatPil waarde={stats.goals} label="Goals" />
+          <StatPil waarde={stats.assists} label="Assists" />
+          <StatPil waarde={stats.matches} label="Matchen" />
         </div>
       </div>
-    </div>
+    </Kaart>
   )
 }
 
-function StatPil({ icoon, waarde, label, kleur, tekstkleur, grens }) {
+function StatPil({ waarde, label }) {
   return (
-    <div style={{
-      flex: 1, background: kleur, padding: '8px 4px', textAlign: 'center',
-      borderLeft: grens ? '1px solid #f1f5f9' : 'none',
-    }}>
-      <div style={{ fontSize: '13px', fontWeight: '800', color: tekstkleur }}>{waarde}</div>
-      <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '1px' }}>{label}</div>
+    <div>
+      <div className="z-tab-nums" style={{ fontSize: '17px', fontWeight: 700, color: waarde ? 'var(--z-tekst)' : 'var(--z-tekst-4)' }}>{waarde}</div>
+      <div style={{ fontSize: '12px', color: 'var(--z-tekst-3)' }}>{label}</div>
     </div>
   )
 }

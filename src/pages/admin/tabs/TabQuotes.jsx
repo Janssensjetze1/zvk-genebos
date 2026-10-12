@@ -109,7 +109,7 @@ export default function TabQuotes() {
     else herlaad()
   }
 
-  if (loading) return <p style={{ fontSize: '14px', color: '#94a3b8' }}>Laden...</p>
+  if (loading) return <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Laden...</p>
 
   const term = zoek.trim().toLowerCase()
   const zichtbaar = term
@@ -150,7 +150,7 @@ export default function TabQuotes() {
       {/* Nieuwe quote */}
       {toonFormulier && (
         <form onSubmit={handleToevoegen} style={{
-          background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px',
+          background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)', borderRadius: '12px',
           padding: '20px', marginBottom: '16px',
         }}>
           <label style={labelStijl}>Quote *</label>
@@ -196,20 +196,20 @@ export default function TabQuotes() {
             <div key={q.id}>
               <div style={{
                 background: 'white',
-                border: `1px solid ${bewerkId === q.id ? '#93c5fd' : '#e2e8f0'}`,
+                border: `1px solid ${bewerkId === q.id ? '#93c5fd' : 'var(--z-lijn)'}`,
                 borderRadius: bewerkId === q.id ? '10px 10px 0 0' : '10px',
                 padding: '13px 16px', display: 'flex', alignItems: 'flex-start', gap: '14px',
                 opacity: q.actief ? 1 : 0.6,
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{
-                    fontSize: '14px', color: '#334155', fontStyle: 'italic',
+                    fontSize: '14px', color: 'var(--z-tekst-2)', fontStyle: 'italic',
                     lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap',
                   }}>
                     "{q.tekst}"
                   </p>
                   <p style={{
-                    fontSize: '12px', fontWeight: '600', color: '#94a3b8',
+                    fontSize: '12px', fontWeight: '600', color: 'var(--z-tekst-4)',
                     marginTop: '6px', marginBottom: 0,
                   }}>
                     {q.auteur}
@@ -221,9 +221,9 @@ export default function TabQuotes() {
                     onClick={() => toggleActief(q)}
                     title={q.actief ? 'Uit de rotatie halen' : 'Terug in de rotatie zetten'}
                     style={{
-                      background: q.actief ? '#f0fdf4' : '#f8fafc',
-                      color: q.actief ? '#16a34a' : '#94a3b8',
-                      border: `1px solid ${q.actief ? '#bbf7d0' : '#e2e8f0'}`,
+                      background: q.actief ? 'var(--z-winst-bg)' : 'var(--z-vlak)',
+                      color: q.actief ? 'var(--z-winst)' : 'var(--z-tekst-4)',
+                      border: `1px solid ${q.actief ? 'var(--z-winst-rand)' : 'var(--z-lijn)'}`,
                       borderRadius: '6px', padding: '5px 11px',
                       fontSize: '12px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap',
                     }}
@@ -233,19 +233,19 @@ export default function TabQuotes() {
                   <button
                     onClick={() => bewerkId === q.id ? stopBewerken() : startBewerken(q)}
                     style={{
-                      background: bewerkId === q.id ? '#f1f5f9' : 'white',
-                      border: '1px solid #e2e8f0', borderRadius: '6px',
+                      background: bewerkId === q.id ? 'var(--z-lijn-zacht)' : 'white',
+                      border: '1px solid var(--z-lijn)', borderRadius: '6px',
                       padding: '5px 12px', fontSize: '13px', fontWeight: '500',
-                      color: '#475569', cursor: 'pointer',
+                      color: 'var(--z-tekst-2)', cursor: 'pointer',
                     }}
                   >
                     {bewerkId === q.id ? 'Annuleren' : 'Bewerken'}
                   </button>
                   <button
                     onClick={() => handleVerwijder(q)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: '#cbd5e1', padding: '5px 8px', borderRadius: '6px' }}
-                    onMouseEnter={e => e.target.style.color = '#ef4444'}
-                    onMouseLeave={e => e.target.style.color = '#cbd5e1'}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: 'var(--z-lijn-sterk)', padding: '5px 8px', borderRadius: '6px' }}
+                    onMouseEnter={e => e.target.style.color = 'var(--z-verlies)'}
+                    onMouseLeave={e => e.target.style.color = 'var(--z-lijn-sterk)'}
                   >
                     Verwijderen
                   </button>
@@ -255,7 +255,7 @@ export default function TabQuotes() {
               {/* Inline bewerkformulier */}
               {bewerkId === q.id && (
                 <form onSubmit={e => handleBewerken(e, q)} style={{
-                  background: '#f8fafc', border: '1px solid #93c5fd', borderTop: 'none',
+                  background: 'var(--z-vlak)', border: '1px solid #93c5fd', borderTop: 'none',
                   borderRadius: '0 0 10px 10px', padding: '14px 16px',
                 }}>
                   <label style={{ ...labelStijl, fontSize: '12px' }}>Quote</label>

@@ -79,7 +79,7 @@ export default function PWASplashScreen({ onKlaar }) {
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 9999,
-      background: '#0a0a14',
+      background: 'radial-gradient(120% 80% at 50% 0%, #1b3a8f 0%, #13234d 45%, #0c1a3d 100%)',
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
       padding: '40px 32px',
@@ -134,7 +134,7 @@ export default function PWASplashScreen({ onKlaar }) {
         <div style={{
           height: '100%',
           width: `${voortgang}%`,
-          background: 'linear-gradient(90deg, #3b82f6, #93c5fd)',
+          background: 'linear-gradient(90deg, var(--z-blauw-500), #93c5fd)',
           borderRadius: '100px',
           transition: 'width 0.08s linear',
           boxShadow: '0 0 8px rgba(147,197,253,0.5)',

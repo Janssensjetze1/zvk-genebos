@@ -35,6 +35,7 @@ import PWAPronostiek from './pwa/PWAPronostiek'
 import PWAWedstrijdDetail from './pwa/PWAWedstrijdDetail'
 import Invullen from './pages/Invullen'
 import Badges from './pages/Badges'
+import Stats from './pages/Stats'
 import Pronostiek from './pages/Pronostiek'
 import WedstrijdDetailPagina from './pages/WedstrijdDetailPagina'
 
@@ -145,6 +146,9 @@ function AppRoutes() {
       } />
       <Route path="/klassement" element={
         <ProtectedRoute><Layout><Klassement /></Layout></ProtectedRoute>
+      } />
+      <Route path="/stats" element={
+        <ProtectedRoute><Layout><Stats /></Layout></ProtectedRoute>
       } />
       <Route path="/pronostiek" element={
         <ProtectedRoute><Layout><Pronostiek /></Layout></ProtectedRoute>

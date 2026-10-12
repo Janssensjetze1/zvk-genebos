@@ -66,7 +66,7 @@ export default function TabSeizoen() {
     window.location.reload()
   }
 
-  if (loading) return <p style={{ fontSize: '14px', color: '#94a3b8' }}>Laden...</p>
+  if (loading) return <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Laden...</p>
 
   return (
     <>
@@ -74,13 +74,13 @@ export default function TabSeizoen() {
     <div>
       {/* Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <p style={{ fontSize: '14px', color: '#94a3b8' }}>{seizoenen.length} seizoen{seizoenen.length !== 1 ? 'en' : ''}</p>
+        <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>{seizoenen.length} seizoen{seizoenen.length !== 1 ? 'en' : ''}</p>
         <button
           onClick={() => { setToonFormulier(v => !v); setFout('') }}
           style={{
-            background: toonFormulier ? 'white' : '#0f172a',
-            color: toonFormulier ? '#64748b' : 'white',
-            border: toonFormulier ? '1px solid #e2e8f0' : 'none',
+            background: toonFormulier ? 'white' : 'var(--z-tekst)',
+            color: toonFormulier ? 'var(--z-tekst-3)' : 'white',
+            border: toonFormulier ? '1px solid var(--z-lijn)' : 'none',
             borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
           }}
         >
@@ -91,11 +91,11 @@ export default function TabSeizoen() {
       {/* Nieuw seizoen formulier */}
       {toonFormulier && (
         <form onSubmit={handleToevoegen} style={{
-          background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px',
+          background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)', borderRadius: '12px',
           padding: '20px', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '14px',
         }}>
-          <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a' }}>Nieuw seizoen</h3>
-          {fout && <p style={{ fontSize: '13px', color: '#ef4444' }}>{fout}</p>}
+          <h3 style={{ fontSize: '15px', fontWeight: '600', color: 'var(--z-tekst)' }}>Nieuw seizoen</h3>
+          {fout && <p style={{ fontSize: '13px', color: 'var(--z-verlies)' }}>{fout}</p>}
           <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
             <div style={{ flex: 2, minWidth: '160px' }}>
               <label style={labelStijl}>Naam *</label>
@@ -119,8 +119,8 @@ export default function TabSeizoen() {
 
       {/* Seizoenenlijst */}
       {seizoenen.length === 0 ? (
-        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
-          <p style={{ fontSize: '14px', color: '#94a3b8' }}>Nog geen seizoenen. Voeg het eerste toe!</p>
+        <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
+          <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Nog geen seizoenen. Voeg het eerste toe!</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -130,7 +130,7 @@ export default function TabSeizoen() {
               <div key={s.id}>
                 <div style={{
                   background: 'white',
-                  border: `1px solid ${bewerkId === s.id ? '#93c5fd' : isActief ? '#bfdbfe' : '#e2e8f0'}`,
+                  border: `1px solid ${bewerkId === s.id ? '#93c5fd' : isActief ? 'var(--z-blauw-200)' : 'var(--z-lijn)'}`,
                   borderRadius: bewerkId === s.id ? '10px 10px 0 0' : '10px',
                   padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px',
                   background: isActief ? '#f0f9ff' : 'white',
@@ -138,7 +138,7 @@ export default function TabSeizoen() {
                   {/* Icoon */}
                   <div style={{
                     width: '36px', height: '36px', borderRadius: '8px', flexShrink: 0,
-                    background: isActief ? '#dbeafe' : '#f1f5f9',
+                    background: isActief ? '#dbeafe' : 'var(--z-lijn-zacht)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: '16px',
                   }}>
@@ -147,15 +147,15 @@ export default function TabSeizoen() {
 
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a' }}>{s.name}</span>
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--z-tekst)' }}>{s.name}</span>
                       {isActief && (
                         <span style={{
                           fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '20px',
-                          background: '#dbeafe', color: '#1d4ed8',
+                          background: '#dbeafe', color: 'var(--z-blauw)',
                         }}>Huidig</span>
                       )}
                     </div>
-                    <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--z-tekst-4)', marginTop: '2px' }}>
                       {new Date(s.start_date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'short', year: 'numeric' })}
                       {' · '}
                       {new Date(s.end_date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -167,8 +167,8 @@ export default function TabSeizoen() {
                       <button
                         onClick={() => switchSeizoen(s)}
                         style={{
-                          background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '6px',
-                          padding: '5px 12px', fontSize: '12px', fontWeight: '500', color: '#475569', cursor: 'pointer',
+                          background: 'var(--z-lijn-zacht)', border: '1px solid var(--z-lijn)', borderRadius: '6px',
+                          padding: '5px 12px', fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-2)', cursor: 'pointer',
                         }}
                       >
                         Archief bekijken
@@ -177,9 +177,9 @@ export default function TabSeizoen() {
                     <button
                       onClick={() => bewerkId === s.id ? stopBewerken() : startBewerken(s)}
                       style={{
-                        background: bewerkId === s.id ? '#f1f5f9' : 'white',
-                        border: '1px solid #e2e8f0', borderRadius: '6px',
-                        padding: '5px 12px', fontSize: '13px', fontWeight: '500', color: '#475569', cursor: 'pointer',
+                        background: bewerkId === s.id ? 'var(--z-lijn-zacht)' : 'white',
+                        border: '1px solid var(--z-lijn)', borderRadius: '6px',
+                        padding: '5px 12px', fontSize: '13px', fontWeight: '500', color: 'var(--z-tekst-2)', cursor: 'pointer',
                       }}
                     >
                       {bewerkId === s.id ? 'Annuleren' : 'Bewerken'}
@@ -187,9 +187,9 @@ export default function TabSeizoen() {
                     {!isActief && (
                       <button
                         onClick={() => handleVerwijder(s)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: '#cbd5e1', padding: '5px 8px', borderRadius: '6px' }}
-                        onMouseEnter={e => e.target.style.color = '#ef4444'}
-                        onMouseLeave={e => e.target.style.color = '#cbd5e1'}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: 'var(--z-lijn-sterk)', padding: '5px 8px', borderRadius: '6px' }}
+                        onMouseEnter={e => e.target.style.color = 'var(--z-verlies)'}
+                        onMouseLeave={e => e.target.style.color = 'var(--z-lijn-sterk)'}
                       >
                         Verwijderen
                       </button>
@@ -200,11 +200,11 @@ export default function TabSeizoen() {
                 {/* Inline bewerkformulier */}
                 {bewerkId === s.id && (
                   <form onSubmit={e => handleBewerken(e, s)} style={{
-                    background: '#f8fafc', border: '1px solid #93c5fd', borderTop: 'none',
+                    background: 'var(--z-vlak)', border: '1px solid #93c5fd', borderTop: 'none',
                     borderRadius: '0 0 10px 10px', padding: '16px',
                     display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'flex-end',
                   }}>
-                    {bewerkFout && <p style={{ width: '100%', fontSize: '12px', color: '#ef4444', margin: 0 }}>{bewerkFout}</p>}
+                    {bewerkFout && <p style={{ width: '100%', fontSize: '12px', color: 'var(--z-verlies)', margin: 0 }}>{bewerkFout}</p>}
                     <div style={{ flex: 2, minWidth: '140px' }}>
                       <label style={labelStijl}>Naam</label>
                       <input type="text" value={bewerkNaam} onChange={e => setBewerkNaam(e.target.value)} required style={{ ...inputStijl, padding: '8px 12px' }} />
@@ -232,6 +232,6 @@ export default function TabSeizoen() {
   )
 }
 
-const labelStijl = { display: 'block', fontSize: '12px', fontWeight: '500', color: '#64748b', marginBottom: '5px' }
-const inputStijl = { width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '9px 12px', fontSize: '14px', color: '#0f172a', outline: 'none', background: 'white', boxSizing: 'border-box' }
-const knopStijl = (disabled) => ({ background: '#0f172a', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 20px', fontSize: '13px', fontWeight: '600', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 })
+const labelStijl = { display: 'block', fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-3)', marginBottom: '5px' }
+const inputStijl = { width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px', padding: '9px 12px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'white', boxSizing: 'border-box' }
+const knopStijl = (disabled) => ({ background: 'var(--z-tekst)', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 20px', fontSize: '13px', fontWeight: '600', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 })

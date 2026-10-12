@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { useTopscorer } from '../context/TopscorerContext'
 import { RING_KLASSE } from '../lib/eer'
+import { PaginaKop } from '../ui'
 
 export default function Account() {
   const { user, profile, patchProfile } = useAuth()
@@ -150,9 +151,8 @@ export default function Account() {
   const jouwEer = eer(profile?.player_id)
 
   return (
-    <div style={{ maxWidth: '560px' }}>
-      <h1 style={{ fontSize: '22px', fontWeight: '600', color: '#0f172a', marginBottom: '4px' }}>Accountinstellingen</h1>
-      <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '32px' }}>Beheer je persoonlijke gegevens</p>
+    <div style={{ maxWidth: '920px' }}>
+      <PaginaKop titel="Account" ondertitel="Je profiel, meldingen en wachtwoord" />
 
       {/* Profiel: naam & foto */}
       <Sectie titel="Profiel" beschrijving="Naam en profielfoto zichtbaar voor andere leden">
@@ -169,18 +169,18 @@ export default function Account() {
               onClick={() => fotoInputRef.current?.click()}
               style={{
                 width: '100%', height: '100%', borderRadius: '50%',
-                background: '#eff6ff', overflow: 'hidden',
+                background: 'var(--z-blauw-50)', overflow: 'hidden',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', position: 'relative', boxSizing: 'border-box',
                 border: fotoPreview
-                  ? '2px solid #3b82f6'
+                  ? '2px solid var(--z-blauw-500)'
                   : jouwEer ? 'none' : '2px solid transparent',
                 transition: 'border 0.2s',
               }}
             >
               {fotoSrc
                 ? <img src={fotoSrc} alt={weergaveNaam} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : <span style={{ fontSize: '24px', fontWeight: '700', color: '#1d4ed8' }}>{weergaveNaam.charAt(0).toUpperCase()}</span>
+                : <span style={{ fontSize: '24px', fontWeight: '700', color: 'var(--z-blauw)' }}>{weergaveNaam.charAt(0).toUpperCase()}</span>
               }
                 {/* Overlay bij hover */}
                 <div style={{
@@ -213,7 +213,7 @@ export default function Account() {
                 onClick={() => fotoInputRef.current?.click()}
                 style={{
                   display: 'block', fontSize: '13px', fontWeight: '500',
-                  color: '#3b82f6', background: 'none', border: 'none',
+                  color: 'var(--z-blauw-500)', background: 'none', border: 'none',
                   padding: 0, cursor: 'pointer', marginBottom: '4px',
                 }}
               >
@@ -221,7 +221,7 @@ export default function Account() {
               </button>
               {fotoPreview ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--z-tekst-3)' }}>
                     {fotoBestand?.name?.length > 24
                       ? fotoBestand.name.slice(0, 22) + '…'
                       : fotoBestand?.name}
@@ -229,13 +229,13 @@ export default function Account() {
                   <button
                     type="button"
                     onClick={handleFotoVerwijderen}
-                    style={{ fontSize: '12px', color: '#ef4444', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                    style={{ fontSize: '12px', color: 'var(--z-verlies)', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                   >
                     Verwijderen
                   </button>
                 </div>
               ) : (
-                <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>JPG, PNG of WebP · max 5 MB</p>
+                <p style={{ fontSize: '12px', color: 'var(--z-tekst-4)', margin: 0 }}>JPG, PNG of WebP · max 5 MB</p>
               )}
             </div>
           </div>
@@ -253,7 +253,7 @@ export default function Account() {
           </Veld>
 
           {!speler && (
-            <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '-8px' }}>
+            <p style={{ fontSize: '12px', color: 'var(--z-tekst-4)', marginTop: '-8px' }}>
               Je account is nog niet gekoppeld aan een spelersfiche. Een admin doet dit voor je.
             </p>
           )}
@@ -267,7 +267,6 @@ export default function Account() {
         </form>
       </Sectie>
 
-      <Divider />
 
       {/* E-mail */}
       <Sectie titel="E-mailadres" beschrijving="Het adres waarmee je inlogt">
@@ -284,7 +283,6 @@ export default function Account() {
         </form>
       </Sectie>
 
-      <Divider />
 
       {/* Wachtwoord */}
       <Sectie titel="Wachtwoord" beschrijving="Kies een sterk wachtwoord van minstens 6 tekens">
@@ -326,22 +324,25 @@ export default function Account() {
 
 function Sectie({ titel, beschrijving, children }) {
   return (
-    <div style={{ marginBottom: '8px' }}>
-      <div style={{ marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a', marginBottom: '2px' }}>{titel}</h2>
-        <p style={{ fontSize: '13px', color: '#94a3b8' }}>{beschrijving}</p>
+    <section style={{
+      display: 'grid', gridTemplateColumns: 'minmax(0, 240px) minmax(0, 1fr)', gap: '32px',
+      padding: '28px 0', borderTop: '1px solid var(--z-lijn)',
+    }}>
+      <div>
+        <h2 style={{ fontSize: '15px', fontWeight: '600', color: 'var(--z-tekst)', marginBottom: '4px' }}>{titel}</h2>
+        <p style={{ fontSize: '13px', color: 'var(--z-tekst-3)', lineHeight: 1.5 }}>{beschrijving}</p>
       </div>
-      <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
+      <div className="z-kaart z-kaart-pad">
         {children}
       </div>
-    </div>
+    </section>
   )
 }
 
 function Veld({ label, children }) {
   return (
     <div>
-      <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '6px' }}>{label}</label>
+      <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: 'var(--z-tekst-2)', marginBottom: '6px' }}>{label}</label>
       {children}
     </div>
   )
@@ -358,8 +359,8 @@ function WachtwoordVeld({ value, onChange, toon, onToggle, placeholder, required
         minLength={minLength}
         placeholder={placeholder}
         style={{
-          width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px',
-          padding: '9px 42px 9px 14px', fontSize: '14px', color: '#0f172a',
+          width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px',
+          padding: '9px 42px 9px 14px', fontSize: '14px', color: 'var(--z-tekst)',
           outline: 'none', background: 'white', boxSizing: 'border-box',
         }}
       />
@@ -371,7 +372,7 @@ function WachtwoordVeld({ value, onChange, toon, onToggle, placeholder, required
           position: 'absolute', right: '12px',
           background: 'none', border: 'none', cursor: 'pointer',
           padding: '0', lineHeight: 0,
-          color: toon ? '#475569' : '#94a3b8',
+          color: toon ? 'var(--z-tekst-2)' : 'var(--z-tekst-4)',
         }}
       >
         {toon ? (
@@ -389,26 +390,24 @@ function WachtwoordVeld({ value, onChange, toon, onToggle, placeholder, required
   )
 }
 
-function Divider() {
-  return <div style={{ borderTop: '1px solid #f1f5f9', margin: '24px 0' }} />
-}
 
 function Bericht({ bericht }) {
   const ok = bericht.type === 'ok'
   return (
-    <span style={{ fontSize: '13px', color: ok ? '#16a34a' : '#ef4444' }}>
+    <span style={{ fontSize: '13px', color: ok ? 'var(--z-winst)' : 'var(--z-verlies)' }}>
       {ok ? '✓' : '✕'} {bericht.tekst}
     </span>
   )
 }
 
 const inputStijl = {
-  width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px',
-  padding: '9px 14px', fontSize: '14px', color: '#0f172a', outline: 'none', background: 'white',
+  width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px',
+  padding: '9px 14px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'white',
 }
 
 const knopStijl = (disabled) => ({
-  background: '#0f172a', color: 'white', border: 'none', borderRadius: '8px',
-  padding: '9px 20px', fontSize: '13px', fontWeight: '600',
+  display: 'inline-flex', alignItems: 'center', height: '36px',
+  background: 'var(--z-blauw)', color: 'white', border: 'none', borderRadius: 'var(--z-r-s)',
+  padding: '0 16px', fontSize: '13px', fontWeight: '600',
   cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1,
 })

@@ -4,60 +4,29 @@ import { useState } from 'react'
 export function ConfirmDialog({ bericht, bevestigLabel = 'Bevestigen', annuleerLabel = 'Annuleren', gevaar = false, onBevestig, onAnnuleer }) {
   return (
     <>
-      {/* Overlay */}
+      <div className="z-sheet-achter" onClick={onAnnuleer} style={{ zIndex: 1000 }} />
       <div
-        onClick={onAnnuleer}
+        role="alertdialog"
+        className="z-kaart"
         style={{
-          position: 'fixed', inset: 0, zIndex: 1000,
-          background: 'rgba(0,0,0,0.45)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
+          position: 'fixed', top: '50%', left: '50%', zIndex: 1001,
+          transform: 'translate(-50%, -50%)',
+          padding: '24px', width: '340px', maxWidth: 'calc(100vw - 32px)',
+          boxShadow: 'var(--z-schaduw-l)', borderRadius: 'var(--z-r-l)',
         }}
-      />
-      {/* Dialog */}
-      <div style={{
-        position: 'fixed', top: '50%', left: '50%', zIndex: 1001,
-        transform: 'translate(-50%, -50%)',
-        background: '#1a1a2e',
-        border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: '20px',
-        padding: '28px 28px 24px',
-        width: '320px', maxWidth: 'calc(100vw - 32px)',
-        boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
-      }}>
-        <p style={{
-          fontSize: '15px', color: 'rgba(255,255,255,0.88)',
-          lineHeight: 1.55, margin: '0 0 24px', textAlign: 'center',
-        }}>
+      >
+        <p style={{ fontSize: '15px', color: 'var(--z-tekst)', lineHeight: 1.55, margin: '0 0 20px' }}>
           {bericht}
         </p>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            onClick={onAnnuleer}
-            style={{
-              flex: 1, padding: '12px', borderRadius: '12px',
-              background: 'rgba(255,255,255,0.07)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'rgba(255,255,255,0.6)',
-              fontSize: '14px', fontWeight: '600', cursor: 'pointer',
-            }}
-          >
+          <button type="button" className="z-knop" onClick={onAnnuleer} style={{ flex: 1, height: '42px' }}>
             {annuleerLabel}
           </button>
           <button
+            type="button"
+            className="z-knop z-knop-primair"
             onClick={onBevestig}
-            style={{
-              flex: 1, padding: '12px', borderRadius: '12px',
-              background: gevaar
-                ? 'linear-gradient(135deg, #dc2626, #b91c1c)'
-                : 'linear-gradient(135deg, #6366f1, #22d3ee)',
-              border: 'none',
-              color: 'white',
-              fontSize: '14px', fontWeight: '700', cursor: 'pointer',
-              boxShadow: gevaar
-                ? '0 4px 16px rgba(220,38,38,0.35)'
-                : '0 4px 16px rgba(99,102,241,0.35)',
-            }}
+            style={{ flex: 1, height: '42px', ...(gevaar && { background: 'var(--z-verlies)', borderColor: 'var(--z-verlies)' }) }}
           >
             {bevestigLabel}
           </button>

@@ -7,7 +7,7 @@ import { usePronostiek, pronostiekSluit, pronostiekOpent, tijdTotLabel } from '.
 // op de pronostiekpagina bij wedstrijden die nú te voorspellen zijn).
 // Dezelfde compacte opmaak op mobiel en desktop.
 
-const ACCENT = '#6366f1'
+const ACCENT = 'var(--z-blauw)'
 
 function Stepper({ label, waarde, zet, disabled }) {
   const knop = (teken, onClick, uit) => (
@@ -17,8 +17,8 @@ function Stepper({ label, waarde, zet, disabled }) {
       aria-label={`${label} ${teken === '−' ? 'minder' : 'meer'}`}
       style={{
         width: '30px', height: '30px', borderRadius: '9px', flexShrink: 0,
-        border: '1px solid #e2e8f0', background: 'white',
-        color: uit ? '#cbd5e1' : '#475569',
+        border: '1px solid var(--z-lijn)', background: 'white',
+        color: uit ? 'var(--z-lijn-sterk)' : 'var(--z-tekst-2)',
         fontSize: '16px', fontWeight: '700', lineHeight: 1,
         cursor: disabled || uit ? 'not-allowed' : 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -30,13 +30,13 @@ function Stepper({ label, waarde, zet, disabled }) {
   return (
     <div style={{ flex: 1, minWidth: 0 }}>
       <div style={{
-        fontSize: '10px', fontWeight: '600', color: '#94a3b8', marginBottom: '5px',
+        fontSize: '10px', fontWeight: '600', color: 'var(--z-tekst-4)', marginBottom: '5px',
         textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
       }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
         {knop('−', () => zet(Math.max(0, waarde - 1)), waarde <= 0)}
         <span style={{
-          fontSize: '21px', fontWeight: '800', color: '#0f172a',
+          fontSize: '21px', fontWeight: '800', color: 'var(--z-tekst)',
           minWidth: '22px', textAlign: 'center', lineHeight: 1, fontVariantNumeric: 'tabular-nums',
         }}>{waarde}</span>
         {knop('+', () => zet(Math.min(50, waarde + 1)), waarde >= 50)}
@@ -56,21 +56,21 @@ function Voorspellingenlijst({ lijst, metPunten, gebruikerId }) {
           <div key={v.user_id ?? i} style={{
             display: 'flex', alignItems: 'center', gap: '10px',
             padding: '6px 9px', borderRadius: '8px',
-            background: ikzelf ? '#eef2ff' : '#f8fafc',
+            background: ikzelf ? 'var(--z-blauw-50)' : 'var(--z-vlak)',
           }}>
             <span style={{
               flex: 1, minWidth: 0, fontSize: '12px',
               fontWeight: ikzelf ? '700' : '500',
-              color: ikzelf ? ACCENT : '#334155',
+              color: ikzelf ? ACCENT : 'var(--z-tekst-2)',
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>{v.naam ?? 'Onbekend'}</span>
-            <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--z-tekst)', fontVariantNumeric: 'tabular-nums' }}>
               {vThuis}–{vUit}
             </span>
             {metPunten && (
               <span style={{
                 fontSize: '12px', fontWeight: '800', minWidth: '30px', textAlign: 'right',
-                color: v.punten >= 5 ? '#16a34a' : v.punten > 0 ? '#d97706' : '#cbd5e1',
+                color: v.punten >= 5 ? 'var(--z-winst)' : v.punten > 0 ? '#d97706' : 'var(--z-lijn-sterk)',
               }}>{v.punten > 0 ? `+${v.punten}` : '0'}{v.durfbonus ? '🎯' : ''}</span>
             )}
           </div>
@@ -102,22 +102,22 @@ export default function Pronostiek({ wedstrijd, standaardOpen = false }) {
   let samenvatting, chip
   if (status === 'nog-niet') {
     samenvatting = 'Opent later'
-    chip = { tekst: tijdTotLabel(pronostiekOpent(wedstrijd)).replace('nog ', 'over '), kleur: '#94a3b8', bg: '#f8fafc', rand: '#e2e8f0' }
+    chip = { tekst: tijdTotLabel(pronostiekOpent(wedstrijd)).replace('nog ', 'over '), kleur: 'var(--z-tekst-4)', bg: 'var(--z-vlak)', rand: 'var(--z-lijn)' }
   } else if (status === 'open') {
     samenvatting = mijn ? `Jouw gok: ${mijn.home_score}–${mijn.away_score}` : 'Nog niet ingevuld'
     chip = mijn
-      ? { tekst: tijdTotLabel(pronostiekSluit(wedstrijd)), kleur: '#16a34a', bg: '#f0fdf4', rand: '#bbf7d0' }
-      : { tekst: tijdTotLabel(pronostiekSluit(wedstrijd)), kleur: '#d97706', bg: '#fffbeb', rand: '#fde68a' }
+      ? { tekst: tijdTotLabel(pronostiekSluit(wedstrijd)), kleur: 'var(--z-winst)', bg: 'var(--z-winst-bg)', rand: 'var(--z-winst-rand)' }
+      : { tekst: tijdTotLabel(pronostiekSluit(wedstrijd)), kleur: '#d97706', bg: 'var(--z-gelijk-bg)', rand: 'var(--z-gelijk-rand)' }
   } else if (metPunten) {
     samenvatting = mijnScore
       ? `Jouw gok: ${mijnScore.voorspeld_thuis}–${mijnScore.voorspeld_uit}`
       : 'Je gokte niet mee'
     chip = mijnScore
-      ? { tekst: `+${mijnScore.punten}${mijnScore.durfbonus ? ' 🎯' : ''}`, kleur: mijnScore.punten > 0 ? '#16a34a' : '#94a3b8', bg: mijnScore.punten > 0 ? '#f0fdf4' : '#f8fafc', rand: mijnScore.punten > 0 ? '#bbf7d0' : '#e2e8f0' }
-      : { tekst: `${scores.length} gokten`, kleur: '#94a3b8', bg: '#f8fafc', rand: '#e2e8f0' }
+      ? { tekst: `+${mijnScore.punten}${mijnScore.durfbonus ? ' 🎯' : ''}`, kleur: mijnScore.punten > 0 ? 'var(--z-winst)' : 'var(--z-tekst-4)', bg: mijnScore.punten > 0 ? 'var(--z-winst-bg)' : 'var(--z-vlak)', rand: mijnScore.punten > 0 ? 'var(--z-winst-rand)' : 'var(--z-lijn)' }
+      : { tekst: `${scores.length} gokten`, kleur: 'var(--z-tekst-4)', bg: 'var(--z-vlak)', rand: 'var(--z-lijn)' }
   } else {
     samenvatting = mijn ? `Jouw gok: ${mijn.home_score}–${mijn.away_score}` : 'Je gokte niet mee'
-    chip = { tekst: 'gesloten', kleur: '#64748b', bg: '#f1f5f9', rand: '#e2e8f0' }
+    chip = { tekst: 'gesloten', kleur: 'var(--z-tekst-3)', bg: 'var(--z-lijn-zacht)', rand: 'var(--z-lijn)' }
   }
 
   const anderen = alle
@@ -145,7 +145,7 @@ export default function Pronostiek({ wedstrijd, standaardOpen = false }) {
       >
         <span style={{ fontSize: '13px', flexShrink: 0 }}>🔮</span>
         <span style={{
-          flex: 1, minWidth: 0, fontSize: '12px', fontWeight: '600', color: '#64748b',
+          flex: 1, minWidth: 0, fontSize: '12px', fontWeight: '600', color: 'var(--z-tekst-3)',
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>{loading ? 'Pronostiek laden...' : samenvatting}</span>
 
@@ -170,11 +170,11 @@ export default function Pronostiek({ wedstrijd, standaardOpen = false }) {
         <>
           <div style={{
             display: 'flex', alignItems: 'flex-start', gap: '6px',
-            background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px',
+            background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)', borderRadius: '12px',
             padding: '10px 8px',
           }}>
             <Stepper label={thuisNaam} waarde={thuis} zet={setThuis} disabled={bezig} />
-            <span style={{ fontSize: '16px', color: '#cbd5e1', fontWeight: '700', paddingTop: '22px' }}>–</span>
+            <span style={{ fontSize: '16px', color: 'var(--z-lijn-sterk)', fontWeight: '700', paddingTop: '22px' }}>–</span>
             <Stepper label={uitNaam} waarde={uit} zet={setUit} disabled={bezig} />
 
             <button
@@ -186,8 +186,8 @@ export default function Pronostiek({ wedstrijd, standaardOpen = false }) {
               style={{
                 alignSelf: 'flex-end', flexShrink: 0,
                 height: '30px', padding: '0 14px', borderRadius: '9px', border: 'none',
-                background: bewaard ? '#16a34a' : gewijzigd ? ACCENT : '#e2e8f0',
-                color: bewaard || gewijzigd ? 'white' : '#94a3b8',
+                background: bewaard ? 'var(--z-winst)' : gewijzigd ? ACCENT : 'var(--z-lijn)',
+                color: bewaard || gewijzigd ? 'white' : 'var(--z-tekst-4)',
                 fontSize: '13px', fontWeight: '700',
                 cursor: bezig || !gewijzigd ? 'default' : 'pointer',
                 transition: 'background 0.15s',
@@ -195,20 +195,20 @@ export default function Pronostiek({ wedstrijd, standaardOpen = false }) {
             >{bezig ? '...' : bewaard ? '✓' : mijn ? 'Wijzig' : 'Opslaan'}</button>
           </div>
 
-          {fout && <p style={{ fontSize: '12px', color: '#ef4444', margin: 0 }}>{fout}</p>}
+          {fout && <p style={{ fontSize: '12px', color: 'var(--z-verlies)', margin: 0 }}>{fout}</p>}
 
           {/* Wat gokten de anderen? Zichtbaar zodra je zelf ingevuld hebt. */}
           {mijn && anderen.length > 0 && (
             <>
               <div style={{
-                fontSize: '11px', fontWeight: '700', color: '#94a3b8',
+                fontSize: '11px', fontWeight: '700', color: 'var(--z-tekst-4)',
                 textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '2px',
               }}>De rest gokte</div>
               <Voorspellingenlijst lijst={anderen} metPunten={false} gebruikerId={gebruikerId} />
             </>
           )}
 
-          <p style={{ fontSize: '11px', color: '#cbd5e1', margin: 0, lineHeight: 1.4 }}>
+          <p style={{ fontSize: '11px', color: 'var(--z-lijn-sterk)', margin: 0, lineHeight: 1.4 }}>
             {aantal === 0
               ? 'Nog niemand voorspelde deze wedstrijd.'
               : `${aantal} ${aantal === 1 ? 'lid gokte' : 'leden gokten'} al.`}
@@ -218,14 +218,14 @@ export default function Pronostiek({ wedstrijd, standaardOpen = false }) {
       ) : (
         // ── Gesloten: ieders gok ───────────────────────────────────────────
         lijst.length === 0 ? (
-          <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>Niemand had een voorspelling ingediend.</p>
+          <p style={{ fontSize: '12px', color: 'var(--z-tekst-4)', margin: 0 }}>Niemand had een voorspelling ingediend.</p>
         ) : (
           <Voorspellingenlijst lijst={lijst} metPunten={metPunten} gebruikerId={gebruikerId} />
         )
       )}
 
       {uit_geklapt && metPunten && lijst.some(v => v.durfbonus) && (
-        <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
+        <p style={{ fontSize: '11px', color: 'var(--z-tekst-4)', margin: 0 }}>
           🎯 als enige de exacte score juist.
         </p>
       )}

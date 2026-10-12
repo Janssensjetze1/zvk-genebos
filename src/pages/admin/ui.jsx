@@ -2,32 +2,17 @@
 // velden, kaarten en meldingen gebruikt in plaats van eigen inline stijlen.
 // De kale stijlobjecten (inputStijl, labelStijl) staan in ./stijlen.
 
-const KNOP_SOORTEN = {
-  vol:     { background: '#0f172a', color: 'white', border: '1px solid #0f172a' },
-  rand:    { background: 'white', color: '#475569', border: '1px solid #e2e8f0' },
-  gevaar:  { background: 'white', color: '#b91c1c', border: '1px solid #fecaca' },
-  stil:    { background: 'transparent', color: '#94a3b8', border: '1px solid transparent' },
+const KNOP_KLASSE = {
+  vol: 'z-knop-primair',
+  rand: '',
+  gevaar: 'z-knop-gevaar',
+  stil: 'z-knop-stil',
 }
 
-export function Knop({ soort = 'rand', klein = false, disabled, children, ...rest }) {
+export function Knop({ soort = 'rand', klein = false, disabled, children, className = '', ...rest }) {
+  const klassen = ['z-knop', KNOP_KLASSE[soort], klein && 'z-knop-klein', className].filter(Boolean).join(' ')
   return (
-    <button
-      type="button"
-      disabled={disabled}
-      {...rest}
-      style={{
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-        borderRadius: '8px',
-        padding: klein ? '5px 11px' : '9px 18px',
-        fontSize: klein ? '12px' : '13px',
-        fontWeight: '600', whiteSpace: 'nowrap',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.6 : 1,
-        transition: 'background 0.15s, border-color 0.15s, color 0.15s',
-        ...KNOP_SOORTEN[soort],
-        ...rest.style,
-      }}
-    >
+    <button type="button" disabled={disabled} {...rest} className={klassen}>
       {children}
     </button>
   )
@@ -35,10 +20,8 @@ export function Knop({ soort = 'rand', klein = false, disabled, children, ...res
 
 export function Kaart({ children, actief = false, style }) {
   return (
-    <div style={{
-      background: 'white',
-      border: `1px solid ${actief ? '#93c5fd' : '#e2e8f0'}`,
-      borderRadius: '12px',
+    <div className="z-kaart" style={{
+      ...(actief && { borderColor: 'var(--z-blauw-200)', boxShadow: '0 0 0 3px var(--z-blauw-50)' }),
       ...style,
     }}>
       {children}
@@ -54,8 +37,8 @@ export function TabKop({ titel, subtitel, children }) {
       gap: '16px', flexWrap: 'wrap', marginBottom: '18px',
     }}>
       <div>
-        <h2 style={{ fontSize: '17px', fontWeight: '700', color: '#0f172a', margin: '0 0 3px' }}>{titel}</h2>
-        {subtitel && <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>{subtitel}</p>}
+        <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--z-tekst)', letterSpacing: '-0.01em', margin: '0 0 4px' }}>{titel}</h2>
+        {subtitel && <p style={{ fontSize: '13px', color: 'var(--z-tekst-3)', margin: 0 }}>{subtitel}</p>}
       </div>
       {children && <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>{children}</div>}
     </div>
@@ -63,10 +46,10 @@ export function TabKop({ titel, subtitel, children }) {
 }
 
 const MELDING_SOORTEN = {
-  fout:  { background: '#fef2f2', border: '#fecaca', color: '#b91c1c' },
-  goed:  { background: '#f0fdf4', border: '#bbf7d0', color: '#15803d' },
-  info:  { background: '#f8fafc', border: '#e2e8f0', color: '#475569' },
-  let:   { background: '#fffbeb', border: '#fde68a', color: '#b45309' },
+  fout:  { background: 'var(--z-verlies-bg)', border: 'var(--z-verlies-rand)', color: 'var(--z-verlies)' },
+  goed:  { background: 'var(--z-winst-bg)', border: 'var(--z-winst-rand)', color: 'var(--z-winst)' },
+  info:  { background: 'var(--z-vlak)', border: 'var(--z-lijn)', color: 'var(--z-tekst-2)' },
+  let:   { background: 'var(--z-gelijk-bg)', border: 'var(--z-gelijk-rand)', color: 'var(--z-gelijk)' },
 }
 
 export function Melding({ soort = 'info', children, style }) {
@@ -74,7 +57,7 @@ export function Melding({ soort = 'info', children, style }) {
   return (
     <div style={{
       background: s.background, border: `1px solid ${s.border}`, color: s.color,
-      borderRadius: '10px', padding: '10px 14px', fontSize: '13px', lineHeight: 1.5,
+      borderRadius: 'var(--z-r-s)', padding: '10px 14px', fontSize: '13px', lineHeight: 1.5,
       ...style,
     }}>
       {children}
@@ -85,19 +68,19 @@ export function Melding({ soort = 'info', children, style }) {
 export function LegeStaat({ emoji = '📭', titel, tekst, children }) {
   return (
     <div style={{
-      background: 'white', border: '1px dashed #e2e8f0', borderRadius: '12px',
+      background: 'var(--z-kaart)', border: '1px dashed var(--z-lijn-sterk)', borderRadius: 'var(--z-r)',
       padding: '44px 24px', textAlign: 'center',
     }}>
       <div style={{ fontSize: '28px', marginBottom: '10px' }}>{emoji}</div>
-      {titel && <p style={{ fontSize: '14px', fontWeight: '600', color: '#475569', margin: '0 0 4px' }}>{titel}</p>}
-      {tekst && <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>{tekst}</p>}
+      {titel && <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--z-tekst-2)', margin: '0 0 4px' }}>{titel}</p>}
+      {tekst && <p style={{ fontSize: '13px', color: 'var(--z-tekst-3)', margin: 0 }}>{tekst}</p>}
       {children && <div style={{ marginTop: '16px' }}>{children}</div>}
     </div>
   )
 }
 
 // Klein rond getal, bijvoorbeeld naast een tabbladnaam
-export function Teller({ aantal, kleur = '#ef4444' }) {
+export function Teller({ aantal, kleur = 'var(--z-verlies)' }) {
   if (!aantal) return null
   return (
     <span style={{

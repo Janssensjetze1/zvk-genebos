@@ -12,7 +12,7 @@ export default function Opgave({ wedstrijd }) {
 
   if (loading) {
     return (
-      <div style={{ fontSize: '12px', color: '#cbd5e1', padding: '10px 0' }}>
+      <div style={{ fontSize: '12px', color: 'var(--z-lijn-sterk)', padding: '10px 0' }}>
         Opgave laden...
       </div>
     )
@@ -27,7 +27,7 @@ export default function Opgave({ wedstrijd }) {
       {/* Kop met teller */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
         <span style={{
-          fontSize: '11px', fontWeight: '700', color: '#94a3b8',
+          fontSize: '11px', fontWeight: '700', color: 'var(--z-tekst-4)',
           textTransform: 'uppercase', letterSpacing: '0.05em',
         }}>
           ✋ Wie doet mee?
@@ -35,20 +35,20 @@ export default function Opgave({ wedstrijd }) {
         <span style={{
           fontSize: '11px', fontWeight: '700',
           padding: '3px 9px', borderRadius: '20px',
-          background: volzet ? '#fef2f2' : aantalMee > 0 ? '#f0fdf4' : '#f8fafc',
-          border: `1px solid ${volzet ? '#fecaca' : aantalMee > 0 ? '#bbf7d0' : '#e2e8f0'}`,
-          color: volzet ? '#ef4444' : aantalMee > 0 ? '#16a34a' : '#94a3b8',
+          background: volzet ? 'var(--z-verlies-bg)' : aantalMee > 0 ? 'var(--z-winst-bg)' : 'var(--z-vlak)',
+          border: `1px solid ${volzet ? 'var(--z-verlies-rand)' : aantalMee > 0 ? 'var(--z-winst-rand)' : 'var(--z-lijn)'}`,
+          color: volzet ? 'var(--z-verlies)' : aantalMee > 0 ? 'var(--z-winst)' : 'var(--z-tekst-4)',
         }}>
           {aantalMee}/{MAX_MEE}{volzet ? ' · volzet' : ''}
         </span>
       </div>
 
       {/* Bezettingsbalk */}
-      <div style={{ height: '5px', borderRadius: '4px', background: '#f1f5f9', overflow: 'hidden' }}>
+      <div style={{ height: '5px', borderRadius: '4px', background: 'var(--z-lijn-zacht)', overflow: 'hidden' }}>
         <div style={{
           width: `${Math.min(100, (aantalMee / MAX_MEE) * 100)}%`,
           height: '100%',
-          background: volzet ? '#ef4444' : '#16a34a',
+          background: volzet ? 'var(--z-verlies)' : 'var(--z-winst)',
           transition: 'width 0.25s',
         }} />
       </div>
@@ -75,8 +75,8 @@ export default function Opgave({ wedstrijd }) {
                   height: '44px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   borderRadius: '12px',
-                  border: `1.5px solid ${actief ? s.rand : '#e2e8f0'}`,
-                  background: actief ? s.bg : geblokkeerd ? '#f8fafc' : 'white',
+                  border: `1.5px solid ${actief ? s.rand : 'var(--z-lijn)'}`,
+                  background: actief ? s.bg : geblokkeerd ? 'var(--z-vlak)' : 'white',
                   boxShadow: actief ? `inset 0 0 0 1px ${s.rand}` : 'none',
                   cursor: uit ? 'not-allowed' : 'pointer',
                   opacity: bezig ? 0.6 : geblokkeerd ? 0.45 : 1,
@@ -97,8 +97,8 @@ export default function Opgave({ wedstrijd }) {
 
       {gebruikerId && !magMeedoen && (
         <div style={{
-          fontSize: '12px', color: '#94a3b8', background: '#f8fafc',
-          border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 12px',
+          fontSize: '12px', color: 'var(--z-tekst-4)', background: 'var(--z-vlak)',
+          border: '1px solid var(--z-lijn)', borderRadius: '10px', padding: '10px 12px',
         }}>
           Je hangt nog niet aan een spelersfiche. Vraag een admin om je te koppelen.
         </div>
@@ -107,15 +107,15 @@ export default function Opgave({ wedstrijd }) {
       {/* Foutmelding */}
       {fout && (
         <div style={{
-          fontSize: '12px', color: '#b91c1c', background: '#fef2f2',
-          border: '1px solid #fecaca', borderRadius: '10px', padding: '8px 12px',
+          fontSize: '12px', color: '#b91c1c', background: 'var(--z-verlies-bg)',
+          border: '1px solid var(--z-verlies-rand)', borderRadius: '10px', padding: '8px 12px',
         }}>
           {fout}
         </div>
       )}
 
       {/* Overzicht per status: uitklapbaar */}
-      <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
+      <div style={{ borderTop: '1px solid var(--z-lijn-zacht)', paddingTop: '10px' }}>
         <button
           type="button"
           onClick={e => { e.stopPropagation(); if (!niemand) setToonLijst(o => !o) }}
@@ -127,7 +127,7 @@ export default function Opgave({ wedstrijd }) {
           }}
         >
           <span style={{
-            fontSize: '11px', fontWeight: '700', color: '#94a3b8',
+            fontSize: '11px', fontWeight: '700', color: 'var(--z-tekst-4)',
             textTransform: 'uppercase', letterSpacing: '0.05em',
           }}>
             Wie gaf zich op
@@ -135,7 +135,7 @@ export default function Opgave({ wedstrijd }) {
 
           {/* Samenvatting blijft ook dichtgeklapt zichtbaar */}
           {niemand ? (
-            <span style={{ fontSize: '12px', color: '#cbd5e1', fontStyle: 'italic' }}>
+            <span style={{ fontSize: '12px', color: 'var(--z-lijn-sterk)', fontStyle: 'italic' }}>
               nog niemand
             </span>
           ) : (
@@ -172,7 +172,7 @@ export default function Opgave({ wedstrijd }) {
                       .sort((x, y) => (x.naam ?? '').localeCompare(y.naam ?? ''))
                       .map(o => (
                         <span key={o.user_id} style={{
-                          fontSize: '12px', color: '#475569', background: st.bg,
+                          fontSize: '12px', color: 'var(--z-tekst-2)', background: st.bg,
                           border: `1px solid ${st.rand}`, borderRadius: '20px', padding: '3px 10px',
                         }}>
                           {o.naam ?? 'Onbekend'}

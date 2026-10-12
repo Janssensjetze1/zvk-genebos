@@ -6,13 +6,14 @@ import { useAuth } from '../../../context/AuthContext'
 import { opgaveNatuurlijkOpen, opgaveOpentOp } from '../../../hooks/useOpgave'
 import { useVerslag } from '../../../hooks/useVerslag'
 import VerslagPaneel from '../../../components/VerslagPaneel'
+import WedstrijdFormulier from '../../../components/WedstrijdFormulier'
+import { Knop } from '../../../ui'
 
-const TYPES = ['competitie', 'beker', 'vriendschappelijk']
 const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
 const TYPE_COLORS = {
-  competitie: { bg: '#eff6ff', color: '#1d4ed8' },
+  competitie: { bg: 'var(--z-blauw-50)', color: 'var(--z-blauw)' },
   beker: { bg: '#fdf4ff', color: '#9333ea' },
-  vriendschappelijk: { bg: '#f0fdf4', color: '#16a34a' },
+  vriendschappelijk: { bg: 'var(--z-winst-bg)', color: 'var(--z-winst)' },
 }
 
 // Opgave vooraf door de spelers zelf (tabel match_availability)
@@ -27,10 +28,8 @@ export default function TabWedstrijden() {
   const [teams, setTeams] = useState([])
   const [spelers, setSpelers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [toonFormulier, setToonFormulier] = useState(false)
-  const [toonAndere, setToonAndere] = useState(false)
-  const [bewerkWedstrijd, setBewerkWedstrijd] = useState(null)
-  const [bewerkAndere, setBewerkAndere] = useState(null)
+  // Formulier: null = dicht, {} = nieuwe wedstrijd, { wedstrijd } = bewerken
+  const [formulier, setFormulier] = useState(null)
   const [wedstrijdblad, setWedstrijdblad] = useState(null)
 
   useEffect(() => { fetchAlles() }, [seizoen])
@@ -63,67 +62,30 @@ export default function TabWedstrijden() {
   const andereWedstrijden = wedstrijden.filter(w => !w.home_team?.is_zvk && !w.away_team?.is_zvk)
 
   if (!seizoen) return (
-    <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '48px', textAlign: 'center' }}>
-      <p style={{ fontSize: '14px', color: '#94a3b8' }}>Selecteer eerst een seizoen via Beheer → Seizoenen.</p>
+    <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '48px', textAlign: 'center' }}>
+      <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Selecteer eerst een seizoen via Beheer → Seizoenen.</p>
     </div>
   )
 
-  if (loading) return <p style={{ fontSize: '14px', color: '#94a3b8' }}>Laden...</p>
+  if (loading) return <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Laden...</p>
 
   return (
     <>
     {ConfirmUI}
     <div>
       {/* Toolbar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <p style={{ fontSize: '14px', color: '#94a3b8' }}>{wedstrijden.length} wedstrijd{wedstrijden.length !== 1 ? 'en' : ''} in {seizoen.name}</p>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button
-            onClick={() => { setToonAndere(true); setToonFormulier(false); setBewerkWedstrijd(null); setBewerkAndere(null); setWedstrijdblad(null) }}
-            style={{ background: 'white', color: '#475569', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 14px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}
-          >
-            + Andere wedstrijd
-          </button>
-          <button
-            onClick={() => { setToonFormulier(true); setToonAndere(false); setBewerkWedstrijd(null); setBewerkAndere(null); setWedstrijdblad(null) }}
-            style={{ background: '#0f172a', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
-          >
-            + ZVK wedstrijd plannen
-          </button>
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '20px' }}>
+        <p style={{ fontSize: '14px', color: 'var(--z-tekst-3)' }}>{wedstrijden.length} wedstrijd{wedstrijden.length !== 1 ? 'en' : ''} in {seizoen.name}</p>
+        <Knop icoon="plus" soort="primair" onClick={() => { setFormulier({}); setWedstrijdblad(null) }}>
+          Wedstrijd toevoegen
+        </Knop>
       </div>
 
-      {/* Nieuw wedstrijd formulier (enkel basisinfo) */}
-      {toonFormulier && (
-        <NieuweWedstrijd
-          seizoenId={seizoen.id}
-          zvkTeam={zvkTeam}
-          tegenstanders={tegenstanders}
-          onSluiten={() => setToonFormulier(false)}
-          onOpgeslagen={() => { setToonFormulier(false); fetchAlles() }}
-        />
-      )}
-
-      {/* Wedstrijd bewerken (basisinfo) */}
-      {bewerkWedstrijd && !wedstrijdblad && (
-        <NieuweWedstrijd
-          seizoenId={seizoen.id}
-          zvkTeam={zvkTeam}
-          tegenstanders={tegenstanders}
-          wedstrijd={bewerkWedstrijd}
-          onSluiten={() => setBewerkWedstrijd(null)}
-          onOpgeslagen={() => { setBewerkWedstrijd(null); fetchAlles() }}
-        />
-      )}
-
-      {/* Andere wedstrijd formulier */}
-      {(toonAndere || bewerkAndere) && (
-        <AndereWedstrijd
-          seizoenId={seizoen.id}
-          teams={tegenstanders}
-          wedstrijd={bewerkAndere}
-          onSluiten={() => { setToonAndere(false); setBewerkAndere(null) }}
-          onOpgeslagen={() => { setToonAndere(false); setBewerkAndere(null); fetchAlles() }}
+      {formulier && (
+        <WedstrijdFormulier
+          wedstrijd={formulier.wedstrijd}
+          onSluiten={() => setFormulier(null)}
+          onOpgeslagen={fetchAlles}
         />
       )}
 
@@ -141,12 +103,12 @@ export default function TabWedstrijden() {
 
       {/* ZVK wedstrijden */}
       <div style={{ marginBottom: '28px' }}>
-        <h2 style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
+        <h2 style={{ fontSize: '13px', fontWeight: '600', color: 'var(--z-tekst-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
           ZVK Wedstrijden
         </h2>
         {zvkWedstrijden.length === 0 ? (
-          <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
-            <p style={{ fontSize: '14px', color: '#94a3b8' }}>Nog geen wedstrijden. Plan de eerste!</p>
+          <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
+            <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Nog geen wedstrijden. Voeg de eerste toe met de knop hierboven.</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -157,9 +119,9 @@ export default function TabWedstrijden() {
                 zvkTeam={zvkTeam}
                 spelers={spelers}
                 user={user}
-                actief={bewerkWedstrijd?.id === w.id || wedstrijdblad?.id === w.id}
-                onBewerken={() => { setBewerkWedstrijd(w); setWedstrijdblad(null); setToonFormulier(false); setToonAndere(false); setBewerkAndere(null) }}
-                onWedstrijdblad={() => { setWedstrijdblad(w); setBewerkWedstrijd(null); setToonFormulier(false); setToonAndere(false); setBewerkAndere(null) }}
+                actief={formulier?.wedstrijd?.id === w.id || wedstrijdblad?.id === w.id}
+                onBewerken={() => { setFormulier({ wedstrijd: w }); setWedstrijdblad(null) }}
+                onWedstrijdblad={() => { setWedstrijdblad(w); setFormulier(null) }}
                 onVerwijderen={async () => {
                   if (!await bevestig('Wedstrijd verwijderen?', { gevaar: true, bevestigLabel: 'Verwijderen' })) return
                   await supabase.from('matches').delete().eq('id', w.id)
@@ -173,15 +135,15 @@ export default function TabWedstrijden() {
 
       {/* Andere wedstrijden */}
       <div>
-        <h2 style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
+        <h2 style={{ fontSize: '13px', fontWeight: '600', color: 'var(--z-tekst-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
           Andere Wedstrijden
-          <span style={{ fontSize: '11px', fontWeight: '400', color: '#94a3b8', textTransform: 'none', marginLeft: '8px', letterSpacing: 0 }}>
+          <span style={{ fontSize: '11px', fontWeight: '400', color: 'var(--z-tekst-4)', textTransform: 'none', marginLeft: '8px', letterSpacing: 0 }}>
             voor het klassement
           </span>
         </h2>
         {andereWedstrijden.length === 0 ? (
-          <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
-            <p style={{ fontSize: '14px', color: '#94a3b8' }}>Nog geen andere wedstrijden ingegeven.</p>
+          <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
+            <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Nog geen andere wedstrijden ingegeven.</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -189,8 +151,8 @@ export default function TabWedstrijden() {
               <AndereWedstrijdKaart
                 key={w.id}
                 wedstrijd={w}
-                actief={bewerkAndere?.id === w.id}
-                onBewerken={() => { setBewerkAndere(w); setToonAndere(false); setToonFormulier(false); setBewerkWedstrijd(null); setWedstrijdblad(null) }}
+                actief={formulier?.wedstrijd?.id === w.id}
+                onBewerken={() => { setFormulier({ wedstrijd: w }); setWedstrijdblad(null) }}
                 onVerwijderen={async () => {
                   if (!await bevestig('Wedstrijd verwijderen?', { gevaar: true, bevestigLabel: 'Verwijderen' })) return
                   await supabase.from('matches').delete().eq('id', w.id)
@@ -203,152 +165,6 @@ export default function TabWedstrijden() {
       </div>
     </div>
     </>
-  )
-}
-
-// ─── Nieuwe wedstrijd (alleen basisinfo) ─────────────────────────────────────
-
-function NieuweWedstrijd({ seizoenId, zvkTeam, tegenstanders, wedstrijd, onSluiten, onOpgeslagen }) {
-  const isBewerk = !!wedstrijd
-  const isThuis = isBewerk ? wedstrijd.home_team?.is_zvk : true
-  const tegenstander = isBewerk ? (isThuis ? wedstrijd.away_team : wedstrijd.home_team) : null
-
-  const [datum, setDatum] = useState(isBewerk ? wedstrijd.date : '')
-  const [uur, setUur] = useState(isBewerk ? (wedstrijd.time ?? '') : '')
-  const [type, setType] = useState(isBewerk ? wedstrijd.type : 'competitie')
-  const [tegenstanderId, setTegenstanderId] = useState(tegenstander?.id ?? '')
-  const [thuis, setThuis] = useState(isThuis)
-  const [locatie, setLocatie] = useState(isBewerk ? (wedstrijd.location ?? '') : 'De Voordijcker')
-  const [opslaan, setOpslaan] = useState(false)
-  const [fout, setFout] = useState('')
-
-  async function handleOpslaan(e) {
-    e.preventDefault()
-    if (!tegenstanderId) { setFout('Kies een tegenstander.'); return }
-    setFout(''); setOpslaan(true)
-
-    const teg = tegenstanders.find(t => t.id === tegenstanderId)
-    const homeTeamId = thuis ? zvkTeam.id : teg.id
-    const awayTeamId = thuis ? teg.id : zvkTeam.id
-
-    if (isBewerk) {
-      const { error } = await supabase.from('matches').update({
-        date: datum, time: (uur && uur !== '__anders__') ? uur : null, type, location: locatie || null,
-        home_team_id: homeTeamId, away_team_id: awayTeamId,
-      }).eq('id', wedstrijd.id)
-      setOpslaan(false)
-      if (error) { setFout('Opslaan mislukt: ' + error.message); return }
-    } else {
-      const { error } = await supabase.from('matches').insert({
-        season_id: seizoenId, date: datum, time: (uur && uur !== '__anders__') ? uur : null, type, location: locatie || null,
-        home_team_id: homeTeamId, away_team_id: awayTeamId,
-        home_score: 0, away_score: 0,
-      })
-      setOpslaan(false)
-      if (error) { setFout('Opslaan mislukt: ' + error.message); return }
-    }
-    onOpgeslagen()
-  }
-
-  return (
-    <form onSubmit={handleOpslaan} style={{
-      background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px',
-      padding: '20px 24px', marginBottom: '20px',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a' }}>
-          {isBewerk ? 'Wedstrijd bewerken' : 'Wedstrijd plannen'}
-        </h3>
-        <button type="button" onClick={onSluiten} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: '20px' }}>×</button>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '140px' }}>
-            <label style={labelStijl}>Datum *</label>
-            <input type="date" value={datum} onChange={e => setDatum(e.target.value)} required style={inputStijl} />
-          </div>
-          <div style={{ flexShrink: 0 }}>
-            <label style={labelStijl}>Uur</label>
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-              {['18:00', '19:00'].map(t => (
-                <button key={t} type="button" onClick={() => setUur(t)} style={{
-                  padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500',
-                  cursor: 'pointer', border: 'none',
-                  background: uur === t ? '#0f172a' : '#f1f5f9',
-                  color: uur === t ? 'white' : '#64748b',
-                }}>{t}u</button>
-              ))}
-              <button type="button" onClick={() => setUur(uur === '18:00' || uur === '19:00' || uur === '' ? '__anders__' : uur)} style={{
-                padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500',
-                cursor: 'pointer', border: 'none',
-                background: uur !== '18:00' && uur !== '19:00' && uur !== '' ? '#0f172a' : '#f1f5f9',
-                color: uur !== '18:00' && uur !== '19:00' && uur !== '' ? 'white' : '#64748b',
-              }}>Anders</button>
-              {uur !== '18:00' && uur !== '19:00' && uur !== '' && (
-                <input
-                  type="time"
-                  value={uur === '__anders__' ? '' : uur}
-                  onChange={e => setUur(e.target.value)}
-                  style={{ ...inputStijl, width: '110px', padding: '6px 10px' }}
-                  autoFocus
-                />
-              )}
-            </div>
-          </div>
-          <div style={{ flex: 2, minWidth: '180px' }}>
-            <label style={labelStijl}>Tegenstander *</label>
-            <select value={tegenstanderId} onChange={e => setTegenstanderId(e.target.value)} style={inputStijl}>
-              <option value="">Kies tegenstander</option>
-              {tegenstanders.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-            </select>
-          </div>
-          <div style={{ flex: 2, minWidth: '180px' }}>
-            <label style={labelStijl}>Locatie</label>
-            <input type="text" value={locatie} onChange={e => setLocatie(e.target.value)} placeholder="De Voordijcker" style={inputStijl} />
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-          <div>
-            <label style={labelStijl}>Type</label>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              {TYPES.map(t => (
-                <button key={t} type="button" onClick={() => setType(t)} style={{
-                  padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500',
-                  cursor: 'pointer', border: 'none',
-                  background: type === t ? TYPE_COLORS[t].bg : '#f1f5f9',
-                  color: type === t ? TYPE_COLORS[t].color : '#64748b',
-                  outline: type === t ? `2px solid ${TYPE_COLORS[t].color}` : 'none',
-                  outlineOffset: '1px',
-                }}>{TYPE_LABELS[t]}</button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label style={labelStijl}>Thuis of Uit?</label>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              {[true, false].map(isT => (
-                <button key={String(isT)} type="button" onClick={() => setThuis(isT)} style={{
-                  padding: '6px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '500',
-                  cursor: 'pointer', border: 'none',
-                  background: thuis === isT ? '#0f172a' : '#f1f5f9',
-                  color: thuis === isT ? 'white' : '#64748b',
-                }}>{isT ? '🏠 Thuis' : '✈️ Uit'}</button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {fout && <p style={{ fontSize: '13px', color: '#ef4444' }}>{fout}</p>}
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button type="submit" disabled={opslaan} style={knopStijl(opslaan)}>
-            {opslaan ? 'Opslaan...' : isBewerk ? 'Wijzigingen opslaan' : 'Wedstrijd plannen'}
-          </button>
-        </div>
-      </div>
-    </form>
   )
 }
 
@@ -433,11 +249,11 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
 
   return (
     <div style={{
-      background: 'white', border: '2px solid #0f172a', borderRadius: '14px',
+      background: 'white', border: '2px solid var(--z-tekst)', borderRadius: '14px',
       marginBottom: '20px', overflow: 'hidden',
     }}>
       {/* Header */}
-      <div style={{ background: '#0f172a', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ background: 'var(--z-tekst)', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <div style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>
             Wedstrijdblad
@@ -453,7 +269,7 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
       </div>
 
       {/* Stapper */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #f1f5f9' }}>
+      <div style={{ display: 'flex', borderBottom: '1px solid var(--z-lijn-zacht)' }}>
         {['Uitslag & Spelers', 'Doelpunten'].map((label, i) => {
           const nr = i + 1
           const actief = stap === nr
@@ -464,21 +280,21 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
               onClick={() => setStap(nr)}
               style={{
                 flex: 1, padding: '12px', border: 'none', cursor: 'pointer',
-                background: actief ? 'white' : '#f8fafc',
-                borderBottom: actief ? '2px solid #0f172a' : '2px solid transparent',
+                background: actief ? 'white' : 'var(--z-vlak)',
+                borderBottom: actief ? '2px solid var(--z-tekst)' : '2px solid transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               }}
             >
               <div style={{
                 width: '22px', height: '22px', borderRadius: '50%',
-                background: klaar ? '#0f172a' : actief ? '#0f172a' : '#e2e8f0',
-                color: klaar || actief ? 'white' : '#94a3b8',
+                background: klaar ? 'var(--z-tekst)' : actief ? 'var(--z-tekst)' : 'var(--z-lijn)',
+                color: klaar || actief ? 'white' : 'var(--z-tekst-4)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '11px', fontWeight: '700', flexShrink: 0,
               }}>
                 {klaar ? '✓' : nr}
               </div>
-              <span style={{ fontSize: '13px', fontWeight: actief ? '600' : '400', color: actief ? '#0f172a' : '#94a3b8' }}>
+              <span style={{ fontSize: '13px', fontWeight: actief ? '600' : '400', color: actief ? 'var(--z-tekst)' : 'var(--z-tekst-4)' }}>
                 {label}
               </span>
             </button>
@@ -495,16 +311,16 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
               <label style={labelStijl}>Eindstand</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: '600' }}>{zvkTeam?.name ?? 'ZVK'}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--z-tekst-3)', marginBottom: '8px', fontWeight: '600' }}>{zvkTeam?.name ?? 'ZVK'}</div>
                   <input
                     type="number" min="0" value={zvkScore}
                     onChange={e => setZvkScore(parseInt(e.target.value) || 0)}
                     style={{ ...inputStijl, width: '80px', textAlign: 'center', fontSize: '28px', fontWeight: '800', padding: '12px 8px', height: 'auto' }}
                   />
                 </div>
-                <span style={{ fontSize: '24px', color: '#e2e8f0', marginTop: '22px' }}>–</span>
+                <span style={{ fontSize: '24px', color: 'var(--z-lijn)', marginTop: '22px' }}>–</span>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: '600' }}>{tegenstander?.name}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--z-tekst-3)', marginBottom: '8px', fontWeight: '600' }}>{tegenstander?.name}</div>
                   <input
                     type="number" min="0" value={tegScore}
                     onChange={e => setTegScore(parseInt(e.target.value) || 0)}
@@ -517,22 +333,22 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
             {/* Spelers */}
             <div>
               <label style={{ ...labelStijl, marginBottom: '10px' }}>
-                Wie speelde mee? <span style={{ color: '#94a3b8', fontWeight: '400' }}>({aanwezig.size} geselecteerd)</span>
+                Wie speelde mee? <span style={{ color: 'var(--z-tekst-4)', fontWeight: '400' }}>({aanwezig.size} geselecteerd)</span>
               </label>
               {meeIds.length > 0 && (
                 <div style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
-                  background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px',
+                  background: 'var(--z-winst-bg)', border: '1px solid var(--z-winst-rand)', borderRadius: '10px',
                   padding: '10px 14px', marginBottom: '12px',
                 }}>
-                  <span style={{ fontSize: '12px', color: '#15803d' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--z-winst)' }}>
                     ✋ {meeIds.length} {meeIds.length === 1 ? 'speler gaf' : 'spelers gaven'} zich vooraf op als "doet mee".
                   </span>
                   <button
                     type="button"
                     onClick={() => setAanwezig(new Set(meeIds))}
                     style={{
-                      flexShrink: 0, background: 'white', border: '1px solid #bbf7d0', color: '#15803d',
+                      flexShrink: 0, background: 'white', border: '1px solid var(--z-winst-rand)', color: 'var(--z-winst)',
                       borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
                     }}
                   >
@@ -548,8 +364,8 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
                       display: 'flex', alignItems: 'center', gap: '6px',
                       padding: '7px 14px', borderRadius: '20px', cursor: 'pointer',
                       fontSize: '13px', fontWeight: '500', border: 'none',
-                      background: ok ? '#0f172a' : '#f1f5f9',
-                      color: ok ? 'white' : '#475569',
+                      background: ok ? 'var(--z-tekst)' : 'var(--z-lijn-zacht)',
+                      color: ok ? 'white' : 'var(--z-tekst-2)',
                       transition: 'all 0.12s',
                     }}>
                       {ok && <span style={{ fontSize: '10px' }}>✓</span>}
@@ -577,26 +393,26 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
                 <label style={{ ...labelStijl, marginBottom: '2px' }}>Doelpunten ZVK</label>
-                <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>Score ZVK: {zvkScore} · Tegenstander: {tegScore}</p>
+                <p style={{ fontSize: '12px', color: 'var(--z-tekst-4)', margin: 0 }}>Score ZVK: {zvkScore} · Tegenstander: {tegScore}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setDoelpunten(prev => [...prev, { id: null, scorerId: '', assistId: '', minuut: '' }])}
-                style={{ fontSize: '13px', fontWeight: '600', color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                style={{ fontSize: '13px', fontWeight: '600', color: 'var(--z-blauw-500)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
               >
                 + Doelpunt toevoegen
               </button>
             </div>
 
             {doelpunten.length === 0 && (
-              <div style={{ background: '#f8fafc', border: '1px dashed #e2e8f0', borderRadius: '10px', padding: '24px', textAlign: 'center' }}>
-                <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>Nog geen doelpunten. Klik "+ Doelpunt toevoegen" om te starten.</p>
+              <div style={{ background: 'var(--z-vlak)', border: '1px dashed var(--z-lijn)', borderRadius: '10px', padding: '24px', textAlign: 'center' }}>
+                <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)', margin: 0 }}>Nog geen doelpunten. Klik "+ Doelpunt toevoegen" om te starten.</p>
               </div>
             )}
 
             {doelpunten.map((d, idx) => (
               <div key={idx} style={{
-                background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px',
+                background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)', borderRadius: '10px',
                 padding: '14px 16px', display: 'flex', gap: '10px', alignItems: 'flex-end', flexWrap: 'wrap',
               }}>
                 <div style={{ fontSize: '22px', paddingBottom: '8px', flexShrink: 0 }}>⚽</div>
@@ -623,14 +439,14 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
                 <button
                   type="button"
                   onClick={() => setDoelpunten(prev => prev.filter((_, i) => i !== idx))}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#cbd5e1', fontSize: '20px', padding: '0 4px', paddingBottom: '8px' }}
-                  onMouseEnter={e => e.target.style.color = '#ef4444'}
-                  onMouseLeave={e => e.target.style.color = '#cbd5e1'}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--z-lijn-sterk)', fontSize: '20px', padding: '0 4px', paddingBottom: '8px' }}
+                  onMouseEnter={e => e.target.style.color = 'var(--z-verlies)'}
+                  onMouseLeave={e => e.target.style.color = 'var(--z-lijn-sterk)'}
                 >×</button>
               </div>
             ))}
 
-            {fout && <p style={{ fontSize: '13px', color: '#ef4444' }}>{fout}</p>}
+            {fout && <p style={{ fontSize: '13px', color: 'var(--z-verlies)' }}>{fout}</p>}
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
               <button type="button" onClick={() => setStap(1)} style={knopSecundairStijl}>← Vorige</button>
@@ -674,31 +490,31 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
   }
   const gewonnen = zvkScore > tegScore
   const verloren = zvkScore < tegScore
-  const resultaatKleur = gewonnen ? '#16a34a' : verloren ? '#ef4444' : '#64748b'
+  const resultaatKleur = gewonnen ? 'var(--z-winst)' : verloren ? 'var(--z-verlies)' : 'var(--z-tekst-3)'
   const resultaatLabel = gewonnen ? 'W' : verloren ? 'V' : 'G'
 
   return (
     <div style={{
       background: 'white',
-      border: `1px solid ${actief ? '#93c5fd' : '#e2e8f0'}`,
+      border: `1px solid ${actief ? '#93c5fd' : 'var(--z-lijn)'}`,
       borderRadius: '10px', overflow: 'hidden',
     }}>
       <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
         {/* Datum */}
         <div style={{ width: '44px', textAlign: 'center', flexShrink: 0 }}>
-          <div style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', lineHeight: 1 }}>
+          <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--z-tekst)', lineHeight: 1 }}>
             {new Date(w.date).getDate()}
           </div>
-          <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase' }}>
+          <div style={{ fontSize: '11px', color: 'var(--z-tekst-4)', textTransform: 'uppercase' }}>
             {new Date(w.date).toLocaleDateString('nl-BE', { month: 'short' })}
           </div>
         </div>
 
-        <div style={{ width: '1px', height: '32px', background: '#f1f5f9', flexShrink: 0 }} />
+        <div style={{ width: '1px', height: '32px', background: 'var(--z-lijn-zacht)', flexShrink: 0 }} />
 
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => setOpen(v => !v)}>
-          <div style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--z-tekst)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {zvkTeam?.name} {isThuis ? '' : '(uit)'} vs {tegenstander?.name}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px', flexWrap: 'wrap' }}>
@@ -706,8 +522,8 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
               fontSize: '11px', fontWeight: '600', padding: '1px 7px', borderRadius: '10px',
               background: TYPE_COLORS[w.type]?.bg, color: TYPE_COLORS[w.type]?.color,
             }}>{TYPE_LABELS[w.type]}</span>
-            {w.time && <span style={{ fontSize: '11px', color: '#94a3b8' }}>🕐 {w.time.slice(0,5)}</span>}
-            {w.location && <span style={{ fontSize: '11px', color: '#94a3b8' }}>📍 {w.location}</span>}
+            {w.time && <span style={{ fontSize: '11px', color: 'var(--z-tekst-4)' }}>🕐 {w.time.slice(0,5)}</span>}
+            {w.location && <span style={{ fontSize: '11px', color: 'var(--z-tekst-4)' }}>📍 {w.location}</span>}
           </div>
         </div>
 
@@ -716,8 +532,8 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
           {isPast ? (
             <>
               <div style={{
-                fontSize: '16px', fontWeight: '700', color: '#0f172a',
-                background: '#f8fafc', border: '1px solid #e2e8f0',
+                fontSize: '16px', fontWeight: '700', color: 'var(--z-tekst)',
+                background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)',
                 borderRadius: '8px', padding: '4px 12px', lineHeight: 1.5,
               }}>
                 {zvkScore} – {tegScore}
@@ -731,8 +547,8 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
             </>
           ) : (
             <span style={{
-              fontSize: '12px', fontWeight: '500', color: '#64748b',
-              background: '#f8fafc', border: '1px solid #e2e8f0',
+              fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-3)',
+              background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)',
               borderRadius: '8px', padding: '4px 10px',
             }}>Gepland</span>
           )}
@@ -746,7 +562,7 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
               title="De opgave staat open volgens de vaste regel: woensdag 10u van de matchweek"
               style={{
                 display: 'flex', alignItems: 'center', gap: '5px',
-                background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0',
+                background: 'var(--z-winst-bg)', color: 'var(--z-winst)', border: '1px solid var(--z-winst-rand)',
                 borderRadius: '7px', padding: '5px 11px', fontSize: '12px', fontWeight: '600',
               }}
             >✋ Opgave open</span>
@@ -759,9 +575,9 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
                 : `Opgave nu al openzetten, gaat anders open op ${openingLabel}`}
               style={{
                 display: 'flex', alignItems: 'center', gap: '5px',
-                background: opgaveOverride ? '#f0fdf4' : 'white',
-                color: opgaveOverride ? '#16a34a' : '#64748b',
-                border: `1px solid ${opgaveOverride ? '#bbf7d0' : '#e2e8f0'}`,
+                background: opgaveOverride ? 'var(--z-winst-bg)' : 'white',
+                color: opgaveOverride ? 'var(--z-winst)' : 'var(--z-tekst-3)',
+                border: `1px solid ${opgaveOverride ? 'var(--z-winst-rand)' : 'var(--z-lijn)'}`,
                 borderRadius: '7px', padding: '5px 11px',
                 fontSize: '12px', fontWeight: '600',
                 cursor: opgaveBezig ? 'not-allowed' : 'pointer',
@@ -777,9 +593,9 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
             title="Wedstrijdblad invullen"
             style={{
               display: 'flex', alignItems: 'center', gap: '6px',
-              background: heeftData ? 'white' : '#0f172a',
-              color: heeftData ? '#475569' : 'white',
-              border: heeftData ? '1px solid #e2e8f0' : 'none',
+              background: heeftData ? 'white' : 'var(--z-tekst)',
+              color: heeftData ? 'var(--z-tekst-2)' : 'white',
+              border: heeftData ? '1px solid var(--z-lijn)' : 'none',
               borderRadius: '7px', padding: '5px 12px',
               fontSize: '12px', fontWeight: '600', cursor: 'pointer',
             }}
@@ -797,9 +613,9 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
               title={verslagState.verslag ? 'Verslag opnieuw genereren' : 'Verslag genereren'}
               style={{
                 display: 'flex', alignItems: 'center', gap: '5px',
-                background: verslagState.verslag ? '#f0fdf4' : '#faf5ff',
-                color: verslagState.verslag ? '#16a34a' : '#7c3aed',
-                border: `1px solid ${verslagState.verslag ? '#bbf7d0' : '#e9d5ff'}`,
+                background: verslagState.verslag ? 'var(--z-winst-bg)' : '#faf5ff',
+                color: verslagState.verslag ? 'var(--z-winst)' : '#7c3aed',
+                border: `1px solid ${verslagState.verslag ? 'var(--z-winst-rand)' : '#e9d5ff'}`,
                 borderRadius: '7px', padding: '5px 11px',
                 fontSize: '12px', fontWeight: '600', cursor: verslagState.genereert ? 'not-allowed' : 'pointer',
                 opacity: verslagState.genereert ? 0.7 : 1,
@@ -812,15 +628,15 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
           <button
             onClick={onBewerken}
             title="Wedstrijd bewerken"
-            style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '7px', padding: '5px 10px', fontSize: '12px', color: '#64748b', cursor: 'pointer' }}
+            style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '7px', padding: '5px 10px', fontSize: '12px', color: 'var(--z-tekst-3)', cursor: 'pointer' }}
           >
             ✎
           </button>
           <button
             onClick={onVerwijderen}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: '#cbd5e1', padding: '5px 8px', borderRadius: '7px' }}
-            onMouseEnter={e => e.target.style.color = '#ef4444'}
-            onMouseLeave={e => e.target.style.color = '#cbd5e1'}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: 'var(--z-lijn-sterk)', padding: '5px 8px', borderRadius: '7px' }}
+            onMouseEnter={e => e.target.style.color = 'var(--z-verlies)'}
+            onMouseLeave={e => e.target.style.color = 'var(--z-lijn-sterk)'}
           >✕</button>
         </div>
 
@@ -835,38 +651,38 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
 
       {/* Detail uitklappen */}
       {open && (
-        <div style={{ borderTop: '1px solid #f1f5f9', background: '#fafafa' }}>
+        <div style={{ borderTop: '1px solid var(--z-lijn-zacht)', background: '#fafafa' }}>
           <div style={{ padding: '14px 16px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: '180px' }}>
-              <p style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Doelpunten ZVK</p>
+              <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--z-tekst-3)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Doelpunten ZVK</p>
               {w.goals?.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   {w.goals.map(g => (
-                    <div key={g.id} style={{ fontSize: '13px', color: '#334155', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div key={g.id} style={{ fontSize: '13px', color: 'var(--z-tekst-2)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span>⚽</span>
                       <span style={{ fontWeight: '500' }}>{g.scorer?.name}</span>
-                      {g.assist && <span style={{ color: '#94a3b8' }}>({g.assist.name})</span>}
-                      {g.minute && <span style={{ color: '#94a3b8', fontSize: '12px' }}>{g.minute}'</span>}
+                      {g.assist && <span style={{ color: 'var(--z-tekst-4)' }}>({g.assist.name})</span>}
+                      {g.minute && <span style={{ color: 'var(--z-tekst-4)', fontSize: '12px' }}>{g.minute}'</span>}
                     </div>
                   ))}
                 </div>
-              ) : <p style={{ fontSize: '13px', color: '#94a3b8' }}>Nog niet ingevuld.</p>}
+              ) : <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)' }}>Nog niet ingevuld.</p>}
             </div>
             <div style={{ flex: 1, minWidth: '180px' }}>
-              <p style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Aanwezige spelers</p>
+              <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--z-tekst-3)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Aanwezige spelers</p>
               {w.match_players?.length > 0 ? (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                   {w.match_players.map(mp => {
                     const s = spelers.find(x => x.id === mp.player_id)
-                    return s ? <span key={mp.player_id} style={{ fontSize: '12px', padding: '3px 9px', borderRadius: '20px', background: '#f1f5f9', color: '#475569' }}>{s.name}</span> : null
+                    return s ? <span key={mp.player_id} style={{ fontSize: '12px', padding: '3px 9px', borderRadius: '20px', background: 'var(--z-lijn-zacht)', color: 'var(--z-tekst-2)' }}>{s.name}</span> : null
                   })}
                 </div>
-              ) : <p style={{ fontSize: '13px', color: '#94a3b8' }}>Nog niet ingevuld.</p>}
+              ) : <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)' }}>Nog niet ingevuld.</p>}
             </div>
           </div>
           {/* Verslag sectie: lezen, zelf schrijven of aanpassen */}
           {isPast && (
-            <div style={{ borderTop: '1px solid #f1f5f9' }}>
+            <div style={{ borderTop: '1px solid var(--z-lijn-zacht)' }}>
               <VerslagPaneel verslagState={verslagState} variant="admin" toonGenereren={false} />
             </div>
           )}
@@ -878,167 +694,6 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerk
 
 // ─── Andere wedstrijd (score only) ───────────────────────────────────────────
 
-function AndereWedstrijd({ seizoenId, teams, wedstrijd, onSluiten, onOpgeslagen }) {
-  const isBewerk = !!wedstrijd
-  const [datum, setDatum] = useState(isBewerk ? wedstrijd.date : '')
-  const [uur, setUur] = useState(isBewerk ? (wedstrijd.time ?? '') : '')
-  const [type, setType] = useState(isBewerk ? wedstrijd.type : 'competitie')
-  const [thuisId, setThuisId] = useState(isBewerk ? wedstrijd.home_team_id : '')
-  const [uitId, setUitId] = useState(isBewerk ? wedstrijd.away_team_id : '')
-  const [thuisScore, setThuisScore] = useState(isBewerk ? wedstrijd.home_score : 0)
-  const [uitScore, setUitScore] = useState(isBewerk ? wedstrijd.away_score : 0)
-  const [opslaan, setOpslaan] = useState(false)
-  const [fout, setFout] = useState('')
-
-  async function handleOpslaan(e) {
-    e.preventDefault()
-    if (!thuisId || !uitId) { setFout('Kies beide teams.'); return }
-    if (thuisId === uitId) { setFout('Thuis- en uitteam moeten verschillend zijn.'); return }
-    setFout(''); setOpslaan(true)
-
-    if (isBewerk) {
-      const { error } = await supabase.from('matches').update({
-        date: datum, time: (uur && uur !== '__anders__') ? uur : null, type,
-        home_team_id: thuisId, away_team_id: uitId,
-        home_score: thuisScore, away_score: uitScore,
-      }).eq('id', wedstrijd.id)
-      setOpslaan(false)
-      if (error) { setFout('Opslaan mislukt: ' + error.message); return }
-    } else {
-      const { error } = await supabase.from('matches').insert({
-        season_id: seizoenId, date: datum, time: (uur && uur !== '__anders__') ? uur : null, type,
-        home_team_id: thuisId, away_team_id: uitId,
-        home_score: thuisScore, away_score: uitScore,
-      })
-      setOpslaan(false)
-      if (error) { setFout('Opslaan mislukt: ' + error.message); return }
-    }
-    onOpgeslagen()
-  }
-
-  const thuisTeam = teams.find(t => t.id === thuisId)
-  const uitTeam = teams.find(t => t.id === uitId)
-
-  return (
-    <form onSubmit={handleOpslaan} style={{
-      background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px',
-      padding: '20px 24px', marginBottom: '20px',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-        <div>
-          <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a', margin: 0 }}>
-            {isBewerk ? 'Wedstrijd bewerken' : 'Andere wedstrijd invoeren'}
-          </h3>
-          <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>
-            Score volstaat voor het klassement. Vul het uur in, anders sluit de pronostiek om 19:00.
-          </p>
-        </div>
-        <button type="button" onClick={onSluiten} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: '20px' }}>×</button>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '140px' }}>
-            <label style={labelStijl}>Datum *</label>
-            <input type="date" value={datum} onChange={e => setDatum(e.target.value)} required style={inputStijl} />
-          </div>
-          <div>
-            <label style={labelStijl}>Uur</label>
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-              {['18:00', '19:00'].map(t => (
-                <button key={t} type="button" onClick={() => setUur(t)} style={{
-                  padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500',
-                  cursor: 'pointer', border: 'none',
-                  background: uur === t ? '#0f172a' : '#f1f5f9',
-                  color: uur === t ? 'white' : '#64748b',
-                }}>{t}u</button>
-              ))}
-              <button type="button" onClick={() => setUur(uur === '18:00' || uur === '19:00' || uur === '' ? '__anders__' : uur)} style={{
-                padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500',
-                cursor: 'pointer', border: 'none',
-                background: uur !== '18:00' && uur !== '19:00' && uur !== '' ? '#0f172a' : '#f1f5f9',
-                color: uur !== '18:00' && uur !== '19:00' && uur !== '' ? 'white' : '#64748b',
-              }}>Anders</button>
-              {uur !== '18:00' && uur !== '19:00' && uur !== '' && (
-                <input
-                  type="time"
-                  value={uur === '__anders__' ? '' : uur}
-                  onChange={e => setUur(e.target.value)}
-                  style={{ ...inputStijl, width: '110px', padding: '6px 10px' }}
-                />
-              )}
-              {uur !== '' && (
-                <button type="button" onClick={() => setUur('')} title="Uur wissen" style={{
-                  background: 'none', border: 'none', cursor: 'pointer', color: '#cbd5e1', fontSize: '14px', padding: '4px 2px',
-                }}>✕</button>
-              )}
-            </div>
-          </div>
-          <div>
-            <label style={labelStijl}>Type</label>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              {TYPES.map(t => (
-                <button key={t} type="button" onClick={() => setType(t)} style={{
-                  padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '500',
-                  cursor: 'pointer', border: 'none',
-                  background: type === t ? TYPE_COLORS[t].bg : '#f1f5f9',
-                  color: type === t ? TYPE_COLORS[t].color : '#64748b',
-                  outline: type === t ? `2px solid ${TYPE_COLORS[t].color}` : 'none',
-                  outlineOffset: '1px',
-                }}>{TYPE_LABELS[t]}</button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Teams + score naast elkaar */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', flexWrap: 'wrap' }}>
-          <div style={{ flex: 2, minWidth: '160px' }}>
-            <label style={labelStijl}>Thuisteam *</label>
-            <select value={thuisId} onChange={e => setThuisId(e.target.value)} style={inputStijl}>
-              <option value="">Kies team</option>
-              {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-            </select>
-          </div>
-
-          {/* Score */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', flexShrink: 0 }}>
-            <div style={{ textAlign: 'center' }}>
-              <label style={{ ...labelStijl, textAlign: 'center' }}>{thuisTeam?.name ?? 'Thuis'}</label>
-              <input type="number" min="0" value={thuisScore}
-                onChange={e => setThuisScore(parseInt(e.target.value) || 0)}
-                style={{ ...inputStijl, width: '64px', textAlign: 'center', fontSize: '20px', fontWeight: '700', padding: '8px 4px', height: 'auto' }} />
-            </div>
-            <span style={{ fontSize: '18px', color: '#cbd5e1', paddingBottom: '10px' }}>–</span>
-            <div style={{ textAlign: 'center' }}>
-              <label style={{ ...labelStijl, textAlign: 'center' }}>{uitTeam?.name ?? 'Uit'}</label>
-              <input type="number" min="0" value={uitScore}
-                onChange={e => setUitScore(parseInt(e.target.value) || 0)}
-                style={{ ...inputStijl, width: '64px', textAlign: 'center', fontSize: '20px', fontWeight: '700', padding: '8px 4px', height: 'auto' }} />
-            </div>
-          </div>
-
-          <div style={{ flex: 2, minWidth: '160px' }}>
-            <label style={labelStijl}>Uitteam *</label>
-            <select value={uitId} onChange={e => setUitId(e.target.value)} style={inputStijl}>
-              <option value="">Kies team</option>
-              {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-            </select>
-          </div>
-        </div>
-
-        {fout && <p style={{ fontSize: '13px', color: '#ef4444' }}>{fout}</p>}
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button type="submit" disabled={opslaan} style={knopStijl(opslaan)}>
-            {opslaan ? 'Opslaan...' : isBewerk ? 'Wijzigingen opslaan' : 'Wedstrijd opslaan'}
-          </button>
-        </div>
-      </div>
-    </form>
-  )
-}
-
 // ─── Andere wedstrijd kaart ───────────────────────────────────────────────────
 
 function AndereWedstrijdKaart({ wedstrijd: w, actief, onBewerken, onVerwijderen }) {
@@ -1048,28 +703,28 @@ function AndereWedstrijdKaart({ wedstrijd: w, actief, onBewerken, onVerwijderen 
   return (
     <div style={{
       background: 'white',
-      border: `1px solid ${actief ? '#93c5fd' : '#e2e8f0'}`,
+      border: `1px solid ${actief ? '#93c5fd' : 'var(--z-lijn)'}`,
       borderRadius: '10px', padding: '10px 16px',
       display: 'flex', alignItems: 'center', gap: '14px',
     }}>
       {/* Datum */}
       <div style={{ width: '40px', textAlign: 'center', flexShrink: 0 }}>
-        <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', lineHeight: 1 }}>
+        <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--z-tekst)', lineHeight: 1 }}>
           {new Date(w.date).getDate()}
         </div>
-        <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase' }}>
+        <div style={{ fontSize: '11px', color: 'var(--z-tekst-4)', textTransform: 'uppercase' }}>
           {new Date(w.date).toLocaleDateString('nl-BE', { month: 'short' })}
         </div>
       </div>
 
-      <div style={{ width: '1px', height: '28px', background: '#f1f5f9', flexShrink: 0 }} />
+      <div style={{ width: '1px', height: '28px', background: 'var(--z-lijn-zacht)', flexShrink: 0 }} />
 
       {/* Teams */}
-      <div style={{ flex: 1, fontSize: '13px', color: '#334155', display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flexWrap: 'wrap' }}>
+      <div style={{ flex: 1, fontSize: '13px', color: 'var(--z-tekst-2)', display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flexWrap: 'wrap' }}>
         <span style={{ fontWeight: '600' }}>{w.home_team?.name}</span>
         <span style={{
-          fontSize: '13px', fontWeight: '700', color: '#0f172a',
-          background: '#f8fafc', border: '1px solid #e2e8f0',
+          fontSize: '13px', fontWeight: '700', color: 'var(--z-tekst)',
+          background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)',
           borderRadius: '6px', padding: '2px 10px',
         }}>
           {w.home_score} – {w.away_score}
@@ -1080,13 +735,13 @@ function AndereWedstrijdKaart({ wedstrijd: w, actief, onBewerken, onVerwijderen 
           background: TYPE_COLORS[w.type]?.bg, color: TYPE_COLORS[w.type]?.color,
         }}>{TYPE_LABELS[w.type]}</span>
         {w.time ? (
-          <span style={{ fontSize: '11px', color: '#94a3b8' }}>🕐 {w.time.slice(0, 5)}</span>
+          <span style={{ fontSize: '11px', color: 'var(--z-tekst-4)' }}>🕐 {w.time.slice(0, 5)}</span>
         ) : (
           <span
             title="Zonder uur rekent de pronostiek met 20:00 als aftrap"
             style={{
               fontSize: '11px', fontWeight: '600', padding: '1px 7px', borderRadius: '10px',
-              background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a',
+              background: 'var(--z-gelijk-bg)', color: '#d97706', border: '1px solid var(--z-gelijk-rand)',
             }}
           >geen uur</span>
         )}
@@ -1095,14 +750,14 @@ function AndereWedstrijdKaart({ wedstrijd: w, actief, onBewerken, onVerwijderen 
       {/* Acties */}
       <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
         <button onClick={onBewerken} style={{
-          background: 'white', border: '1px solid #e2e8f0', borderRadius: '6px',
-          padding: '4px 10px', fontSize: '12px', color: '#64748b', cursor: 'pointer',
+          background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '6px',
+          padding: '4px 10px', fontSize: '12px', color: 'var(--z-tekst-3)', cursor: 'pointer',
         }}>✎</button>
         <button
           onClick={onVerwijderen}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: '#cbd5e1', padding: '4px 6px', borderRadius: '6px' }}
-          onMouseEnter={e => e.target.style.color = '#ef4444'}
-          onMouseLeave={e => e.target.style.color = '#cbd5e1'}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: 'var(--z-lijn-sterk)', padding: '4px 6px', borderRadius: '6px' }}
+          onMouseEnter={e => e.target.style.color = 'var(--z-verlies)'}
+          onMouseLeave={e => e.target.style.color = 'var(--z-lijn-sterk)'}
         >✕</button>
       </div>
     </div>
@@ -1111,7 +766,7 @@ function AndereWedstrijdKaart({ wedstrijd: w, actief, onBewerken, onVerwijderen 
 
 // ─── Stijlen ─────────────────────────────────────────────────────────────────
 
-const labelStijl = { display: 'block', fontSize: '12px', fontWeight: '500', color: '#64748b', marginBottom: '5px' }
-const inputStijl = { width: '100%', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '9px 12px', fontSize: '14px', color: '#0f172a', outline: 'none', background: 'white', boxSizing: 'border-box' }
-const knopStijl = (disabled) => ({ background: '#0f172a', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 22px', fontSize: '13px', fontWeight: '600', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 })
-const knopSecundairStijl = { background: 'white', color: '#475569', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '9px 18px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }
+const labelStijl = { display: 'block', fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-3)', marginBottom: '5px' }
+const inputStijl = { width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px', padding: '9px 12px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'white', boxSizing: 'border-box' }
+const knopStijl = (disabled) => ({ background: 'var(--z-tekst)', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 22px', fontSize: '13px', fontWeight: '600', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 })
+const knopSecundairStijl = { background: 'white', color: 'var(--z-tekst-2)', border: '1px solid var(--z-lijn)', borderRadius: '8px', padding: '9px 18px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }

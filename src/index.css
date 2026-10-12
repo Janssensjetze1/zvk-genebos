@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./ui/ui.css";
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -6,36 +7,40 @@
   padding: 0;
 }
 
+/* Oude namen, verwijzen naar de tokens in ui/ui.css */
 :root {
-  --bg:        #f8fafc;
-  --surface:   #ffffff;
-  --card:      #ffffff;
-  --card-hover:#f1f5f9;
-  --border:    #e2e8f0;
-  --border-hov:#cbd5e1;
-  --blue:      #3b82f6;
-  --blue-glow: rgba(59,130,246,0.25);
-  --text:      #0f172a;
-  --muted:     #64748b;
-  --subtle:    #94a3b8;
-  --radius-sm: 10px;
-  --radius:    14px;
-  --radius-lg: 20px;
+  --bg:        var(--z-achtergrond);
+  --surface:   var(--z-kaart);
+  --card:      var(--z-kaart);
+  --card-hover:var(--z-lijn-zacht);
+  --border:    var(--z-lijn);
+  --border-hov:var(--z-lijn-sterk);
+  --blue:      var(--z-blauw-500);
+  --blue-glow: rgba(47,99,239,0.25);
+  --text:      var(--z-tekst);
+  --muted:     var(--z-tekst-3);
+  --subtle:    var(--z-tekst-4);
+  --radius-sm: 8px;
+  --radius:    12px;
+  --radius-lg: 16px;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  font-family: var(--z-font);
+  font-feature-settings: 'cv11', 'ss01';
+  background: var(--z-achtergrond);
+  color: var(--z-tekst);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+button, input, select, textarea { font-family: inherit; }
+
 /* Scrollbar */
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.28); border-radius: 99px; border: 3px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.45); border: 3px solid transparent; background-clip: content-box; }
 
 /* Consistente inputhoogte doorheen de app */
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
@@ -44,27 +49,38 @@ select {
   padding: 0 12px;
   font-size: 14px;
   font-family: inherit;
-  color: #0f172a;
+  color: var(--z-tekst);
   background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1px solid var(--z-lijn);
+  border-radius: var(--z-r-s);
   outline: none;
   box-sizing: border-box;
   color-scheme: light;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 textarea {
   padding: 10px 12px;
   font-size: 14px;
   font-family: inherit;
-  color: #0f172a;
+  color: var(--z-tekst);
   background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1px solid var(--z-lijn);
+  border-radius: var(--z-r-s);
   outline: none;
   box-sizing: border-box;
   color-scheme: light;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--z-blauw-500) !important;
+  box-shadow: 0 0 0 3px rgba(47, 99, 239, 0.15);
+}
+
+::placeholder { color: var(--z-tekst-4); }
 
 /* Geen blauwe highlight op mobile tap */
 * { -webkit-tap-highlight-color: transparent; }
@@ -387,7 +403,7 @@ button:active:not(:disabled) {
   flex-direction: column;
   gap: 2px;
   position: sticky;
-  top: 16px;
+  top: 84px;
 }
 
 .admin-nav-knop {
@@ -395,29 +411,30 @@ button:active:not(:disabled) {
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 9px 12px;
+  height: 38px;
+  padding: 0 12px;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: var(--z-r-s);
   background: transparent;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--z-tekst-3);
   cursor: pointer;
   text-align: left;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .admin-nav-knop:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--z-lijn-zacht);
+  color: var(--z-tekst);
 }
 
 .admin-nav-knop[aria-current='true'] {
   background: white;
-  border-color: #e2e8f0;
-  color: #0f172a;
+  border-color: var(--z-lijn);
+  color: var(--z-blauw);
   font-weight: 600;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--z-schaduw-s);
 }
 
 @media (max-width: 900px) {

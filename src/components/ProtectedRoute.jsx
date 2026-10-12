@@ -36,7 +36,7 @@ function LoadingScreen() {
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 9999,
-      background: '#0a0a14',
+      background: 'radial-gradient(120% 80% at 50% 0%, #1b3a8f 0%, #13234d 45%, #0c1a3d 100%)',
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
       padding: '40px 32px',
@@ -72,7 +72,7 @@ function LoadingScreen() {
       }}>
         <div style={{
           height: '100%', width: '40%',
-          background: 'linear-gradient(90deg, transparent, #3b82f6, #93c5fd, transparent)',
+          background: 'linear-gradient(90deg, transparent, var(--z-blauw-500), #93c5fd, transparent)',
           borderRadius: '100px',
           animation: 'loading-shimmer 1.4s ease-in-out infinite',
         }} />

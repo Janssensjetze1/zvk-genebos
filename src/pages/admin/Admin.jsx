@@ -10,16 +10,17 @@ import TabFeedback from './tabs/TabFeedback'
 import TabQuotes from './tabs/TabQuotes'
 import { useBeheerTellers } from './useBeheerTellers'
 import { Teller } from './ui'
+import { Icoon, PaginaKop } from '../../ui'
 
 const ONDERDELEN = [
-  { id: 'leden',       label: 'Ledenbeheer', icon: '👥', teller: 'wachtendeLeden', tellerKleur: '#3b82f6' },
-  { id: 'spelers',     label: 'Spelers',     icon: '🎽' },
-  { id: 'teams',       label: 'Teams',       icon: '🛡️' },
-  { id: 'wedstrijden', label: 'Wedstrijden', icon: '📅', teller: 'bladOntbreekt', tellerKleur: '#f59e0b' },
-  { id: 'seizoen',     label: 'Seizoenen',   icon: '📆' },
-  { id: 'meldingen',   label: 'Meldingen',   icon: '🔔' },
-  { id: 'quotes',      label: 'Quotes',      icon: '💬' },
-  { id: 'feedback',    label: 'Feedback',    icon: '📬', teller: 'ongelezenFeedback', tellerKleur: '#7c3aed' },
+  { id: 'leden',       label: 'Ledenbeheer', icon: 'leden', teller: 'wachtendeLeden', tellerKleur: 'var(--z-blauw)' },
+  { id: 'spelers',     label: 'Spelers',     icon: 'shirt' },
+  { id: 'teams',       label: 'Teams',       icon: 'schild' },
+  { id: 'wedstrijden', label: 'Wedstrijden', icon: 'bal', teller: 'bladOntbreekt', tellerKleur: 'var(--z-goud)' },
+  { id: 'seizoen',     label: 'Seizoenen',   icon: 'kalender' },
+  { id: 'meldingen',   label: 'Meldingen',   icon: 'bel' },
+  { id: 'quotes',      label: 'Quotes',      icon: 'citaat' },
+  { id: 'feedback',    label: 'Feedback',    icon: 'inbox', teller: 'ongelezenFeedback', tellerKleur: 'var(--z-paars)' },
 ]
 
 export default function Admin() {
@@ -38,12 +39,11 @@ export default function Admin() {
   return (
     <div>
       {/* Header */}
-      <div style={{ marginBottom: '22px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: '600', color: '#0f172a', margin: '0 0 4px' }}>Beheer</h1>
-        <p style={{ fontSize: '14px', color: '#94a3b8', margin: 0 }}>
-          Administratie van de ZVK applicatie{seizoen ? ` · seizoen ${seizoen.name}` : ''}
-        </p>
-      </div>
+      <PaginaKop
+        bovenlabel="Admin"
+        titel="Beheer"
+        ondertitel={`Administratie van de ZVK-app${seizoen ? ` · seizoen ${seizoen.name}` : ''}`}
+      />
 
       {/* Wat vraagt aandacht */}
       <AandachtStrook tellers={tellers} ga={ga} />
@@ -58,7 +58,7 @@ export default function Admin() {
               aria-current={actieveTab === o.id}
               onClick={() => ga(o.id)}
             >
-              <span style={{ fontSize: '15px', flexShrink: 0 }}>{o.icon}</span>
+              <Icoon naam={o.icon} grootte={17} />
               <span style={{ flex: 1 }}>{o.label}</span>
               {o.teller && <Teller aantal={tellers[o.teller]} kleur={o.tellerKleur} />}
             </button>
@@ -89,27 +89,27 @@ function AandachtStrook({ tellers, ga }) {
   const punten = [
     {
       aantal: tellers.wachtendeLeden,
-      emoji: '🙋',
+      icoon: 'leden',
       tekst: n => `${n} ${n === 1 ? 'lid wacht' : 'leden wachten'} op goedkeuring`,
       knop: 'Naar ledenbeheer',
       tab: 'leden',
-      kleur: { bg: '#eff6ff', rand: '#bfdbfe', tekst: '#1d4ed8' },
+      kleur: { bg: 'var(--z-blauw-50)', rand: 'var(--z-blauw-200)', tekst: 'var(--z-blauw)' },
     },
     {
       aantal: tellers.bladOntbreekt,
-      emoji: '📋',
+      icoon: 'invullen',
       tekst: n => `${n} gespeelde ${n === 1 ? 'wedstrijd heeft' : 'wedstrijden hebben'} nog geen wedstrijdblad`,
       knop: 'Naar wedstrijden',
       tab: 'wedstrijden',
-      kleur: { bg: '#fffbeb', rand: '#fde68a', tekst: '#b45309' },
+      kleur: { bg: 'var(--z-gelijk-bg)', rand: 'var(--z-gelijk-rand)', tekst: 'var(--z-gelijk)' },
     },
     {
       aantal: tellers.ongelezenFeedback,
-      emoji: '📬',
+      icoon: 'inbox',
       tekst: n => `${n} ${n === 1 ? 'nieuw bericht' : 'nieuwe berichten'} via feedback`,
       knop: 'Naar feedback',
       tab: 'feedback',
-      kleur: { bg: '#faf5ff', rand: '#e9d5ff', tekst: '#7c3aed' },
+      kleur: { bg: 'var(--z-paars-bg)', rand: '#ddd6fe', tekst: 'var(--z-paars)' },
     },
   ].filter(p => p.aantal > 0)
 
@@ -117,11 +117,11 @@ function AandachtStrook({ tellers, ga }) {
     return (
       <div style={{
         display: 'flex', alignItems: 'center', gap: '10px',
-        background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px',
-        padding: '12px 16px', marginBottom: '24px',
-        fontSize: '13px', color: '#15803d', fontWeight: '500',
+        background: 'var(--z-winst-bg)', border: '1px solid var(--z-winst-rand)', borderRadius: 'var(--z-r)',
+        padding: '12px 16px', marginBottom: '28px',
+        fontSize: '13px', color: 'var(--z-winst)', fontWeight: '500',
       }}>
-        <span style={{ fontSize: '16px' }}>✓</span>
+        <Icoon naam="vink" grootte={16} dikte={2.4} />
         Alles is bij.
       </div>
     )
@@ -130,15 +130,15 @@ function AandachtStrook({ tellers, ga }) {
   return (
     <div style={{
       display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-      gap: '10px', marginBottom: '24px',
+      gap: '12px', marginBottom: '28px',
     }}>
       {punten.map(p => (
         <div key={p.tab} style={{
-          background: p.kleur.bg, border: `1px solid ${p.kleur.rand}`, borderRadius: '12px',
+          background: p.kleur.bg, border: `1px solid ${p.kleur.rand}`, borderRadius: 'var(--z-r)',
           padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px',
         }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-            <span style={{ fontSize: '18px', lineHeight: 1.2, flexShrink: 0 }}>{p.emoji}</span>
+            <span style={{ color: p.kleur.tekst, flexShrink: 0, marginTop: '1px' }}><Icoon naam={p.icoon} grootte={17} /></span>
             <span style={{ fontSize: '13px', fontWeight: '600', color: p.kleur.tekst, lineHeight: 1.45 }}>
               {p.tekst(p.aantal)}
             </span>
@@ -147,7 +147,7 @@ function AandachtStrook({ tellers, ga }) {
             onClick={() => ga(p.tab)}
             style={{
               alignSelf: 'flex-start',
-              background: 'white', border: `1px solid ${p.kleur.rand}`, borderRadius: '8px',
+              background: 'white', border: `1px solid ${p.kleur.rand}`, borderRadius: 'var(--z-r-s)',
               padding: '5px 12px', fontSize: '12px', fontWeight: '600',
               color: p.kleur.tekst, cursor: 'pointer',
             }}

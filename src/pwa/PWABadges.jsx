@@ -134,12 +134,12 @@ export default function PWABadges() {
   const progPct = totaal > 0 ? (aantalVerdiend / totaal) * 100 : 0
 
   return (
-    <div style={{ padding: '20px 16px 120px' }}>
+    <div style={{ padding: '28px 16px 24px' }}>
 
       {/* Header */}
       <div style={{ marginBottom: '6px' }}>
-        <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px' }}>Badges</h1>
-        <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>
+        <h1 className="z-app-titel" style={{ marginBottom: '6px' }}>Badges</h1>
+        <p className="z-ondertitel" style={{ margin: 0 }}>
           {loading ? 'Berekenen...' : `${aantalVerdiend} van ${totaal} verdiend`}
         </p>
       </div>
@@ -148,13 +148,13 @@ export default function PWABadges() {
       {!heeftFiche && !loading && (
         <div style={{
           marginTop: '14px',
-          background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '12px',
+          background: 'var(--z-blauw-50)', border: '1px solid var(--z-blauw-200)', borderRadius: '12px',
           padding: '12px 14px',
         }}>
-          <div style={{ fontSize: '13px', fontWeight: '700', color: '#1d4ed8', marginBottom: '3px' }}>
+          <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--z-blauw)', marginBottom: '3px' }}>
             🔗 Nog geen spelersfiche
           </div>
-          <p style={{ fontSize: '12px', color: '#3b82f6', margin: 0, lineHeight: 1.5 }}>
+          <p style={{ fontSize: '12px', color: 'var(--z-blauw-500)', margin: 0, lineHeight: 1.5 }}>
             De badges voor wedstrijden, goals en assists komen zodra een admin je koppelt. De pronostiekbadges
             hieronder kan je nu al verdienen.
           </p>
@@ -163,10 +163,10 @@ export default function PWABadges() {
 
       {/* Progress bar */}
       {totaal > 0 && (
-        <div style={{ height: '5px', background: '#e2e8f0', borderRadius: '99px', margin: '16px 0 28px', overflow: 'hidden' }}>
+        <div style={{ height: '5px', background: 'var(--z-lijn)', borderRadius: '99px', margin: '16px 0 28px', overflow: 'hidden' }}>
           <div style={{
             height: '100%', width: `${progPct}%`,
-            background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
+            background: 'var(--z-blauw)',
             borderRadius: '99px', transition: 'width 0.6s ease',
           }} />
         </div>
@@ -207,7 +207,7 @@ export default function PWABadges() {
                 background: catInfo.ro, boxShadow: `0 0 10px ${catInfo.ro}`,
               }} />
               <h2 style={{
-                fontSize: '12px', fontWeight: '800', color: '#0f172a', margin: 0,
+                fontSize: '12px', fontWeight: '800', color: 'var(--z-tekst)', margin: 0,
                 textTransform: 'uppercase', letterSpacing: '0.08em',
               }}>
                 {catInfo.label}
@@ -219,7 +219,7 @@ export default function PWABadges() {
               }}>
                 {verdiendInGroep}/{groep.length}{volledig ? ' ✓' : ''}
               </span>
-              <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+              <div style={{ flex: 1, height: '1px', background: 'var(--z-lijn)' }} />
             </div>
 
             {/* Badges van deze categorie */}

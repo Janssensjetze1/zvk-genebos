@@ -86,8 +86,8 @@ export default function TabLeden() {
   const goedgekeurd = profielen.filter(p => p.approved)
 
   if (loading) return (
-    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '32px 0', color: '#94a3b8', fontSize: '14px' }}>
-      <div style={{ width: '16px', height: '16px', border: '2px solid #e2e8f0', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '32px 0', color: 'var(--z-tekst-4)', fontSize: '14px' }}>
+      <div style={{ width: '16px', height: '16px', border: '2px solid var(--z-lijn)', borderTopColor: 'var(--z-blauw-500)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
       Laden...
     </div>
   )
@@ -100,7 +100,7 @@ export default function TabLeden() {
       {/* Wachtend op goedkeuring */}
       <section>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a', margin: 0 }}>Wachtend op goedkeuring</h2>
+          <h2 style={{ fontSize: '15px', fontWeight: '600', color: 'var(--z-tekst)', margin: 0 }}>Wachtend op goedkeuring</h2>
           {wachtend.length > 0 && (
             <span style={{
               background: '#fff7ed', color: '#c2410c', fontSize: '12px', fontWeight: '700',
@@ -109,7 +109,7 @@ export default function TabLeden() {
           )}
         </div>
         {wachtend.length === 0 ? (
-          <div style={{ fontSize: '14px', color: '#94a3b8', padding: '16px 0' }}>Geen openstaande aanvragen.</div>
+          <div style={{ fontSize: '14px', color: 'var(--z-tekst-4)', padding: '16px 0' }}>Geen openstaande aanvragen.</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {wachtend.map(p => (
@@ -124,13 +124,13 @@ export default function TabLeden() {
       {/* Actieve leden */}
       <section>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a', margin: 0 }}>Actieve leden</h2>
-          <span style={{ fontSize: '13px', color: '#94a3b8' }}>{goedgekeurd.length} {goedgekeurd.length === 1 ? 'lid' : 'leden'}</span>
+          <h2 style={{ fontSize: '15px', fontWeight: '600', color: 'var(--z-tekst)', margin: 0 }}>Actieve leden</h2>
+          <span style={{ fontSize: '13px', color: 'var(--z-tekst-4)' }}>{goedgekeurd.length} {goedgekeurd.length === 1 ? 'lid' : 'leden'}</span>
         </div>
         {goedgekeurd.length === 0 ? (
-          <div style={{ fontSize: '14px', color: '#94a3b8' }}>Nog geen goedgekeurde leden.</div>
+          <div style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Nog geen goedgekeurde leden.</div>
         ) : (
-          <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px', overflow: 'hidden' }}>
+          <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '14px', overflow: 'hidden' }}>
             {goedgekeurd.map((p, i) => (
               <LedenRij key={p.id} profiel={p} spelers={spelers}
                 isLast={i === goedgekeurd.length - 1}
@@ -160,7 +160,7 @@ function Avatar({ naam, role, photoUrl, size = 40 }) {
         style={{
           width: size, height: size, borderRadius: '50%', flexShrink: 0,
           objectFit: 'cover',
-          border: `1.5px solid ${isAdmin ? '#e9d5ff' : '#bfdbfe'}`,
+          border: `1.5px solid ${isAdmin ? '#e9d5ff' : 'var(--z-blauw-200)'}`,
         }}
       />
     )
@@ -169,11 +169,11 @@ function Avatar({ naam, role, photoUrl, size = 40 }) {
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
-      background: isAdmin ? '#f3e8ff' : '#eff6ff',
+      background: isAdmin ? '#f3e8ff' : 'var(--z-blauw-50)',
       color: isAdmin ? '#7c3aed' : '#2563eb',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontSize: size > 36 ? '14px' : '12px', fontWeight: '700',
-      border: `1.5px solid ${isAdmin ? '#e9d5ff' : '#bfdbfe'}`,
+      border: `1.5px solid ${isAdmin ? '#e9d5ff' : 'var(--z-blauw-200)'}`,
     }}>
       {initialen}
     </div>
@@ -186,9 +186,9 @@ function RolBadge({ role }) {
   return (
     <span style={{
       fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '20px',
-      background: isAdmin ? '#f3e8ff' : '#f1f5f9',
-      color: isAdmin ? '#7c3aed' : '#475569',
-      border: `1px solid ${isAdmin ? '#e9d5ff' : '#e2e8f0'}`,
+      background: isAdmin ? '#f3e8ff' : 'var(--z-lijn-zacht)',
+      color: isAdmin ? '#7c3aed' : 'var(--z-tekst-2)',
+      border: `1px solid ${isAdmin ? '#e9d5ff' : 'var(--z-lijn)'}`,
     }}>
       {isAdmin ? 'Admin' : 'Lid'}
     </span>
@@ -197,8 +197,8 @@ function RolBadge({ role }) {
 
 // Selectbox stijl
 const selectStyle = {
-  fontSize: '13px', border: '1px solid #e2e8f0', borderRadius: '8px',
-  padding: '6px 10px', color: '#334155', background: 'white', outline: 'none', cursor: 'pointer',
+  fontSize: '13px', border: '1px solid var(--z-lijn)', borderRadius: '8px',
+  padding: '6px 10px', color: 'var(--z-tekst-2)', background: 'white', outline: 'none', cursor: 'pointer',
 }
 
 // Kaart voor wachtende leden
@@ -212,25 +212,25 @@ function WachtendKaart({ profiel, spelers, onGoedkeuren, onWeigeren, onKoppelSpe
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
-          <span style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>
+          <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--z-tekst)' }}>
             {profiel.display_name || '-'}
           </span>
           <span style={{ fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '20px', background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa' }}>
             Wachtend
           </span>
         </div>
-        <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '12px' }}>{profiel.email}</div>
+        <div style={{ fontSize: '13px', color: 'var(--z-tekst-3)', marginBottom: '12px' }}>{profiel.email}</div>
 
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '12px', color: '#94a3b8' }}>Speler:</span>
+            <span style={{ fontSize: '12px', color: 'var(--z-tekst-4)' }}>Speler:</span>
             <select value={profiel.player_id ?? ''} onChange={e => onKoppelSpeler(e.target.value)} style={selectStyle}>
               <option value="">Niet gekoppeld</option>
               {spelers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '12px', color: '#94a3b8' }}>Rol:</span>
+            <span style={{ fontSize: '12px', color: 'var(--z-tekst-4)' }}>Rol:</span>
             <select value={profiel.role} onChange={e => onSetRol(e.target.value)} style={selectStyle}>
               <option value="member">Lid</option>
               <option value="admin">Admin</option>
@@ -241,13 +241,13 @@ function WachtendKaart({ profiel, spelers, onGoedkeuren, onWeigeren, onKoppelSpe
 
       <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
         <button onClick={onGoedkeuren} style={{
-          background: '#0f172a', color: 'white', border: 'none',
+          background: 'var(--z-tekst)', color: 'white', border: 'none',
           borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
         }}>
           Goedkeuren
         </button>
         <button onClick={onWeigeren} style={{
-          background: 'white', color: '#ef4444', border: '1px solid #fecaca',
+          background: 'white', color: 'var(--z-verlies)', border: '1px solid var(--z-verlies-rand)',
           borderRadius: '8px', padding: '8px 12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
         }}>
           Weigeren
@@ -267,7 +267,7 @@ function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
   const nuOnline = isNuOnline(online)
 
   return (
-    <div style={{ borderBottom: isLast ? 'none' : '1px solid #f1f5f9' }}>
+    <div style={{ borderBottom: isLast ? 'none' : '1px solid var(--z-lijn-zacht)' }}>
       {/* Hoofdrij */}
       <div
         onClick={() => setOpen(o => !o)}
@@ -283,26 +283,26 @@ function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
         {/* Naam + email */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-            <span style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--z-tekst)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {profiel.display_name || '-'}
             </span>
             <RolBadge role={profiel.role} />
           </div>
-          <div style={{ fontSize: '12px', color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: '12px', color: 'var(--z-tekst-4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {profiel.email}
           </div>
         </div>
 
         {/* Speler */}
-        <div style={{ fontSize: '13px', color: profiel.players ? '#334155' : '#cbd5e1', width: '140px', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'none', ['@media(min-width:900px)']: { display: 'block' } }}>
+        <div style={{ fontSize: '13px', color: profiel.players ? 'var(--z-tekst-2)' : 'var(--z-lijn-sterk)', width: '140px', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'none', ['@media(min-width:900px)']: { display: 'block' } }}>
           {profiel.players?.name || '-'}
         </div>
 
         {/* Laatst online */}
         <div style={{ flexShrink: 0, textAlign: 'right', minWidth: '110px' }}>
           {lastSeen ? (
-            <div style={{ fontSize: '12px', color: '#64748b' }}>
-              <span style={{ display: 'block', fontSize: '10px', color: '#cbd5e1', fontWeight: '500', marginBottom: '1px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div style={{ fontSize: '12px', color: 'var(--z-tekst-3)' }}>
+              <span style={{ display: 'block', fontSize: '10px', color: 'var(--z-lijn-sterk)', fontWeight: '500', marginBottom: '1px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Laatst online
               </span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
@@ -313,7 +313,7 @@ function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
               </span>
             </div>
           ) : (
-            <span style={{ fontSize: '12px', color: '#e2e8f0' }}>Nooit</span>
+            <span style={{ fontSize: '12px', color: 'var(--z-lijn)' }}>Nooit</span>
           )}
         </div>
 
@@ -325,22 +325,22 @@ function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
 
       {/* Uitklapbaar bewerken */}
       {open && (
-        <div style={{ padding: '12px 20px 16px', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ padding: '12px 20px 16px', background: 'var(--z-vlak)', borderTop: '1px solid var(--z-lijn-zacht)', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>Speler:</span>
+            <span style={{ fontSize: '12px', color: 'var(--z-tekst-4)', fontWeight: '500' }}>Speler:</span>
             <select value={profiel.player_id ?? ''} onChange={e => onKoppelSpeler(e.target.value)} style={selectStyle}>
               <option value="">Niet gekoppeld</option>
               {spelers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>Rol:</span>
+            <span style={{ fontSize: '12px', color: 'var(--z-tekst-4)', fontWeight: '500' }}>Rol:</span>
             <select value={profiel.role} onChange={e => onSetRol(e.target.value)} style={selectStyle}>
               <option value="member">Lid</option>
               <option value="admin">Admin</option>
             </select>
           </div>
-          <div style={{ fontSize: '11px', color: '#cbd5e1', marginLeft: 'auto', fontFamily: 'monospace' }}>
+          <div style={{ fontSize: '11px', color: 'var(--z-lijn-sterk)', marginLeft: 'auto', fontFamily: 'monospace' }}>
             {profiel.id}
           </div>
         </div>

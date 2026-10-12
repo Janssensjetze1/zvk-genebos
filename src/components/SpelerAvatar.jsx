@@ -8,9 +8,9 @@ import { RING_KLASSE } from '../lib/eer'
 export default function SpelerAvatar({
   speler,
   size = 44,
-  achtergrond = '#eff6ff',
-  rand = '2px solid #bfdbfe',
-  letterKleur = '#3b82f6',
+  achtergrond = 'var(--z-blauw-100)',
+  rand = 'none',
+  letterKleur = 'var(--z-blauw)',
   letterGrootte,
   kroon = true,
   style,

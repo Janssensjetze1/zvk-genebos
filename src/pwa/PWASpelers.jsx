@@ -4,6 +4,7 @@ import { useSeason } from '../context/SeasonContext'
 import SpelerDetail from '../components/SpelerDetail'
 import SpelerAvatar from '../components/SpelerAvatar'
 import { isGespeeld } from '../lib/wedstrijd'
+import { AppPagina, Icoon, Kaart, Laden, LegeStaat } from '../ui'
 
 export default function PWASpelers() {
   const { actief: seizoen } = useSeason()
@@ -38,87 +39,62 @@ export default function PWASpelers() {
     .sort((a, b) => b.goals - a.goals)
 
   return (
-    <div style={{ padding: '20px 16px' }}>
-      <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', marginBottom: '16px' }}>Spelers</h1>
-
-      {/* Zoekbalk */}
-      <div style={{ position: 'relative', marginBottom: '20px' }}>
-        <svg style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="8" /><path strokeLinecap="round" d="M21 21l-4.35-4.35" />
-        </svg>
+    <AppPagina
+      bovenlabel={seizoen ? `Seizoen ${seizoen.name}` : null}
+      titel="Spelers"
+      ondertitel={loading ? null : `${spelers.length} spelers · gesorteerd op doelpunten`}
+    >
+      <div style={{ position: 'relative' }}>
+        <Icoon naam="zoek" grootte={17} dikte={2} style={{
+          position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--z-tekst-4)',
+        }} />
         <input
-          value={zoek} onChange={e => setZoek(e.target.value)}
-          placeholder="Zoek speler..."
-          style={{
-            width: '100%', padding: '0 14px 0 42px', height: '44px', fontSize: '15px',
-            border: '1.5px solid #e2e8f0', borderRadius: '12px', outline: 'none',
-            background: 'white', boxSizing: 'border-box', color: '#0f172a',
-          }}
+          value={zoek}
+          onChange={e => setZoek(e.target.value)}
+          placeholder="Zoek speler"
+          style={{ width: '100%', height: '44px', paddingLeft: '42px', fontSize: '16px' }}
         />
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '48px', color: '#94a3b8' }}>Laden...</div>
+        <Laden regels={6} />
+      ) : gefilterd.length === 0 ? (
+        <LegeStaat tekst={zoek ? `Geen speler gevonden voor "${zoek}".` : 'Nog geen spelers.'} icoon="spelers" />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {gefilterd.map((speler, i) => (
-            <div
-              key={speler.id}
-              onClick={() => setGeselecteerdeSpeler(speler)}
-              style={{
-                background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px',
-                padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '14px',
-                cursor: 'pointer', transition: 'border-color 0.15s, box-shadow 0.15s',
-              }}
-              onPointerDown={e => {
-                e.currentTarget.style.boxShadow = '0 2px 12px rgba(59,130,246,0.12)'
-                e.currentTarget.style.borderColor = '#bfdbfe'
-              }}
-              onPointerUp={e => {
-                e.currentTarget.style.boxShadow = 'none'
-                e.currentTarget.style.borderColor = '#e2e8f0'
-              }}
-              onPointerLeave={e => {
-                e.currentTarget.style.boxShadow = 'none'
-                e.currentTarget.style.borderColor = '#e2e8f0'
-              }}
-            >
-              {/* Positie */}
-              <span style={{ fontSize: '12px', color: '#cbd5e1', width: '20px', textAlign: 'center', flexShrink: 0 }}>
-                {i + 1}
-              </span>
-
-              {/* Foto */}
-              <SpelerAvatar speler={speler} size={44} letterGrootte={17} />
-
-              {/* Naam */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {speler.name}
+        <Kaart style={{ overflow: 'hidden' }}>
+          <div className="z-lijst">
+            {gefilterd.map((speler, i) => (
+              <div
+                key={speler.id}
+                className="z-rij z-rij-klik"
+                onClick={() => setGeselecteerdeSpeler(speler)}
+                style={{ padding: '10px 16px', gap: '12px' }}
+              >
+                <span className="z-tab-nums" style={{ width: '20px', textAlign: 'center', flexShrink: 0, fontSize: '13px', fontWeight: 600, color: 'var(--z-tekst-4)' }}>
+                  {i + 1}
+                </span>
+                <SpelerAvatar speler={speler} size={40} letterGrootte={16} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--z-tekst)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {speler.name}
+                  </div>
+                  {speler.position && (
+                    <div style={{ fontSize: '13px', color: 'var(--z-tekst-3)', marginTop: '1px' }}>{speler.position}</div>
+                  )}
                 </div>
-                {speler.position && (
-                  <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{speler.position}</div>
+                {speler.goals > 0 && (
+                  <div className="z-tab-nums" style={{ flexShrink: 0, textAlign: 'right' }}>
+                    <span style={{ fontSize: '17px', fontWeight: 700, color: 'var(--z-tekst)' }}>{speler.goals}</span>
+                    <span style={{ fontSize: '12px', color: 'var(--z-tekst-4)', marginLeft: '4px' }}>{speler.goals === 1 ? 'goal' : 'goals'}</span>
+                  </div>
                 )}
+                <Icoon naam="chevron" grootte={16} dikte={2} className="z-chevron" />
               </div>
-
-              {/* Goals */}
-              {speler.goals > 0 && (
-                <div style={{ flexShrink: 0, textAlign: 'right' }}>
-                  <div style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>{speler.goals}</div>
-                  <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600' }}>doelpunten</div>
-                </div>
-              )}
-
-              {/* Pijltje */}
-              <svg style={{ flexShrink: 0, color: '#cbd5e1' }} width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </Kaart>
       )}
 
-      {/* Speler detail bottom sheet */}
       {geselecteerdeSpeler && (
         <SpelerDetail
           speler={geselecteerdeSpeler}
@@ -127,6 +103,6 @@ export default function PWASpelers() {
           variant="sheet"
         />
       )}
-    </div>
+    </AppPagina>
   )
 }

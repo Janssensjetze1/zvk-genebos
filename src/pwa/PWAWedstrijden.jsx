@@ -1,51 +1,39 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import { useAuth } from '../context/AuthContext'
 import Opgave from '../components/Opgave'
 import { opgaveIsOpen } from '../hooks/useOpgave'
-import { isGespeeld, weekendWedstrijden } from '../lib/wedstrijd'
-import WedstrijdenPerDag, { DagLabel, WedstrijdRijen } from '../components/WedstrijdenPerDag'
-
-const REACTIE_EMOJIS = ['💪', '❤️', '🎯', '😭']
-
-const TYPE_COLORS = {
-  competitie: { bg: '#eff6ff', color: '#1d4ed8' },
-  beker: { bg: '#fdf4ff', color: '#9333ea' },
-  vriendschappelijk: { bg: '#f0fdf4', color: '#16a34a' },
-}
-const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
+import { isGespeeld } from '../lib/wedstrijd'
+import { WedstrijdenPerWeekend } from '../components/WedstrijdenPerDag'
+import VolgendeWedstrijdKaart from '../components/VolgendeWedstrijdKaart'
+import Reacties from '../components/Reacties'
+import WedstrijdFormulier from '../components/WedstrijdFormulier'
+import { AppPagina, Knop, Laden, LegeStaat } from '../ui'
 
 const TABS = [['aankomend', 'Aankomend'], ['gespeeld', 'Gespeeld']]
-
-function Tussenkop({ children }) {
-  return (
-    <h2 style={{
-      fontSize: '12px', fontWeight: '800', color: '#0f172a',
-      textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 10px',
-    }}>{children}</h2>
-  )
-}
-
-function Leeg({ children }) {
-  return (
-    <div style={{ textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '14px' }}>
-      {children}
-    </div>
-  )
-}
+const isZvk = w => !!(w.home_team?.is_zvk || w.away_team?.is_zvk)
 
 export default function PWAWedstrijden() {
   const { actief: seizoen } = useSeason()
   const [wedstrijden, setWedstrijden] = useState([])
   const [loading, setLoading] = useState(true)
+  const [formulierOpen, setFormulierOpen] = useState(false)
+  const { isAdmin } = useAuth()
   // De tab zit in de URL, zodat je na een detailpagina terugkomt waar je was.
   const [params, setParams] = useSearchParams()
   const tab = TABS.some(([id]) => id === params.get('tab')) ? params.get('tab') : 'aankomend'
   const setTab = id => setParams(id === 'aankomend' ? {} : { tab: id }, { replace: true })
 
   useEffect(() => { if (seizoen) fetchWedstrijden() }, [seizoen])
+
+  // Ook verversen als er via het Meer-menu een wedstrijd bijkwam
+  useEffect(() => {
+    const ververs = () => { if (seizoen) fetchWedstrijden() }
+    window.addEventListener('zvk:wedstrijden-gewijzigd', ververs)
+    return () => window.removeEventListener('zvk:wedstrijden-gewijzigd', ververs)
+  }, [seizoen])
 
   async function fetchWedstrijden() {
     setLoading(true)
@@ -64,262 +52,59 @@ export default function PWAWedstrijden() {
     setLoading(false)
   }
 
-  const zvkWedstrijden = wedstrijden.filter(w => w.home_team?.is_zvk || w.away_team?.is_zvk)
-  const aankomend = zvkWedstrijden.filter(w => !isGespeeld(w))
-  const weekend = weekendWedstrijden(wedstrijden)
-
-  // Gespeeld: alle uitslagen per dag, nieuwste eerst. Onze match krijgt de
-  // grote kaart, die van de andere ploegen staan er compact onder.
-  const gespeeldPerDag = []
-  for (const w of wedstrijden.filter(w => isGespeeld(w)).reverse()) {
-    let dag = gespeeldPerDag[gespeeldPerDag.length - 1]
-    if (dag?.datum !== w.date) gespeeldPerDag.push(dag = { datum: w.date, onze: [], andere: [] })
-    if (w.home_team?.is_zvk || w.away_team?.is_zvk) dag.onze.push(w)
-    else dag.andere.push(w)
-  }
-  for (const dag of gespeeldPerDag) dag.andere.sort((a, b) => (a.time ?? '99').localeCompare(b.time ?? '99'))
+  // Aankomend: onze eerstvolgende match groot bovenaan, daaronder het hele
+  // programma van de competitie per weekend, onze wedstrijden inbegrepen
+  const aankomend = wedstrijden
+    .filter(w => !isGespeeld(w))
+    .sort((x, y) => x.date.localeCompare(y.date) || (x.time ?? '99').localeCompare(y.time ?? '99'))
+  const volgende = aankomend.find(isZvk)
+  const gespeeld = wedstrijden.filter(w => isGespeeld(w))
 
   return (
-    <div style={{ padding: '20px 16px' }}>
-      <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', marginBottom: '16px' }}>Wedstrijden</h1>
-
-      {/* Tabs */}
-      <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '10px', padding: '3px', marginBottom: '20px' }}>
+    <AppPagina
+      bovenlabel={seizoen ? `Seizoen ${seizoen.name}` : null}
+      titel="Wedstrijden"
+      actie={isAdmin && (
+        <Knop soort="primair" icoon="plus" onClick={() => setFormulierOpen(true)} style={{ height: '38px' }}>Nieuw</Knop>
+      )}
+    >
+      {formulierOpen && (
+        <WedstrijdFormulier onSluiten={() => setFormulierOpen(false)} onOpgeslagen={fetchWedstrijden} />
+      )}
+      <div className="z-segment z-segment-vol" role="group">
         {TABS.map(([id, label]) => (
-          <button key={id} onClick={() => setTab(id)} style={{
-            flex: 1, padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-            fontSize: '13px', fontWeight: tab === id ? '700' : '500',
-            background: tab === id ? 'white' : 'transparent',
-            color: tab === id ? '#0f172a' : '#64748b',
-            boxShadow: tab === id ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
-          }}>{label}</button>
+          <button key={id} type="button" aria-pressed={tab === id} onClick={() => setTab(id)}>{label}</button>
         ))}
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '48px', color: '#94a3b8' }}>Laden...</div>
+        <Laden regels={4} />
       ) : tab === 'gespeeld' ? (
-        gespeeldPerDag.length === 0 ? <Leeg>Geen wedstrijden gevonden.</Leeg> : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-            {gespeeldPerDag.map(dag => (
-              <div key={dag.datum}>
-                <DagLabel datum={dag.datum} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {dag.onze.map(w => <WedstrijdKaart key={w.id} wedstrijd={w} />)}
-                  {dag.andere.length > 0 && <WedstrijdRijen wedstrijden={dag.andere} variant="pwa" />}
-                </div>
-              </div>
-            ))}
-          </div>
-        )
+        gespeeld.length === 0
+          ? <LegeStaat tekst="Nog geen gespeelde wedstrijden." icoon="bal" />
+          : (
+            <WedstrijdenPerWeekend
+              wedstrijden={gespeeld}
+              variant="pwa"
+              nieuwsteEerst
+              onder={w => isZvk(w) ? <Reacties wedstrijdId={w.id} /> : null}
+            />
+          )
       ) : (
         <>
-          {/* Het programma van het weekend, met alle ploegen */}
-          {weekend.lijst.length > 0 && (
-            <div style={{ marginBottom: '24px' }}>
-              <Tussenkop>{weekend.titel}</Tussenkop>
-              <WedstrijdenPerDag wedstrijden={weekend.lijst} variant="pwa" />
-            </div>
+          {volgende ? (
+            <VolgendeWedstrijdKaart wedstrijd={volgende} variant="pwa">
+              {opgaveIsOpen(volgende) ? <Opgave wedstrijd={volgende} /> : null}
+            </VolgendeWedstrijdKaart>
+          ) : (
+            <LegeStaat titel="Geen wedstrijd gepland" tekst="Onze volgende wedstrijd staat nog niet op de kalender." icoon="kalender" />
           )}
 
-          {weekend.lijst.length > 0 && <Tussenkop>Onze wedstrijden</Tussenkop>}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {aankomend.map(w => <WedstrijdKaart key={w.id} wedstrijd={w} />)}
-            {aankomend.length === 0 && <Leeg>Geen wedstrijden gevonden.</Leeg>}
-          </div>
+          {aankomend.length > 0 && (
+            <WedstrijdenPerWeekend wedstrijden={aankomend} variant="pwa" />
+          )}
         </>
       )}
-    </div>
-  )
-}
-
-function WedstrijdKaart({ wedstrijd: w }) {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const [reacties, setReacties] = useState([])
-  const [mijneReactie, setMijneReactie] = useState(null)
-  const [gepoptEmoji, setGepoptEmoji] = useState(null)
-
-  const isThuis = w.home_team?.is_zvk
-  const tegenstander = isThuis ? w.away_team : w.home_team
-  const zvkScore = isThuis ? w.home_score : w.away_score
-  const tegScore = isThuis ? w.away_score : w.home_score
-  const isPast = isGespeeld(w)
-  const gewonnen = isPast && zvkScore > tegScore
-  const verloren = isPast && zvkScore < tegScore
-  const datum = new Date(w.date)
-
-  // Countdown-label voor aankomende wedstrijden (zelfde logica als de webapp).
-  // Een datum in het verleden die nog niet als gespeeld geldt, valt terug op 'Gepland'.
-  const vandaag = new Date(); vandaag.setHours(0, 0, 0, 0)
-  const dagenTot = Math.round((new Date(w.date) - vandaag) / 86400000)
-  const countdown =
-    dagenTot === 0 ? { tekst: 'Vandaag!',             kleur: '#16a34a', bg: '#f0fdf4', rand: '#bbf7d0' } :
-    dagenTot === 1 ? { tekst: 'Morgen',               kleur: '#d97706', bg: '#fffbeb', rand: '#fde68a' } :
-    dagenTot >   1 ? { tekst: `Over ${dagenTot} dagen`, kleur: '#475569', bg: '#f8fafc', rand: '#e2e8f0' } :
-                     { tekst: 'Gepland',              kleur: '#64748b', bg: '#f1f5f9', rand: '#e2e8f0' }
-
-  const dagNaam = datum.toLocaleDateString('nl-BE', { weekday: 'short' })
-  const dagNr = datum.getDate()
-  const maand = datum.toLocaleDateString('nl-BE', { month: 'short' })
-
-  useEffect(() => {
-    if (isPast) fetchReacties()
-  }, [w.id, isPast])
-
-  async function fetchReacties() {
-    const { data } = await supabase
-      .from('match_reactions')
-      .select('emoji, user_id')
-      .eq('match_id', w.id)
-    setReacties(data ?? [])
-    const mijn = (data ?? []).find(r => r.user_id === user?.id)
-    setMijneReactie(mijn?.emoji ?? null)
-  }
-
-  async function handleReactie(emoji) {
-    if (!user) return
-    // Pop-animatie triggeren
-    setGepoptEmoji(emoji)
-    setTimeout(() => setGepoptEmoji(null), 350)
-
-    if (mijneReactie === emoji) {
-      await supabase.from('match_reactions').delete()
-        .eq('match_id', w.id).eq('user_id', user.id)
-      setReacties(prev => prev.filter(r => r.user_id !== user.id))
-      setMijneReactie(null)
-    } else {
-      await supabase.from('match_reactions').upsert(
-        { match_id: w.id, user_id: user.id, emoji },
-        { onConflict: 'match_id,user_id' }
-      )
-      setReacties(prev => {
-        const zonder = prev.filter(r => r.user_id !== user.id)
-        return [...zonder, { emoji, user_id: user.id }]
-      })
-      setMijneReactie(emoji)
-    }
-  }
-
-  // Tel reacties per emoji
-  const reactieTellers = {}
-  for (const r of reacties) {
-    reactieTellers[r.emoji] = (reactieTellers[r.emoji] || 0) + 1
-  }
-
-  return (
-    <div style={{
-      background: 'white', borderRadius: '16px',
-      border: `1.5px solid ${gewonnen ? '#bbf7d0' : verloren ? '#fecaca' : '#e2e8f0'}`,
-      boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-      overflow: 'hidden',
-    }}>
-      {/* Hoofdrij */}
-      <div
-        style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer' }}
-        onClick={() => navigate(`/app/wedstrijd/${w.id}`)}
-      >
-        {/* Datum blok */}
-        <div style={{
-          width: '48px', textAlign: 'center', flexShrink: 0,
-          background: '#f8fafc', borderRadius: '10px', padding: '8px 4px',
-          border: '1px solid #e2e8f0',
-        }}>
-          <div style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '600' }}>{dagNaam}</div>
-          <div style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', lineHeight: 1.1 }}>{dagNr}</div>
-          <div style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '600' }}>{maand}</div>
-        </div>
-
-        {/* Info */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a', marginBottom: '5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            vs {tegenstander?.name}
-          </div>
-          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <span style={{
-              fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '20px',
-              ...TYPE_COLORS[w.type],
-            }}>{TYPE_LABELS[w.type]}</span>
-            <span style={{ fontSize: '12px', color: '#94a3b8' }}>{isThuis ? 'Thuis' : 'Uit'}</span>
-            {w.time && <span style={{ fontSize: '12px', color: '#94a3b8' }}>· {w.time.slice(0, 5)}</span>}
-          </div>
-        </div>
-
-        {/* Score / status */}
-        <div style={{ flexShrink: 0, textAlign: 'right' }}>
-          {isPast ? (
-            <>
-              <div style={{ fontSize: '22px', fontWeight: '900', color: '#0f172a', letterSpacing: '-1px' }}>
-                {zvkScore}–{tegScore}
-              </div>
-              <div style={{ fontSize: '11px', fontWeight: '700', color: gewonnen ? '#16a34a' : verloren ? '#ef4444' : '#64748b' }}>
-                {gewonnen ? '✓ Gewonnen' : verloren ? '✗ Verloren' : '= Gelijkspel'}
-              </div>
-            </>
-          ) : (
-            <span style={{
-              fontSize: '12px', fontWeight: '700', whiteSpace: 'nowrap',
-              color: countdown.kleur, background: countdown.bg,
-              border: `1px solid ${countdown.rand}`,
-              borderRadius: '20px', padding: '5px 11px',
-            }}>
-              {countdown.tekst}
-            </span>
-          )}
-        </div>
-
-        {/* Naar de detailpagina */}
-        <svg width="14" height="14" fill="none" stroke="#cbd5e1" strokeWidth="3" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </div>
-
-      {/* Emoji-reacties: altijd zichtbaar bij gespeelde wedstrijden */}
-      {isPast && (
-        <div
-          style={{ padding: '0 16px 14px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}
-          onClick={e => e.stopPropagation()}
-        >
-          {REACTIE_EMOJIS.map(emoji => {
-            const count = reactieTellers[emoji] || 0
-            const actief = mijneReactie === emoji
-            const popping = gepoptEmoji === emoji
-            return (
-              <button
-                key={emoji}
-                onClick={() => handleReactie(emoji)}
-                className={popping ? 'emoji-pop' : ''}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '4px',
-                  padding: '4px 10px', borderRadius: '20px', border: '1.5px solid',
-                  borderColor: actief ? '#6366f1' : '#e2e8f0',
-                  background: actief ? '#eef2ff' : count > 0 ? '#f8fafc' : 'transparent',
-                  cursor: 'pointer', fontSize: '15px',
-                  transition: 'border-color 0.15s, background 0.15s',
-                }}
-              >
-                {emoji}
-                {count > 0 && (
-                  <span style={{ fontSize: '12px', fontWeight: '700', color: actief ? '#6366f1' : '#64748b' }}>
-                    {count}
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-      )}
-
-      {/* Opgave: enkel bij aankomende wedstrijden */}
-      {!isPast && opgaveIsOpen(w) && (
-        <div
-          style={{ padding: '14px 16px', borderTop: '1px solid #f1f5f9', background: '#fafafa' }}
-          onClick={e => e.stopPropagation()}
-        >
-          <Opgave wedstrijd={w} />
-        </div>
-      )}
-
-    </div>
+    </AppPagina>
   )
 }

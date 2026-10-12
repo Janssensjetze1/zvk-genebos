@@ -4,16 +4,10 @@ import { useSeason } from '../context/SeasonContext'
 import { supabase } from '../lib/supabase'
 import { isGespeeld, vandaagISO, weekendBereik, weekendWedstrijden } from '../lib/wedstrijd'
 import WedstrijdenPerDag from '../components/WedstrijdenPerDag'
-import { useTopscorer } from '../context/TopscorerContext'
-import EerKronen from '../components/EerKronen'
-import { RING_KLASSE } from '../lib/eer'
-
-const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
-const TYPE_COLORS = {
-  competitie: { bg: '#eff6ff', color: '#1d4ed8' },
-  beker: { bg: '#fdf4ff', color: '#9333ea' },
-  vriendschappelijk: { bg: '#f0fdf4', color: '#16a34a' },
-}
+import Ranglijst from '../components/Ranglijst'
+import VolgendeWedstrijdKaart from '../components/VolgendeWedstrijdKaart'
+import { useNavigate } from 'react-router-dom'
+import { hoofdletter, Kaart, LegeStaat, PaginaKop, Rij, Sectie, Stat, TypeChip, UitslagLetter } from '../ui'
 
 export default function Dashboard() {
   const { profile } = useAuth()
@@ -99,8 +93,8 @@ export default function Dashboard() {
         assistMap[id].assists++
       }
     }
-    setTopscorers(Object.values(scorerMap).sort((a, b) => b.goals - a.goals).slice(0, 3))
-    setTopassists(Object.values(assistMap).sort((a, b) => b.assists - a.assists).slice(0, 3))
+    setTopscorers(Object.values(scorerMap).sort((a, b) => b.goals - a.goals).slice(0, 5))
+    setTopassists(Object.values(assistMap).sort((a, b) => b.assists - a.assists).slice(0, 5))
 
     // Persoonlijke stats
     if (profile?.player_id && ids.length > 0) {
@@ -118,338 +112,107 @@ export default function Dashboard() {
     setLoading(false)
   }
 
-  const isAdmin = profile?.role === 'admin'
+  const voornaam = profile?.display_name?.split(' ')[0]
+  const vandaagTekst = hoofdletter(new Date().toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' }))
+
+  if (!seizoen) {
+    return (
+      <>
+        <PaginaKop titel={`Goeiedag${voornaam ? `, ${voornaam}` : ''}`} ondertitel={vandaagTekst} />
+        <LegeStaat titel="Geen seizoen" tekst="Er is nog geen seizoen aangemaakt." icoon="kalender" />
+      </>
+    )
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+    <>
+      <PaginaKop
+        bovenlabel={`Seizoen ${seizoen.name}`}
+        titel={`Goeiedag${voornaam ? `, ${voornaam}` : ''}`}
+        ondertitel={vandaagTekst}
+      />
 
-      {/* Header */}
-      <div>
-        <h1 style={{ fontSize: '22px', fontWeight: '700', color: '#0f172a', marginBottom: '2px' }}>
-          Goeiedag 👋
-        </h1>
-        <p style={{ fontSize: '14px', color: '#94a3b8' }}>
-          {seizoen?.name ?? 'Geen seizoen'}{isAdmin && ' · Admin'}
-        </p>
-      </div>
+      <div className="z-raster z-raster-hoofd" style={{ alignItems: 'start' }}>
 
-      {/* Rij 1: Wedstrijden + persoonlijke stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+        {/* Links: onze wedstrijden */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', minWidth: 0 }}>
+          <Sectie titel="Volgende wedstrijd">
+            {loading ? <HeroSkelet /> :
+              volgende ? <VolgendeWedstrijdKaart wedstrijd={volgende} /> :
+              <LegeStaat titel="Geen geplande wedstrijden" tekst="De kalender is leeg." icoon="kalender" />}
+          </Sectie>
 
-        {/* Wedstrijden kolom */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div>
-            <SectieLabel>Volgende wedstrijd</SectieLabel>
-            {!seizoen ? <LegeKaart tekst="Geen seizoen geselecteerd." /> :
-              loading ? <LegeKaart tekst="Laden..." /> :
-              volgende ? <VolgendeKaart wedstrijd={volgende} /> :
-              <LegeKaart tekst="Geen geplande wedstrijden." />}
-          </div>
           {!loading && vorige && (
-            <div>
-              <SectieLabel>Vorige wedstrijd</SectieLabel>
+            <Sectie titel="Laatste uitslag">
               <VorigeKaart wedstrijd={vorige} />
-            </div>
+            </Sectie>
+          )}
+
+          {weekend.lijst.length > 0 && (
+            <Sectie titel={weekend.titel} meta="Alle ploegen">
+              <WedstrijdenPerDag wedstrijden={weekend.lijst} variant="desktop" />
+            </Sectie>
           )}
         </div>
 
-        {/* Persoonlijke stats + het weekendprogramma */}
-        {(profile?.player_id || weekend.lijst.length > 0) && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {profile?.player_id && (
-              <div>
-                <SectieLabel>Jouw seizoen</SectieLabel>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                  <StatKaart icoon="🏟️" waarde={loading ? '-' : stats?.gespeeld ?? 0} label="Wedstrijden" />
-                  <StatKaart icoon="⚽" waarde={loading ? '-' : stats?.goals ?? 0} label="Goals" />
-                  <StatKaart icoon="🎯" waarde={loading ? '-' : stats?.assists ?? 0} label="Assists" />
-                </div>
+        {/* Rechts: persoonlijk en de ranglijsten */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', minWidth: 0 }}>
+          {profile?.player_id && (
+            <Sectie titel="Jouw seizoen">
+              <div className="z-raster" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '12px' }}>
+                <Stat label="Matchen" waarde={stats?.gespeeld ?? 0} laden={loading} />
+                <Stat label="Goals" waarde={stats?.goals ?? 0} laden={loading} />
+                <Stat label="Assists" waarde={stats?.assists ?? 0} laden={loading} />
               </div>
-            )}
-            {weekend.lijst.length > 0 && (
-              <div>
-                <SectieLabel>{weekend.titel}</SectieLabel>
-                <WedstrijdenPerDag wedstrijden={weekend.lijst} variant="desktop" />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+            </Sectie>
+          )}
 
-      {/* Rij 2: Podiums */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+          <Sectie titel="De Gouden Stier" meta="Topschutters">
+            <Ranglijst spelers={topscorers} sleutel="goals" eenheid={['goal', 'goals']} loading={loading} />
+          </Sectie>
 
-        <div>
-          <SectieLabel>🐂 De Gouden Stier</SectieLabel>
-          <Podium spelers={topscorers} sleutel="goals" label="goal" loading={loading} />
-        </div>
-
-        <div>
-          <SectieLabel>👑 Assistenkoning</SectieLabel>
-          <Podium spelers={topassists} sleutel="assists" label="assist" loading={loading} />
+          <Sectie titel="Assistenkoning" meta="Meeste assists">
+            <Ranglijst spelers={topassists} sleutel="assists" eenheid={['assist', 'assists']} loading={loading} />
+          </Sectie>
         </div>
       </div>
-
-    </div>
+    </>
   )
 }
 
-// ── Podium ───────────────────────────────────────────────────────────────────
-
-const PODIUM = [
-  { pos: 1, hoogte: 88, kleur: '#f59e0b', bg: 'linear-gradient(160deg,#fef3c7,#fde68a)', label: '🥇', ring: '#f59e0b' },
-  { pos: 2, hoogte: 64, kleur: '#94a3b8', bg: 'linear-gradient(160deg,#f1f5f9,#e2e8f0)', label: '🥈', ring: '#94a3b8' },
-  { pos: 3, hoogte: 48, kleur: '#b45309', bg: 'linear-gradient(160deg,#fef9ee,#fde8c0)', label: '🥉', ring: '#cd7c3a' },
-]
-
-// Volgorde voor display: 2 - 1 - 3 (zilver links, goud midden, brons rechts)
-const DISPLAY_ORDER = [1, 0, 2]
-
-function Podium({ spelers, sleutel, label, loading }) {
-  const { eer } = useTopscorer()
-  if (loading) return <LegeKaart tekst="Laden..." />
-  if (spelers.length === 0) return <LegeKaart tekst="Nog geen data dit seizoen." />
-
+function HeroSkelet() {
   return (
-    <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px 16px 0', overflow: 'hidden' }}>
-      {/* Podium figuren */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '8px', marginBottom: '0' }}>
-        {DISPLAY_ORDER.map(idx => {
-          const speler = spelers[idx]
-          const { hoogte, kleur, bg, label: medaille, ring } = PODIUM[idx]
-          const isGoud = idx === 0
-          // Goud = topscorer, paars = assistenkoning, overal hetzelfde
-          const eretitel = eer(speler?.id)
-          const isTop = !!eretitel
-
-          if (!speler) return (
-            <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ height: hoogte, background: '#f8fafc', borderRadius: '8px 8px 0 0', width: '100%', border: '1px dashed #e2e8f0', borderBottom: 'none' }} />
-            </div>
-          )
-
-          return (
-            <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-              {/* Avatar */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                {/* Ring */}
-                <div style={{
-                  position: 'relative',
-                  width: isGoud ? '68px' : '54px',
-                  height: isGoud ? '68px' : '54px',
-                  borderRadius: '50%',
-                  padding: '3px',
-                  background: isTop ? 'transparent' : `linear-gradient(135deg, ${ring}, white)`,
-                  boxShadow: isTop ? undefined : `0 4px 12px ${ring}44`,
-                  boxSizing: 'border-box',
-                }}
-                className={eretitel ? RING_KLASSE[eretitel] : undefined}
-                >
-                  {eretitel && (
-                    <EerKronen
-                      eer={eretitel}
-                      grootte={19}
-                      style={{
-                        position: 'absolute', top: '-10px', right: '-6px',
-                        transform: 'rotate(18deg)', zIndex: 2,
-                      }}
-                    />
-                  )}
-                  <div style={{
-                    width: '100%', height: '100%', borderRadius: '50%',
-                    background: speler.photo_url ? 'transparent' : '#eff6ff',
-                    overflow: 'hidden',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: isGoud ? '22px' : '17px', fontWeight: '700', color: '#1d4ed8',
-                  }}>
-                    {speler.photo_url
-                      ? <img src={speler.photo_url} alt={speler.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : speler.name?.charAt(0).toUpperCase()
-                    }
-                  </div>
-                </div>
-                <span style={{ fontSize: '16px' }}>{medaille}</span>
-              </div>
-
-              {/* Naam + score */}
-              <div style={{ textAlign: 'center' }}>
-                <div style={{
-                  fontSize: isGoud ? '13px' : '12px', fontWeight: '600', color: '#0f172a',
-                  maxWidth: '90px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>
-                  {speler.name}
-                </div>
-                <div style={{ fontSize: '12px', color: '#64748b' }}>
-                  <strong style={{ color: kleur }}>{speler[sleutel]}</strong> {label}{speler[sleutel] !== 1 ? 's' : ''}
-                </div>
-              </div>
-
-              {/* Podiumblok */}
-              <div style={{
-                width: '100%', height: `${hoogte}px`,
-                background: bg,
-                borderRadius: '8px 8px 0 0',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderTop: `3px solid ${ring}`,
-              }}>
-                <span style={{ fontSize: isGoud ? '24px' : '18px', fontWeight: '800', color: kleur }}>
-                  {idx + 1}
-                </span>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-// ── Volgende wedstrijd ────────────────────────────────────────────────────────
-
-function VolgendeKaart({ wedstrijd: w }) {
-  const isThuis = w.home_team?.is_zvk
-  const tegenstander = isThuis ? w.away_team : w.home_team
-  const datum = new Date(w.date)
-  const dagNaam = datum.toLocaleDateString('nl-BE', { weekday: 'long' })
-  const datumStr = datum.toLocaleDateString('nl-BE', { day: 'numeric', month: 'long' })
-  const diff = Math.ceil((datum - new Date()) / 86400000)
-  const overLabel = diff === 0 ? 'Vandaag!' : diff === 1 ? 'Morgen' : `Over ${diff} dagen`
-  const urgent = diff <= 3
-
-  return (
-    <div style={{
-      background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px',
-      padding: '20px', display: 'flex', gap: '16px', alignItems: 'center',
-    }}>
-      {/* Datum blok */}
-      <div style={{
-        flexShrink: 0, width: '52px', textAlign: 'center',
-        background: '#0f172a', borderRadius: '10px', padding: '10px 0',
-      }}>
-        <div style={{ fontSize: '22px', fontWeight: '800', color: 'white', lineHeight: 1 }}>{datum.getDate()}</div>
-        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', marginTop: '2px' }}>
-          {datum.toLocaleDateString('nl-BE', { month: 'short' })}
-        </div>
-      </div>
-
-      {/* Info */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {isThuis ? 'ZVK Genebos' : tegenstander?.name} vs {isThuis ? tegenstander?.name : 'ZVK Genebos'}
-        </div>
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '11px', fontWeight: '600', padding: '2px 7px', borderRadius: '6px', background: TYPE_COLORS[w.type]?.bg, color: TYPE_COLORS[w.type]?.color }}>
-            {TYPE_LABELS[w.type]}
-          </span>
-          <span style={{ fontSize: '12px', color: '#94a3b8' }}>{isThuis ? '🏠 Thuis' : '✈️ Uit'}</span>
-          {w.time && <span style={{ fontSize: '12px', color: '#94a3b8' }}>· 🕐 {w.time.slice(0, 5)}</span>}
-        </div>
-        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px', textTransform: 'capitalize' }}>
-          {dagNaam} {datumStr}
-        </div>
-      </div>
-
-      {/* Countdown */}
-      <div style={{
-        flexShrink: 0, background: urgent ? '#fff7ed' : '#f8fafc',
-        border: `1px solid ${urgent ? '#fed7aa' : '#e2e8f0'}`,
-        borderRadius: '10px', padding: '8px 12px', textAlign: 'center',
-      }}>
-        <div style={{ fontSize: '13px', fontWeight: '700', color: urgent ? '#c2410c' : '#0f172a' }}>
-          {overLabel}
-        </div>
-      </div>
-    </div>
+    <div style={{ height: '196px', borderRadius: 'var(--z-r-l)', background: 'var(--z-navy)', opacity: 0.12 }} />
   )
 }
 
 // ── Vorige wedstrijd ─────────────────────────────────────────────────────────
 
 function VorigeKaart({ wedstrijd: w }) {
+  const navigate = useNavigate()
   const isThuis = w.home_team?.is_zvk
-  const tegenstander = isThuis ? w.away_team : w.home_team
-  const datum = new Date(w.date)
   const zvkScore = isThuis ? w.home_score : w.away_score
   const tegScore = isThuis ? w.away_score : w.home_score
-  const resultaat = zvkScore > tegScore ? 'W' : zvkScore < tegScore ? 'V' : 'G'
-  const { kleur, bg, label } = {
-    W: { kleur: '#16a34a', bg: '#f0fdf4', label: 'Winst' },
-    V: { kleur: '#ef4444', bg: '#fef2f2', label: 'Verlies' },
-    G: { kleur: '#d97706', bg: '#fffbeb', label: 'Gelijkspel' },
-  }[resultaat]
+  const uitslag = zvkScore > tegScore ? 'W' : zvkScore < tegScore ? 'V' : 'G'
+  const datum = new Date(`${w.date}T00:00:00`).toLocaleDateString('nl-BE', { day: 'numeric', month: 'long' })
 
   return (
-    <div style={{
-      background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px',
-      padding: '16px 20px', display: 'flex', gap: '14px', alignItems: 'center',
-    }}>
-      {/* Resultaat badge */}
-      <div style={{
-        flexShrink: 0, width: '40px', height: '40px', borderRadius: '10px',
-        background: bg, color: kleur,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '14px', fontWeight: '800',
-      }}>
-        {resultaat}
-      </div>
-
-      {/* Info */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
-          <span style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {isThuis ? 'ZVK Genebos' : tegenstander?.name} vs {isThuis ? tegenstander?.name : 'ZVK Genebos'}
-          </span>
+    <Kaart>
+      <Rij onClick={() => navigate(`/wedstrijd/${w.id}`)} style={{ padding: '16px 20px' }}>
+        <UitslagLetter uitslag={uitslag} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--z-tekst)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {w.home_team?.name} – {w.away_team?.name}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', fontSize: '13px', color: 'var(--z-tekst-3)' }}>
+            {datum}
+            <TypeChip type={w.type} />
+          </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '12px', color: '#94a3b8' }}>
-            {datum.toLocaleDateString('nl-BE', { day: 'numeric', month: 'long' })}
-          </span>
-          <span style={{ fontSize: '12px', color: '#cbd5e1' }}>·</span>
-          <span style={{ fontSize: '12px', fontWeight: '600', color: kleur }}>{label}</span>
+        <div className="z-tab-nums" style={{ fontSize: '22px', fontWeight: 700, color: 'var(--z-tekst)', letterSpacing: '0.02em' }}>
+          {w.home_score}<span style={{ color: 'var(--z-tekst-4)', margin: '0 6px' }}>–</span>{w.away_score}
         </div>
-      </div>
-
-      {/* Score */}
-      <div style={{
-        flexShrink: 0,
-        background: '#f8fafc', border: '1px solid #e2e8f0',
-        borderRadius: '8px', padding: '6px 14px', textAlign: 'center',
-      }}>
-        <span style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a', letterSpacing: '0.05em' }}>
-          {w.home_score} – {w.away_score}
-        </span>
-      </div>
-    </div>
-  )
-}
-
-// ── Hulpcomponenten ───────────────────────────────────────────────────────────
-
-function SectieLabel({ children }) {
-  return (
-    <h2 style={{
-      fontSize: '12px', fontWeight: '600', color: '#94a3b8',
-      textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px',
-    }}>
-      {children}
-    </h2>
-  )
-}
-
-function StatKaart({ icoon, waarde, label }) {
-  return (
-    <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
-      <div style={{ fontSize: '22px', marginBottom: '6px' }}>{icoon}</div>
-      <div style={{ fontSize: '26px', fontWeight: '800', color: '#0f172a', lineHeight: 1 }}>{waarde}</div>
-      <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>{label}</div>
-    </div>
-  )
-}
-
-function LegeKaart({ tekst }) {
-  return (
-    <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '28px', textAlign: 'center' }}>
-      <p style={{ fontSize: '13px', color: '#94a3b8' }}>{tekst}</p>
-    </div>
+      </Rij>
+    </Kaart>
   )
 }

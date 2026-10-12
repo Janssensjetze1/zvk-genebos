@@ -9,6 +9,7 @@ import { opgaveOpentOp } from '../hooks/useOpgave'
 import Opgave from './Opgave'
 import Pronostiek from './Pronostiek'
 import VerslagPaneel from './VerslagPaneel'
+import { hoofdletter, Icoon, Laden, LegeStaat, TypeChip } from '../ui'
 
 // Detailpagina van één wedstrijd: alles wat over deze match te weten valt op
 // één plek, zodat de lijsten zelf kort kunnen blijven.
@@ -16,25 +17,22 @@ import VerslagPaneel from './VerslagPaneel'
 
 const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
 const TYPE_COLORS = {
-  competitie: { bg: '#eff6ff', color: '#1d4ed8' },
-  beker: { bg: '#fdf4ff', color: '#9333ea' },
-  vriendschappelijk: { bg: '#f0fdf4', color: '#16a34a' },
+  competitie: { bg: 'var(--z-blauw-50)', color: 'var(--z-blauw)' },
+  beker: { bg: 'var(--z-paars-bg)', color: 'var(--z-paars)' },
+  vriendschappelijk: { bg: 'var(--z-lijn-zacht)', color: 'var(--z-tekst-2)' },
 }
 
 function Blok({ titel, children, rechts }) {
   return (
-    <section style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden' }}>
+    <section className="z-kaart" style={{ overflow: 'hidden' }}>
       <div style={{
         display: 'flex', alignItems: 'center', gap: '8px',
-        padding: '12px 16px', borderBottom: '1px solid #f1f5f9', background: '#fcfdff',
+        padding: '14px 20px', borderBottom: '1px solid var(--z-lijn-zacht)',
       }}>
-        <span style={{
-          flex: 1, fontSize: '11px', fontWeight: '800', color: '#94a3b8',
-          textTransform: 'uppercase', letterSpacing: '0.06em',
-        }}>{titel}</span>
+        <h2 style={{ flex: 1, fontSize: '14px', fontWeight: '600', color: 'var(--z-tekst)' }}>{titel}</h2>
         {rechts}
       </div>
-      <div style={{ padding: '14px 16px' }}>{children}</div>
+      <div style={{ padding: '16px 20px' }}>{children}</div>
     </section>
   )
 }
@@ -44,8 +42,8 @@ function Namenrij({ namen }) {
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
       {namen.map((naam, i) => (
         <span key={`${naam}-${i}`} style={{
-          fontSize: '12px', color: '#475569', background: '#f8fafc',
-          borderRadius: '20px', padding: '4px 10px', border: '1px solid #e2e8f0',
+          fontSize: '12px', color: 'var(--z-tekst-2)', background: 'var(--z-vlak)',
+          borderRadius: '20px', padding: '4px 10px', border: '1px solid var(--z-lijn)',
         }}>{naam}</span>
       ))}
     </div>
@@ -88,16 +86,17 @@ export default function WedstrijdDetail({ variant = 'pwa' }) {
     return () => { levend = false }
   }, [id])
 
-  const buiten = variant === 'pwa' ? '16px 16px 100px' : '0'
+  const buiten = variant === 'pwa' ? '16px 16px 24px' : '0'
 
   if (loading) {
-    return <div style={{ padding: '48px', textAlign: 'center', color: '#94a3b8' }}>Laden...</div>
+    if (variant === 'desktop') return <div style={{ maxWidth: '760px' }}><Laden regels={4} /></div>
+    return <div style={{ padding: '48px', textAlign: 'center', color: 'var(--z-tekst-4)' }}>Laden...</div>
   }
 
   if (!w) {
     return (
-      <div style={{ padding: buiten, maxWidth: '680px' }}>
-        <p style={{ fontSize: '14px', color: '#94a3b8' }}>Deze wedstrijd bestaat niet (meer).</p>
+      <div style={{ padding: buiten, maxWidth: '760px' }}>
+        <LegeStaat titel="Niet gevonden" tekst="Deze wedstrijd bestaat niet (meer)." icoon="kalender" />
       </div>
     )
   }
@@ -118,7 +117,7 @@ export default function WedstrijdDetail({ variant = 'pwa' }) {
     .sort((a, b) => a.localeCompare(b))
 
   return (
-    <div style={{ padding: buiten, maxWidth: '680px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+    <div style={{ padding: buiten, maxWidth: variant === 'desktop' ? '760px' : '680px', display: 'flex', flexDirection: 'column', gap: variant === 'desktop' ? '20px' : '14px' }}>
 
       {/* Terug */}
       <button
@@ -126,18 +125,21 @@ export default function WedstrijdDetail({ variant = 'pwa' }) {
         style={{
           alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '6px',
           background: 'none', border: 'none', cursor: 'pointer',
-          color: '#64748b', fontSize: '13px', fontWeight: '600', padding: '4px 0',
+          color: 'var(--z-tekst-3)', fontSize: '13px', fontWeight: '600', padding: '4px 0',
         }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
+        <Icoon naam="terug" grootte={16} dikte={2.2} />
         Terug
       </button>
 
       {/* Kop */}
+      {variant === 'desktop' ? (
+        <Scorebord w={w} gespeeld={gespeeld} datum={datum} />
+      ) : variant === 'pwa' ? (
+        <ScorebordCompact w={w} gespeeld={gespeeld} datum={datum} />
+      ) : (
       <div style={{
-        background: 'white', border: '1px solid #e2e8f0', borderRadius: '18px',
+        background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '18px',
         padding: '18px 20px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
@@ -145,46 +147,47 @@ export default function WedstrijdDetail({ variant = 'pwa' }) {
             fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '20px',
             background: typeKleur.bg, color: typeKleur.color,
           }}>{TYPE_LABELS[w.type] ?? w.type}</span>
-          <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+          <span style={{ fontSize: '12px', color: 'var(--z-tekst-4)' }}>
             {datum.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })}
             {w.time ? ` · ${w.time.slice(0, 5)}` : ''}
           </span>
-          {w.location && <span style={{ fontSize: '12px', color: '#94a3b8' }}>· {w.location}</span>}
+          {w.location && <span style={{ fontSize: '12px', color: 'var(--z-tekst-4)' }}>· {w.location}</span>}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <span style={{ flex: 1, fontSize: '17px', fontWeight: '700', color: '#0f172a', textAlign: 'right' }}>
+          <span style={{ flex: 1, fontSize: '17px', fontWeight: '700', color: 'var(--z-tekst)', textAlign: 'right' }}>
             {w.home_team?.name}
           </span>
           <span style={{
             flexShrink: 0, fontSize: '22px', fontWeight: '900', letterSpacing: '-0.5px',
-            color: gewonnen ? '#16a34a' : verloren ? '#ef4444' : '#0f172a',
-            background: '#f8fafc', border: '1px solid #e2e8f0',
+            color: gewonnen ? 'var(--z-winst)' : verloren ? 'var(--z-verlies)' : 'var(--z-tekst)',
+            background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)',
             borderRadius: '12px', padding: '6px 14px',
             fontVariantNumeric: 'tabular-nums',
           }}>
             {gespeeld ? `${w.home_score}–${w.away_score}` : 'vs'}
           </span>
-          <span style={{ flex: 1, fontSize: '17px', fontWeight: '700', color: '#0f172a' }}>
+          <span style={{ flex: 1, fontSize: '17px', fontWeight: '700', color: 'var(--z-tekst)' }}>
             {w.away_team?.name}
           </span>
         </div>
       </div>
+      )}
 
       {/* Pronostiek: op deze pagina meteen open, dat is waarvoor je hier bent */}
       {pronostiekStatus(w) !== 'geen' && (
-        <Blok titel="🔮 Pronostiek">
+        <Blok titel="Pronostiek">
           <Pronostiek wedstrijd={w} standaardOpen />
         </Blok>
       )}
 
       {/* Opgave: met een regeltje zolang ze nog niet open staat */}
       {!gespeeld && onze && (
-        <Blok titel="✋ Opgave">
+        <Blok titel="Opgave">
           {opgaveIsOpen(w) ? (
             <Opgave wedstrijd={w} />
           ) : (
-            <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
+            <p style={{ fontSize: '12px', color: 'var(--z-tekst-4)', margin: 0, lineHeight: 1.5 }}>
               De opgave opent {opgaveOpentOp(w)?.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })} om 10u.
             </p>
           )}
@@ -193,21 +196,21 @@ export default function WedstrijdDetail({ variant = 'pwa' }) {
 
       {/* Doelpunten */}
       {gespeeld && w.goals?.length > 0 && (
-        <Blok titel={`⚽ Doelpunten (${w.goals.length})`}>
+        <Blok titel={`Doelpunten (${w.goals.length})`}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
             {w.goals.map(g => (
               <div key={g.id} style={{
                 display: 'flex', alignItems: 'center', gap: '10px',
-                padding: '7px 10px', borderRadius: '9px', background: '#f8fafc',
+                padding: '7px 10px', borderRadius: '9px', background: 'var(--z-vlak)',
               }}>
-                <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a', flex: 1, minWidth: 0 }}>
+                <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--z-tekst)', flex: 1, minWidth: 0 }}>
                   {g.scorer?.name ?? 'Onbekend'}
                 </span>
                 {g.assist?.name && (
-                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>assist: {g.assist.name}</span>
+                  <span style={{ fontSize: '12px', color: 'var(--z-tekst-4)' }}>assist: {g.assist.name}</span>
                 )}
                 {g.minute != null && (
-                  <span style={{ fontSize: '12px', color: '#cbd5e1', fontVariantNumeric: 'tabular-nums' }}>{g.minute}'</span>
+                  <span style={{ fontSize: '12px', color: 'var(--z-lijn-sterk)', fontVariantNumeric: 'tabular-nums' }}>{g.minute}'</span>
                 )}
               </div>
             ))}
@@ -217,17 +220,115 @@ export default function WedstrijdDetail({ variant = 'pwa' }) {
 
       {/* Aanwezig */}
       {gespeeld && spelers.length > 0 && (
-        <Blok titel={`👥 Wie speelde er (${spelers.length})`}>
+        <Blok titel={`Wie speelde er (${spelers.length})`}>
           <Namenrij namen={spelers} />
         </Blok>
       )}
 
       {/* Verslag: eigen component, zodat useVerslag de wedstrijd al kent */}
       {gespeeld && onze && (
-        <Blok titel="📰 Wedstrijdverslag">
+        <Blok titel="Wedstrijdverslag">
           <VerslagBlok wedstrijd={w} variant={variant} />
         </Blok>
       )}
+    </div>
+  )
+}
+
+// Desktopkop: scorebord in clubkleuren
+function Scorebord({ w, gespeeld, datum }) {
+  const ploeg = team => (
+    <div style={{
+      flex: 1, minWidth: 0, fontSize: '20px', fontWeight: 700, letterSpacing: '-0.01em',
+      color: team?.is_zvk ? 'white' : 'rgba(255,255,255,0.8)',
+      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+    }}>{team?.name}</div>
+  )
+  const meta = { display: 'inline-flex', alignItems: 'center', gap: '6px' }
+
+  return (
+    <div style={{
+      position: 'relative', overflow: 'hidden', borderRadius: 'var(--z-r-l)', padding: '24px 28px',
+      background: 'radial-gradient(120% 140% at 100% 0%, #2a4fb8 0%, #13234d 45%, #0c1a3d 100%)',
+      color: 'white', boxShadow: 'var(--z-schaduw-l)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '22px' }}>
+        <TypeChip type={w.type} />
+        <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>
+          {gespeeld ? 'Eindstand' : 'Nog te spelen'}
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+        <div style={{ flex: 1, minWidth: 0, textAlign: 'right', display: 'flex' }}>{ploeg(w.home_team)}</div>
+        <div className="z-tab-nums" style={{
+          flexShrink: 0, minWidth: '120px', textAlign: 'center', padding: '10px 18px',
+          borderRadius: 'var(--z-r)', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)',
+          fontSize: gespeeld ? '34px' : '18px', fontWeight: 800, letterSpacing: '0.02em', lineHeight: 1.1,
+        }}>
+          {gespeeld ? <>{w.home_score}<span style={{ opacity: 0.4, margin: '0 8px' }}>–</span>{w.away_score}</> : (w.time?.slice(0, 5) ?? 'vs')}
+        </div>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex' }}>{ploeg(w.away_team)}</div>
+      </div>
+
+      <div style={{
+        display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '6px 20px', marginTop: '22px',
+        paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '13px', color: 'rgba(255,255,255,0.7)',
+      }}>
+        <span style={meta}>
+          <Icoon naam="kalender" grootte={15} />
+          {hoofdletter(datum.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }))}
+        </span>
+        {w.time && <span style={meta}><Icoon naam="klok" grootte={15} />{w.time.slice(0, 5)}</span>}
+        {w.location && <span style={meta}><Icoon naam="locatie" grootte={15} />{w.location}</span>}
+      </div>
+    </div>
+  )
+}
+
+// App-kop: zelfde scorebord, de ploegen onder elkaar zodat lange namen passen
+function ScorebordCompact({ w, gespeeld, datum }) {
+  const thuisWint = gespeeld && w.home_score > w.away_score
+  const uitWint = gespeeld && w.away_score > w.home_score
+  const regel = (team, score, wint, verliest) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <span style={{
+        flex: 1, minWidth: 0, fontSize: '18px', fontWeight: 700, letterSpacing: '-0.01em',
+        color: verliest ? 'rgba(255,255,255,0.6)' : 'white',
+        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+      }}>{team?.name}</span>
+      {gespeeld && (
+        <span className="z-tab-nums" style={{ fontSize: '28px', fontWeight: 800, lineHeight: 1, color: wint ? 'white' : 'rgba(255,255,255,0.6)' }}>
+          {score}
+        </span>
+      )}
+    </div>
+  )
+
+  return (
+    <div style={{
+      borderRadius: 'var(--z-r-l)', padding: '18px 20px', color: 'white', boxShadow: 'var(--z-schaduw-l)',
+      background: 'radial-gradient(120% 140% at 100% 0%, #2a4fb8 0%, #13234d 50%, #0c1a3d 100%)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+        <TypeChip type={w.type} />
+        <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>{gespeeld ? 'Eindstand' : 'Nog te spelen'}</span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {regel(w.home_team, w.home_score, thuisWint, uitWint)}
+        {regel(w.away_team, w.away_score, uitWint, thuisWint)}
+      </div>
+      <div style={{
+        display: 'flex', flexWrap: 'wrap', gap: '4px 16px', marginTop: '16px', paddingTop: '12px',
+        borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '13px', color: 'rgba(255,255,255,0.7)',
+      }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+          <Icoon naam="kalender" grootte={14} />
+          {hoofdletter(datum.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' }))}
+        </span>
+        {w.time && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><Icoon naam="klok" grootte={14} />{w.time.slice(0, 5)}</span>}
+        {w.location && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><Icoon naam="locatie" grootte={14} />{w.location}</span>}
+      </div>
     </div>
   )
 }

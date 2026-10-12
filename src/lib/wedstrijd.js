@@ -81,3 +81,48 @@ export function andereProgramma(wedstrijden) {
     .filter(w => !isZvk(w) && !isGespeeld(w))
     .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '99').localeCompare(b.time ?? '99'))
 }
+
+// Groepeer wedstrijden per speelweek (maandag tot zondag). Vallen alle
+// wedstrijden van die week op vrijdag tot zondag, dan heet de groep
+// "Weekend 16–18 oktober", anders "Week 12–18 oktober". nieuwsteEerst bepaalt
+// de volgorde van de weken; binnen een week staat alles chronologisch.
+export function perWeekend(wedstrijden, { nieuwsteEerst = false } = {}) {
+  const groepen = new Map()
+  for (const w of wedstrijden ?? []) {
+    if (!w?.date) continue
+    const d = new Date(`${w.date}T00:00:00`)
+    const maandag = new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7))
+    const sleutel = datumISO(maandag)
+    if (!groepen.has(sleutel)) groepen.set(sleutel, { sleutel, maandag, lijst: [] })
+    groepen.get(sleutel).lijst.push(w)
+  }
+  const lijst = [...groepen.values()]
+  for (const g of lijst) {
+    g.lijst.sort((a, b) =>
+      a.date.localeCompare(b.date) ||
+      (a.time ?? '99').localeCompare(b.time ?? '99') ||
+      Number(isZvk(b)) - Number(isZvk(a)))
+    g.titel = weekTitel(g.maandag, g.lijst)
+  }
+  lijst.sort((a, b) => nieuwsteEerst ? b.sleutel.localeCompare(a.sleutel) : a.sleutel.localeCompare(b.sleutel))
+  return lijst
+}
+
+function weekTitel(maandag, lijst) {
+  const plus = n => new Date(maandag.getFullYear(), maandag.getMonth(), maandag.getDate() + n)
+  const enkelWeekend = lijst.every(w => {
+    const dag = new Date(`${w.date}T00:00:00`).getDay()
+    return dag === 5 || dag === 6 || dag === 0
+  })
+  const van = enkelWeekend ? plus(4) : maandag
+  const tot = plus(6)
+  const maand = d => d.toLocaleDateString('nl-BE', { month: 'long' })
+  const bereik = van.getMonth() === tot.getMonth()
+    ? `${van.getDate()}–${tot.getDate()} ${maand(tot)}`
+    : `${van.getDate()} ${maand(van)} – ${tot.getDate()} ${maand(tot)}`
+
+  const { van: ditWeekend } = weekendBereik()
+  const ditIs = datumISO(plus(4)) === ditWeekend
+  if (enkelWeekend) return ditIs ? `Dit weekend · ${bereik}` : `Weekend ${bereik}`
+  return ditIs ? `Deze week · ${bereik}` : `Week ${bereik}`
+}

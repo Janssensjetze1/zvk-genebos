@@ -101,7 +101,7 @@ export function AnnouncementPopup() {
           </div>
         ) : (
           <div style={{
-            background: 'linear-gradient(135deg, #0f172a, #1e293b)',
+            background: 'linear-gradient(135deg, var(--z-tekst), #1e293b)',
             padding: '28px 24px 20px',
             textAlign: 'center',
           }}>
@@ -112,13 +112,13 @@ export function AnnouncementPopup() {
         {/* Inhoud */}
         <div style={{ padding: '24px 24px 28px' }}>
           <h2 style={{
-            fontSize: '18px', fontWeight: '800', color: '#0f172a',
+            fontSize: '18px', fontWeight: '800', color: 'var(--z-tekst)',
             marginBottom: '10px', textAlign: 'center',
           }}>
             {melding.title}
           </h2>
           <p style={{
-            fontSize: '14px', color: '#475569', lineHeight: 1.65,
+            fontSize: '14px', color: 'var(--z-tekst-2)', lineHeight: 1.65,
             textAlign: 'center', marginBottom: '24px',
           }}>
             {melding.message}
@@ -127,13 +127,13 @@ export function AnnouncementPopup() {
           <button
             onClick={handleSluiten}
             style={{
-              width: '100%', background: '#0f172a', color: 'white',
+              width: '100%', background: 'var(--z-tekst)', color: 'white',
               border: 'none', borderRadius: '12px', padding: '13px',
               fontSize: '14px', fontWeight: '700', cursor: 'pointer',
               transition: 'background 0.15s',
             }}
             onMouseEnter={e => e.target.style.background = '#1e293b'}
-            onMouseLeave={e => e.target.style.background = '#0f172a'}
+            onMouseLeave={e => e.target.style.background = 'var(--z-tekst)'}
           >
             Begrepen 👍
           </button>

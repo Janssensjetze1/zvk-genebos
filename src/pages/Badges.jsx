@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useSeason } from '../context/SeasonContext'
 import { badgesVoor, CAT, SHINE, CATEGORIE_VOLGORDE, verborgen } from '../data/badges'
 import { haalBadgeData } from '../lib/badgeStats'
+import { PaginaKop } from '../ui'
 
 
 const HEX = 'polygon(50% 0%,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%)'
@@ -117,32 +118,22 @@ export default function Badges() {
 
   return (
     <div>
-      <div style={{ marginBottom: '28px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div>
-          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px' }}>Badges</h1>
-          <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>
-            {loading ? 'Berekenen...' : totaal === 0 ? 'Binnenkort beschikbaar' : `${aantalVerdiend} van ${totaal} verdiend`}
-          </p>
-        </div>
-        {loading && (
-          <div style={{
-            width: '18px', height: '18px', marginLeft: '4px',
-            border: '2.5px solid #e2e8f0', borderTopColor: '#3b82f6',
-            borderRadius: '50%', animation: 'spin 0.7s linear infinite',
-          }} />
-        )}
-      </div>
+      <PaginaKop
+        bovenlabel={seizoen ? `Seizoen ${seizoen.name}` : null}
+        titel="Badges"
+        ondertitel={loading ? 'Berekenen…' : totaal === 0 ? 'Binnenkort beschikbaar' : `${aantalVerdiend} van ${totaal} verdiend`}
+      />
 
       {/* Zonder spelersfiche zie je enkel wat aan je account hangt */}
       {!heeftFiche && !loading && (
         <div style={{
-          background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '14px',
+          background: 'var(--z-blauw-50)', border: '1px solid var(--z-blauw-200)', borderRadius: 'var(--z-r)',
           padding: '14px 18px', marginBottom: '20px', maxWidth: '560px',
         }}>
-          <div style={{ fontSize: '14px', fontWeight: '700', color: '#1d4ed8', marginBottom: '3px' }}>
+          <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--z-blauw)', marginBottom: '3px' }}>
             🔗 Nog geen spelersfiche gekoppeld
           </div>
-          <p style={{ fontSize: '13px', color: '#3b82f6', margin: 0, lineHeight: 1.55 }}>
+          <p style={{ fontSize: '13px', color: 'var(--z-blauw-500)', margin: 0, lineHeight: 1.55 }}>
             De badges voor wedstrijden, goals en assists komen zodra een admin je koppelt. De pronostiekbadges
             hieronder kan je nu al verdienen.
           </p>
@@ -152,28 +143,28 @@ export default function Badges() {
       {/* Voortgang: enkel tonen als er badges zijn */}
       {totaal > 0 && (
         <div style={{
-          background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px',
-          padding: '20px 24px', marginBottom: '28px',
+          background: 'white', border: '1px solid var(--z-lijn)', borderRadius: 'var(--z-r)',
+          padding: '20px 24px', marginBottom: '28px', boxShadow: 'var(--z-schaduw-s)',
           display: 'flex', alignItems: 'center', gap: '20px',
         }}>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>Voortgang</span>
-              <span style={{ fontSize: '13px', color: '#64748b' }}>{aantalVerdiend}/{totaal}</span>
+              <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--z-tekst)' }}>Voortgang</span>
+              <span style={{ fontSize: '13px', color: 'var(--z-tekst-3)' }}>{aantalVerdiend}/{totaal}</span>
             </div>
-            <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '99px', overflow: 'hidden' }}>
+            <div style={{ height: '8px', background: 'var(--z-lijn-zacht)', borderRadius: '99px', overflow: 'hidden' }}>
               <div style={{
                 height: '100%', width: `${progPct}%`,
-                background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
+                background: 'var(--z-blauw)',
                 borderRadius: '99px', transition: 'width 0.6s ease',
               }} />
             </div>
           </div>
           <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: 1 }}>
+            <div style={{ fontSize: '28px', fontWeight: '800', color: 'var(--z-tekst)', lineHeight: 1 }}>
               {Math.round(progPct)}%
             </div>
-            <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>voltooid</div>
+            <div style={{ fontSize: '11px', color: 'var(--z-tekst-4)', marginTop: '2px' }}>voltooid</div>
           </div>
         </div>
       )}
@@ -213,8 +204,8 @@ export default function Badges() {
               </span>
               <div style={{ flex: 1, height: '1px', background: catInfo.lbo }} />
               <span style={{
-                fontSize: '12px', color: '#94a3b8', flexShrink: 0, fontWeight: '600',
-                background: '#f8fafc', border: '1px solid #e2e8f0',
+                fontSize: '12px', color: 'var(--z-tekst-4)', flexShrink: 0, fontWeight: '600',
+                background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)',
                 borderRadius: '99px', padding: '2px 10px',
               }}>
                 {verdiendInGroep}/{groep.length}
@@ -231,7 +222,7 @@ export default function Badges() {
                     onClick={() => setGeselecteerd(badge)}
                     style={{
                       background: badge.verdiend ? c.lb : 'white',
-                      border: `1.5px solid ${badge.verdiend ? c.lbo : '#e2e8f0'}`,
+                      border: `1.5px solid ${badge.verdiend ? c.lbo : 'var(--z-lijn)'}`,
                       borderRadius: '20px', padding: '24px 16px 18px',
                       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
                       cursor: 'pointer',
@@ -252,8 +243,8 @@ export default function Badges() {
                     <div style={{
                       position: 'absolute', top: '12px', right: '12px',
                       width: '22px', height: '22px', borderRadius: '50%',
-                      background: badge.verdiend ? '#dcfce7' : '#f1f5f9',
-                      border: `1.5px solid ${badge.verdiend ? '#86efac' : '#e2e8f0'}`,
+                      background: badge.verdiend ? '#dcfce7' : 'var(--z-lijn-zacht)',
+                      border: `1.5px solid ${badge.verdiend ? '#86efac' : 'var(--z-lijn)'}`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: '10px',
                     }}>
@@ -265,12 +256,12 @@ export default function Badges() {
                     <div style={{ textAlign: 'center', width: '100%' }}>
                       <div style={{
                         fontSize: '13px', fontWeight: '700', marginBottom: '6px',
-                        color: badge.verdiend ? '#0f172a' : '#94a3b8',
+                        color: badge.verdiend ? 'var(--z-tekst)' : 'var(--z-tekst-4)',
                       }}>
                         {verborgen(badge) ? '???' : badge.naam}
                       </div>
                       <p style={{
-                        fontSize: '11px', color: badge.verdiend ? '#64748b' : '#cbd5e1',
+                        fontSize: '11px', color: badge.verdiend ? 'var(--z-tekst-3)' : 'var(--z-lijn-sterk)',
                         margin: 0, lineHeight: 1.5,
                       }}>
                         {verborgen(badge) ? '' : badge.beschrijving}
@@ -306,7 +297,7 @@ export default function Badges() {
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '18px' }}>
                 <BadgeHex emoji={geselecteerd.emoji} categorie={geselecteerd.categorie} size={108} verdiend={geselecteerd.verdiend} />
                 <div style={{ textAlign: 'center' }}>
-                  <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: '0 0 10px' }}>
+                  <h2 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--z-tekst)', margin: '0 0 10px' }}>
                     {verborgen(geselecteerd) ? '???' : geselecteerd.naam}
                   </h2>
                   <span style={{
@@ -317,18 +308,18 @@ export default function Badges() {
                     {cat.label}
                   </span>
                 </div>
-                <p style={{ fontSize: '14px', color: '#475569', textAlign: 'center', lineHeight: 1.65, margin: 0 }}>
+                <p style={{ fontSize: '14px', color: 'var(--z-tekst-2)', textAlign: 'center', lineHeight: 1.65, margin: 0 }}>
                   {(verborgen(geselecteerd) ? '' : geselecteerd.beschrijving) || 'Deze badge is nog geheim.'}
                 </p>
                 <button
                   onClick={() => setGeselecteerd(null)}
                   style={{
-                    width: '100%', background: '#f1f5f9', border: 'none',
+                    width: '100%', background: 'var(--z-lijn-zacht)', border: 'none',
                     borderRadius: '12px', padding: '13px', fontSize: '14px',
-                    fontWeight: '600', color: '#475569', cursor: 'pointer',
+                    fontWeight: '600', color: 'var(--z-tekst-2)', cursor: 'pointer',
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.background = '#e2e8f0')}
-                  onMouseLeave={e => (e.currentTarget.style.background = '#f1f5f9')}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--z-lijn)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'var(--z-lijn-zacht)')}
                 >
                   Sluiten
                 </button>

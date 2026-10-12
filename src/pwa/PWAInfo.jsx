@@ -8,8 +8,8 @@ function Sectie({ emoji, titel, standaardOpen = false, children }) {
 
   return (
     <div style={{
-      background: 'white', borderRadius: '16px', border: '1.5px solid #e2e8f0',
-      boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden',
+      background: 'white', borderRadius: 'var(--z-r)', border: '1px solid var(--z-lijn)',
+      boxShadow: 'var(--z-schaduw-s)', overflow: 'hidden',
     }}>
       <button
         onClick={() => setOpen(o => !o)}
@@ -20,8 +20,8 @@ function Sectie({ emoji, titel, standaardOpen = false, children }) {
         }}
       >
         <span style={{ fontSize: '20px', flexShrink: 0 }}>{emoji}</span>
-        <span style={{ flex: 1, fontSize: '15px', fontWeight: '600', color: '#0f172a' }}>{titel}</span>
-        <svg width="14" height="14" fill="none" stroke="#cbd5e1" strokeWidth="2" viewBox="0 0 24 24"
+        <span style={{ flex: 1, fontSize: '15px', fontWeight: '600', color: 'var(--z-tekst)' }}>{titel}</span>
+        <svg width="14" height="14" fill="none" stroke="currentColor" className="z-chevron" strokeWidth="2" viewBox="0 0 24 24"
           style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
@@ -29,8 +29,8 @@ function Sectie({ emoji, titel, standaardOpen = false, children }) {
 
       {open && (
         <div style={{
-          padding: '2px 16px 16px', borderTop: '1px solid #f1f5f9',
-          fontSize: '13px', color: '#475569', lineHeight: 1.65,
+          padding: '2px 16px 16px', borderTop: '1px solid var(--z-lijn-zacht)',
+          fontSize: '13px', color: 'var(--z-tekst-2)', lineHeight: 1.65,
         }}>
           <div style={{ paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {children}
@@ -46,7 +46,7 @@ function Stap({ nr, children }) {
     <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
       <span style={{
         flexShrink: 0, width: '20px', height: '20px', borderRadius: '50%',
-        background: '#f1f5f9', color: '#64748b',
+        background: 'var(--z-lijn-zacht)', color: 'var(--z-tekst-3)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: '11px', fontWeight: '700', marginTop: '1px',
       }}>{nr}</span>
@@ -58,21 +58,21 @@ function Stap({ nr, children }) {
 function Tip({ children }) {
   return (
     <div style={{
-      background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px',
-      padding: '10px 12px', fontSize: '12px', color: '#64748b',
+      background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)', borderRadius: '10px',
+      padding: '10px 12px', fontSize: '12px', color: 'var(--z-tekst-3)',
     }}>
       {children}
     </div>
   )
 }
 
-const vet = { fontWeight: '600', color: '#0f172a' }
+const vet = { fontWeight: '600', color: 'var(--z-tekst)' }
 
 export default function PWAInfo() {
   return (
-    <div style={{ padding: '20px 16px' }}>
-      <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>Info</h1>
-      <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '20px', lineHeight: 1.6 }}>
+    <div style={{ padding: '28px 16px 24px' }}>
+      <h1 className="z-app-titel" style={{ marginBottom: '6px' }}>Info</h1>
+      <p className="z-ondertitel" style={{ marginBottom: '24px', lineHeight: 1.55 }}>
         Tik op een onderwerp om het open te klappen.
       </p>
 
@@ -200,11 +200,11 @@ export default function PWAInfo() {
       </div>
 
       <p style={{
-        fontSize: '12px', color: '#cbd5e1', textAlign: 'center',
+        fontSize: '12px', color: 'var(--z-lijn-sterk)', textAlign: 'center',
         marginTop: '24px', lineHeight: 1.6,
       }}>
         Iets kapot, of een idee voor de app?<br />
-        Gebruik <span style={{ fontWeight: '600', color: '#94a3b8' }}>Feedback</span> in ditzelfde menu.
+        Gebruik <span style={{ fontWeight: '600', color: 'var(--z-tekst-4)' }}>Feedback</span> in ditzelfde menu.
       </p>
     </div>
   )

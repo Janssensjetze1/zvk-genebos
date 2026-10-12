@@ -14,9 +14,9 @@ const MAAT = {
 
 function Knop({ soort = 'stil', onClick, disabled, children }) {
   const stijlen = {
-    vol:  { background: '#0f172a', color: 'white', border: 'none' },
-    rand: { background: 'white', color: '#475569', border: '1px solid #e2e8f0' },
-    stil: { background: 'none', color: '#94a3b8', border: 'none', textDecoration: 'underline', padding: '0' },
+    vol:  { background: 'var(--z-tekst)', color: 'white', border: 'none' },
+    rand: { background: 'white', color: 'var(--z-tekst-2)', border: '1px solid var(--z-lijn)' },
+    stil: { background: 'none', color: 'var(--z-tekst-4)', border: 'none', textDecoration: 'underline', padding: '0' },
   }
   return (
     <button
@@ -55,8 +55,8 @@ export default function VerslagPaneel({ verslagState: v, variant = 'pwa', toonGe
 
       {v.fout && (
         <div style={{
-          fontSize: '12px', color: '#b91c1c', background: '#fef2f2',
-          border: '1px solid #fecaca', borderRadius: '10px', padding: '8px 12px', marginBottom: '10px',
+          fontSize: '12px', color: '#b91c1c', background: 'var(--z-verlies-bg)',
+          border: '1px solid var(--z-verlies-rand)', borderRadius: '10px', padding: '8px 12px', marginBottom: '10px',
         }}>
           {v.fout}
         </div>
@@ -64,7 +64,7 @@ export default function VerslagPaneel({ verslagState: v, variant = 'pwa', toonGe
 
       {/* Bezig met genereren */}
       {v.genereert ? (
-        <div style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>
+        <div style={{ textAlign: 'center', padding: '20px', color: 'var(--z-tekst-4)' }}>
           <div className="pulse-soft" style={{ fontSize: '26px', marginBottom: '8px' }}>📝</div>
           <p style={{ fontSize: '13px' }}>Verslag wordt gegenereerd...</p>
         </div>
@@ -80,9 +80,9 @@ export default function VerslagPaneel({ verslagState: v, variant = 'pwa', toonGe
             placeholder="Schrijf hier het wedstrijdverslag..."
             style={{
               width: '100%', boxSizing: 'border-box',
-              fontSize: maat.tekst, lineHeight: 1.7, color: '#334155',
+              fontSize: maat.tekst, lineHeight: 1.7, color: 'var(--z-tekst-2)',
               fontFamily: 'inherit',
-              background: 'white', border: '1.5px solid #e2e8f0', borderRadius: '10px',
+              background: 'white', border: '1.5px solid var(--z-lijn)', borderRadius: '10px',
               padding: '12px', resize: 'vertical', outline: 'none',
             }}
           />
@@ -91,7 +91,7 @@ export default function VerslagPaneel({ verslagState: v, variant = 'pwa', toonGe
               {v.bezig ? 'Bewaren...' : '💾 Bewaren'}
             </Knop>
             <Knop soort="rand" onClick={v.annuleer} disabled={v.bezig}>Annuleren</Knop>
-            <span style={{ fontSize: '11px', color: '#cbd5e1', marginLeft: 'auto' }}>
+            <span style={{ fontSize: '11px', color: 'var(--z-lijn-sterk)', marginLeft: 'auto' }}>
               Leeg bewaren wist het verslag.
             </span>
           </div>
@@ -101,7 +101,7 @@ export default function VerslagPaneel({ verslagState: v, variant = 'pwa', toonGe
       ) : v.verslag ? (
         <div>
           <p style={{
-            fontSize: maat.tekst, color: '#334155', lineHeight: 1.75,
+            fontSize: maat.tekst, color: 'var(--z-tekst-2)', lineHeight: 1.75,
             whiteSpace: 'pre-wrap', fontStyle: 'italic', margin: 0,
           }}>
             {v.verslag}
@@ -117,7 +117,7 @@ export default function VerslagPaneel({ verslagState: v, variant = 'pwa', toonGe
       /* Nog geen verslag */
       ) : isAdmin ? (
         <div style={{ textAlign: isAdminKaart ? 'left' : 'center', padding: isAdminKaart ? 0 : '16px' }}>
-          <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '12px' }}>Nog geen verslag.</p>
+          <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)', marginBottom: '12px' }}>Nog geen verslag.</p>
           <div style={{
             display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center',
             justifyContent: isAdminKaart ? 'flex-start' : 'center',
@@ -129,7 +129,7 @@ export default function VerslagPaneel({ verslagState: v, variant = 'pwa', toonGe
           </div>
         </div>
       ) : (
-        <p style={{ fontSize: '13px', color: '#94a3b8', textAlign: 'center', padding: '16px', margin: 0 }}>
+        <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)', textAlign: 'center', padding: '16px', margin: 0 }}>
           Nog geen verslag beschikbaar.
         </p>
       )}
