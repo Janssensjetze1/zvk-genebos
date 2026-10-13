@@ -28,22 +28,18 @@ export default function VolgendeWedstrijdKaart({ wedstrijd: w, variant = 'deskto
       position: 'relative', overflow: 'hidden',
       borderRadius: 'var(--z-r-l)', color: 'white',
       boxShadow: '0 10px 30px rgba(12,26,61,0.35), 0 2px 6px rgba(12,26,61,0.2)',
-      background: 'radial-gradient(120% 140% at 100% 0%, #2a4fb8 0%, #13234d 45%, #0c1a3d 100%)',
+      background: 'var(--z-kaart)',
     }}>
-      {/* Terreinlijnen: middenlijn en middencirkel van een zaalvoetbalveld */}
-      <svg className="z-held-lijnen" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <g fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="1.5">
-          <line x1="250" y1="-10" x2="250" y2="210" />
-          <circle cx="250" cy="100" r="58" />
-          <circle cx="250" cy="100" r="3" fill="rgba(255,255,255,0.1)" />
-          <path d="M400 30 a 70 70 0 0 0 0 140" />
-        </g>
-      </svg>
-
+      {/* Het blauwe vlak met het logo: los van de opgave eronder, zodat het
+          logo niet verspringt of verdwijnt als die openklapt. */}
+      <div style={{
+        position: 'relative', overflow: 'hidden', isolation: 'isolate',
+        background: 'radial-gradient(120% 140% at 100% 0%, #2a4fb8 0%, #13234d 45%, #0c1a3d 100%)',
+      }}>
       {/* Het clublogo schuin rechtsonder, verwerkt in de achtergrond */}
       <img src="/logo.png" alt="" aria-hidden="true" className="z-held-logo" style={{
-        right: pwa ? '-34px' : '-22px', bottom: pwa ? '-52px' : '-58px',
-        width: pwa ? '200px' : '260px', opacity: 0.2, zIndex: 0,
+        right: pwa ? '-30px' : '-22px', bottom: pwa ? '-44px' : '-58px',
+        width: pwa ? '180px' : '260px', opacity: pwa ? 0.24 : 0.2,
       }} />
 
       <div
@@ -107,10 +103,11 @@ export default function VolgendeWedstrijdKaart({ wedstrijd: w, variant = 'deskto
           {w.location && <span style={meta}><Icoon naam="locatie" grootte={15} /> {w.location}</span>}
         </div>
       </div>
+      </div>
 
       {/* Bijvoorbeeld de opgave: in een licht vlak onderaan het kaartje */}
       {children && (
-        <div style={{ position: 'relative', zIndex: 3, background: 'var(--z-kaart)', color: 'var(--z-tekst)', padding: '14px 16px', borderRadius: '0 0 var(--z-r-l) var(--z-r-l)' }}>
+        <div style={{ position: 'relative', zIndex: 3, color: 'var(--z-tekst)', padding: '14px 16px' }}>
           {children}
         </div>
       )}
