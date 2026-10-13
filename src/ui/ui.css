@@ -931,19 +931,43 @@
   .z-stand tbody tr:not(.z-stand-wij):hover td { background: var(--z-vlak); }
 }
 
-/* Smalle versie voor de app */
-.z-stand-compact th { padding: 12px 4px 8px; font-size: 11px; }
-.z-stand-compact td { padding: 0 4px; height: 60px; font-size: 13px; }
-.z-stand-compact th:first-child, .z-stand-compact td:first-child { padding-left: 10px; }
-.z-stand-compact th:last-child, .z-stand-compact td:last-child { padding-right: 10px; }
-.z-stand-compact .z-stand-pos { width: 34px; }
-.z-stand-compact .z-stand-naam {
-  font-size: 14px;
-  white-space: normal;
-  line-height: 1.25;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+
+/* Klassement in de app: klassieke, strakke tabel */
+.z-mini { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; table-layout: auto; }
+.z-mini th {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--z-tekst-4);
+  text-align: center;
+  padding: 10px 3px 8px;
+  border-bottom: 1px solid var(--z-lijn);
+  white-space: nowrap;
 }
-.z-stand-compact th, .z-stand-compact td { padding-left: 3px; padding-right: 3px; }
-.z-stand-compact td.z-stand-ptn span { min-width: 34px; height: 30px; font-size: 15px; }
+.z-mini td {
+  font-size: 13px;
+  color: var(--z-tekst-2);
+  text-align: center;
+  padding: 0 3px;
+  height: 42px;
+  border-bottom: 1px solid var(--z-lijn-zacht);
+  white-space: nowrap;
+}
+.z-mini tr:last-child td { border-bottom: none; }
+.z-mini .links { text-align: left; }
+.z-mini th:first-child, .z-mini td:first-child { padding-left: 10px; width: 22px; }
+.z-mini th:last-child, .z-mini td:last-child { padding-right: 10px; }
+.z-mini td.z-mini-ploeg { width: 100%; max-width: 1px; }
+.z-mini-naam {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--z-tekst);
+  font-variant-numeric: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.z-mini td.z-mini-ptn { font-size: 14px; font-weight: 800; color: var(--z-tekst); }
+.z-mini tr.z-mini-wij td { background: var(--z-blauw-50); }
+.z-mini tr.z-mini-wij td:first-child { box-shadow: inset 3px 0 0 var(--z-blauw); }
+.z-mini tr.z-mini-wij .z-mini-naam, .z-mini tr.z-mini-wij td.z-mini-ptn { color: var(--z-blauw); }

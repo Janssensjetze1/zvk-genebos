@@ -526,7 +526,7 @@ function PloegKiezer({ label, waarde, teams, uitsluiten, zvk, onKies, onNieuw, b
   )
 }
 
-function ScoreRij({ naam, waarde, onChange }) {
+export function ScoreRij({ naam, waarde, onChange }) {
   const knop = {
     width: '36px', height: '36px', borderRadius: '50%', border: '1px solid var(--z-lijn)',
     background: 'var(--z-kaart)', cursor: 'pointer', fontSize: '18px', color: 'var(--z-tekst-2)',

@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSeason } from '../context/SeasonContext'
 import { useIsPWA } from '../hooks/useIsPWA'
+import { vandaagISO, perWeekend } from '../lib/wedstrijd'
+import PloegLogo from '../components/PloegLogo'
+import ScoreInvullen from '../components/ScoreInvullen'
+import { Chip, Icoon, LegeStaat, Segment } from '../ui'
 
 const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
 
@@ -14,6 +18,9 @@ export default function Invullen() {
   const [loading, setLoading] = useState(true)
   const [geselecteerd, setGeselecteerd] = useState(null)
   const [opgeslagen, setOpgeslagen] = useState(false)
+  const [andere, setAndere] = useState([])
+  const [weergave, setWeergave] = useState('zvk') // 'zvk' | 'andere'
+  const [scoreVoor, setScoreVoor] = useState(null)
 
   useEffect(() => { if (seizoen) fetchAlles() }, [seizoen])
 
@@ -32,12 +39,16 @@ export default function Invullen() {
     ])
     const zvkWedstrijden = (wData ?? []).filter(w => w.home_team?.is_zvk || w.away_team?.is_zvk)
     setWedstrijden(zvkWedstrijden)
+    // Andere ploegen: enkel wat al gespeeld is of vandaag op het programma staat
+    const vandaag = vandaagISO()
+    setAndere((wData ?? []).filter(w => !w.home_team?.is_zvk && !w.away_team?.is_zvk && w.date <= vandaag))
     setSpelers(sData ?? [])
     setTeams(tData ?? [])
     setLoading(false)
   }
 
   const zvkTeam = teams.find(t => t.is_zvk)
+  const teDoen = andere.filter(w => (w.home_score ?? 0) === 0 && (w.away_score ?? 0) === 0).length
 
   if (!seizoen) return (
     <div style={emptyStijl}>
@@ -87,8 +98,35 @@ export default function Invullen() {
         </div>
       )}
 
-      <div style={{ padding: '16px' }}>
-        {wedstrijden.length === 0 ? (
+      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <Segment
+          vol
+          waarde={weergave}
+          onChange={setWeergave}
+          opties={[
+            { waarde: 'zvk', label: 'ZVK Genebos' },
+            { waarde: 'andere', label: `Andere ploegen${teDoen > 0 ? ` (${teDoen})` : ''}` },
+          ]}
+        />
+
+        {weergave === 'andere' ? (
+          andere.length === 0 ? (
+            <LegeStaat tekst="Nog geen gespeelde wedstrijden van andere ploegen." icoon="bal" />
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {perWeekend(andere, { nieuwsteEerst: true }).map(week => (
+                <section key={week.sleutel}>
+                  <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--z-tekst)', margin: '0 0 10px' }}>{week.titel}</h2>
+                  <div className="z-kaart z-lijst" style={{ overflow: 'hidden' }}>
+                    {week.lijst.map(w => (
+                      <AndereRij key={w.id} wedstrijd={w} onOpen={() => setScoreVoor(w)} />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          )
+        ) : wedstrijden.length === 0 ? (
           <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '16px', padding: '48px 24px', textAlign: 'center' }}>
             <div style={{ fontSize: '40px', marginBottom: '12px' }}>📋</div>
             <p style={{ color: 'var(--z-tekst-4)', fontSize: '14px' }}>Geen wedstrijden gevonden.</p>
@@ -106,6 +144,40 @@ export default function Invullen() {
           </div>
         )}
       </div>
+
+      {scoreVoor && (
+        <ScoreInvullen
+          wedstrijd={scoreVoor}
+          onSluiten={() => setScoreVoor(null)}
+          onOpgeslagen={fetchAlles}
+        />
+      )}
+    </div>
+  )
+}
+
+// Nog niet ingevuld: 0–0 en al gespeeld (of vandaag)
+const nogInTeVullen = w => (w.home_score ?? 0) === 0 && (w.away_score ?? 0) === 0
+
+function AndereRij({ wedstrijd: w, onOpen }) {
+  const leeg = nogInTeVullen(w)
+  const regel = (team, score) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <PloegLogo team={team} grootte={22} />
+      <span style={{ flex: 1, minWidth: 0, fontSize: '15px', color: 'var(--z-tekst)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {team?.name}
+      </span>
+      {!leeg && <span className="z-tab-nums" style={{ fontSize: '16px', fontWeight: 700, color: 'var(--z-tekst)' }}>{score}</span>}
+    </div>
+  )
+  return (
+    <div className="z-rij z-rij-klik" onClick={onOpen} style={{ padding: '12px 16px' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        {regel(w.home_team, w.home_score)}
+        {regel(w.away_team, w.away_score)}
+      </div>
+      {leeg && <Chip toon="gelijk">In te vullen</Chip>}
+      <Icoon naam="chevron" grootte={16} dikte={2} className="z-chevron" />
     </div>
   )
 }

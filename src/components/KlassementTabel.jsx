@@ -6,7 +6,7 @@ import PloegLogo from './PloegLogo'
 import { Kaart, Laden, LegeStaat } from '../ui'
 
 // De competitiestand, gedeeld door desktop en app.
-// compact: smalle versie voor de app (minder kolommen, vorm onder de naam)
+// compact: klassieke, strakke tabel voor de app (één regel per ploeg)
 
 const MEDAILLE = ['#d4a017', '#9aa5b5', '#b8733a']
 const VORM_KLEUR = {
@@ -19,18 +19,18 @@ function saldoTekst(n) {
   return n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0'
 }
 
-function Vorm({ vorm, klein }) {
+function Vorm({ vorm }) {
   if (vorm.length === 0) return <span style={{ color: 'var(--z-tekst-4)', fontSize: '12px' }}>–</span>
-  const maat = klein ? 14 : 20
+  const maat = 20
   return (
-    <span style={{ display: 'inline-flex', gap: klein ? '3px' : '4px' }}>
+    <span style={{ display: 'inline-flex', gap: '4px' }}>
       {vorm.map((u, i) => (
         <span key={i} title={{ W: 'Gewonnen', G: 'Gelijk', V: 'Verloren' }[u]} style={{
-          width: maat, height: maat, borderRadius: klein ? '4px' : '5px',
+          width: maat, height: maat, borderRadius: '5px',
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: klein ? '9px' : '11px', fontWeight: 700, ...VORM_KLEUR[u],
+          fontSize: '11px', fontWeight: 700, ...VORM_KLEUR[u],
           opacity: i === vorm.length - 1 ? 1 : 0.85,
-        }}>{klein ? '' : u}</span>
+        }}>{u}</span>
       ))}
     </span>
   )
@@ -64,23 +64,24 @@ export default function KlassementTabel({ compact = false }) {
 
   const stand = berekenKlassement(teams, wedstrijden)
   if (stand.length === 0) return <LegeStaat tekst="Nog geen ploegen in de competitie." icoon="klassement" />
+  if (compact) return <CompacteStand stand={stand} />
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? '16px' : '20px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <Kaart style={{ overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
-          <table className={`z-stand${compact ? ' z-stand-compact' : ''}`}>
+          <table className="z-stand">
             <thead>
               <tr>
                 <th className="z-stand-pos">#</th>
                 <th className="links">Ploeg</th>
-                {!compact && <th title="Gespeeld">GS</th>}
+                <th title="Gespeeld">GS</th>
                 <th title="Gewonnen">W</th>
                 <th title="Gelijk">G</th>
                 <th title="Verloren">V</th>
-                <th title="Doelpunten voor en tegen">{compact ? 'DV–DT' : 'Doelp.'}</th>
-                {!compact && <th title="Doelsaldo">+/−</th>}
-                {!compact && <th className="links">Vorm</th>}
+                <th title="Doelpunten voor en tegen">Doelp.</th>
+                <th title="Doelsaldo">+/−</th>
+                <th className="links">Vorm</th>
                 <th className="z-stand-ptn" title="Punten">Ptn</th>
               </tr>
             </thead>
@@ -90,32 +91,29 @@ export default function KlassementTabel({ compact = false }) {
                   <td className="z-stand-pos">
                     <span style={{
                       display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                      width: compact ? '24px' : '28px', height: compact ? '24px' : '28px', borderRadius: '50%',
-                      fontSize: compact ? '12px' : '13px', fontWeight: 700,
+                      width: '28px', height: '28px', borderRadius: '50%',
+                      fontSize: '13px', fontWeight: 700,
                       color: i < 3 && t.gespeeld > 0 ? 'white' : 'var(--z-tekst-3)',
                       background: i < 3 && t.gespeeld > 0 ? MEDAILLE[i] : 'transparent',
                     }}>{i + 1}</span>
                   </td>
                   <td className="links z-stand-ploeg">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-                      <PloegLogo team={t} grootte={compact ? 24 : 28} />
+                      <PloegLogo team={t} grootte={28} />
                       <div style={{ minWidth: 0 }}>
                         <div className="z-stand-naam">{t.name}</div>
-                        {compact && t.vorm.length > 0 && <div style={{ marginTop: '4px' }}><Vorm vorm={t.vorm} klein /></div>}
                       </div>
                     </div>
                   </td>
-                  {!compact && <td>{t.gespeeld}</td>}
+                  <td>{t.gespeeld}</td>
                   <td>{t.gewonnen}</td>
                   <td>{t.gelijk}</td>
                   <td>{t.verloren}</td>
                   <td style={{ color: 'var(--z-tekst-3)', whiteSpace: 'nowrap' }}>{t.voor}–{t.tegen}</td>
-                  {!compact && (
-                    <td style={{ fontWeight: 600, color: t.saldo > 0 ? 'var(--z-winst)' : t.saldo < 0 ? 'var(--z-verlies)' : 'var(--z-tekst-4)' }}>
-                      {saldoTekst(t.saldo)}
-                    </td>
-                  )}
-                  {!compact && <td className="links z-stand-vorm"><Vorm vorm={t.vorm} /></td>}
+                  <td style={{ fontWeight: 600, color: t.saldo > 0 ? 'var(--z-winst)' : t.saldo < 0 ? 'var(--z-verlies)' : 'var(--z-tekst-4)' }}>
+                    {saldoTekst(t.saldo)}
+                  </td>
+                  <td className="links z-stand-vorm"><Vorm vorm={t.vorm} /></td>
                   <td className="z-stand-ptn"><span>{t.punten}</span></td>
                 </tr>
               ))}
@@ -125,9 +123,55 @@ export default function KlassementTabel({ compact = false }) {
       </Kaart>
 
       <p style={{ fontSize: '12px', color: 'var(--z-tekst-4)', lineHeight: 1.5 }}>
-        {compact
-          ? 'W gewonnen · G gelijk · V verloren · DV–DT doelpunten voor en tegen · Blokjes: de laatste vijf uitslagen, de meest recente rechts.'
-          : 'GS gespeeld · W gewonnen · G gelijk · V verloren · Vorm: de laatste vijf uitslagen, de meest recente rechts. Bij gelijke punten telt eerst het doelsaldo, dan het aantal gemaakte doelpunten.'}
+        GS gespeeld · W gewonnen · G gelijk · V verloren · Vorm: de laatste vijf uitslagen, de meest recente rechts. Bij gelijke punten telt eerst het doelsaldo, dan het aantal gemaakte doelpunten.
+      </p>
+    </div>
+  )
+}
+
+// Klassieke, strakke tabel voor de app: één regel per ploeg
+function CompacteStand({ stand }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <Kaart style={{ overflow: 'hidden' }}>
+        <table className="z-mini">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th className="links">Ploeg</th>
+              <th title="Gespeeld">GS</th>
+              <th title="Gewonnen">W</th>
+              <th title="Gelijk">G</th>
+              <th title="Verloren">V</th>
+              <th title="Doelsaldo">+/−</th>
+              <th title="Punten">Ptn</th>
+            </tr>
+          </thead>
+          <tbody>
+            {stand.map((t, i) => (
+              <tr key={t.id} className={t.is_zvk ? 'z-mini-wij' : undefined}>
+                <td style={{ fontWeight: 700, color: i < 3 && t.gespeeld > 0 ? MEDAILLE[i] : 'var(--z-tekst-4)' }}>{i + 1}</td>
+                <td className="links z-mini-ploeg">
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: 0 }}>
+                    <PloegLogo team={t} grootte={18} />
+                    <span className="z-mini-naam">{t.name}</span>
+                  </span>
+                </td>
+                <td>{t.gespeeld}</td>
+                <td>{t.gewonnen}</td>
+                <td>{t.gelijk}</td>
+                <td>{t.verloren}</td>
+                <td style={{ color: t.saldo > 0 ? 'var(--z-winst)' : t.saldo < 0 ? 'var(--z-verlies)' : 'var(--z-tekst-4)' }}>
+                  {saldoTekst(t.saldo)}
+                </td>
+                <td className="z-mini-ptn">{t.punten}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Kaart>
+      <p style={{ fontSize: '12px', color: 'var(--z-tekst-4)', lineHeight: 1.5 }}>
+        GS gespeeld · W gewonnen · G gelijk · V verloren · +/− doelsaldo
       </p>
     </div>
   )
