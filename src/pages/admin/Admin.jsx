@@ -1,31 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useSeason } from '../../context/SeasonContext'
-import TabLeden from './tabs/TabLeden'
-import TabSpelers from './tabs/TabSpelers'
-import TabTeams from './tabs/TabTeams'
-import TabWedstrijden from './tabs/TabWedstrijden'
-import TabSeizoen from './tabs/TabSeizoen'
-import TabMeldingen from './tabs/TabMeldingen'
-import TabFeedback from './tabs/TabFeedback'
-import TabQuotes from './tabs/TabQuotes'
-import TabGebruik from './tabs/TabGebruik'
-import TabDatabase from './tabs/TabDatabase'
 import { useBeheerTellers } from './useBeheerTellers'
 import { Teller } from './ui'
+import { OnderdeelInhoud } from './onderdelen'
+import { ONDERDELEN } from './onderdelenLijst'
 import { Icoon, PaginaKop } from '../../ui'
-
-const ONDERDELEN = [
-  { id: 'leden',       label: 'Ledenbeheer', icon: 'leden', teller: 'wachtendeLeden', tellerKleur: 'var(--z-blauw)' },
-  { id: 'spelers',     label: 'Spelers',     icon: 'shirt' },
-  { id: 'teams',       label: 'Teams',       icon: 'schild' },
-  { id: 'wedstrijden', label: 'Wedstrijden', icon: 'bal', teller: 'bladOntbreekt', tellerKleur: 'var(--z-goud)' },
-  { id: 'seizoen',     label: 'Seizoenen',   icon: 'kalender' },
-  { id: 'meldingen',   label: 'Meldingen',   icon: 'bel' },
-  { id: 'quotes',      label: 'Quotes',      icon: 'citaat' },
-  { id: 'gebruik',     label: 'Gebruik',     icon: 'klassement' },
-  { id: 'database',    label: 'Database',    icon: 'archief' },
-  { id: 'feedback',    label: 'Feedback',    icon: 'inbox', teller: 'ongelezenFeedback', tellerKleur: 'var(--z-paars)' },
-]
 
 export default function Admin() {
   const { actief: seizoen } = useSeason()
@@ -71,18 +50,7 @@ export default function Admin() {
 
         {/* Inhoud */}
         <div style={{ minWidth: 0 }}>
-          {actieveTab === 'leden' && <TabLeden />}
-          {actieveTab === 'spelers' && <TabSpelers />}
-          {actieveTab === 'teams' && <TabTeams />}
-          {actieveTab === 'wedstrijden' && <TabWedstrijden />}
-          {actieveTab === 'seizoen' && <TabSeizoen />}
-          {actieveTab === 'meldingen' && <TabMeldingen />}
-          {actieveTab === 'quotes' && <TabQuotes />}
-          {actieveTab === 'gebruik' && <TabGebruik />}
-          {actieveTab === 'database' && <TabDatabase />}
-          {actieveTab === 'feedback' && (
-            <TabFeedback onGelezen={() => tellers.setTellers(t => ({ ...t, ongelezenFeedback: 0 }))} />
-          )}
+          <OnderdeelInhoud id={actieveTab} tellers={tellers} />
         </div>
       </div>
     </div>

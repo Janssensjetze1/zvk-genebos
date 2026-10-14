@@ -303,7 +303,7 @@ export default function TabMeldingen() {
             <div key={m.id} style={{
               background: 'var(--z-kaart)', border: `1px solid ${m.is_active ? 'var(--z-blauw-200)' : 'var(--z-lijn)'}`,
               borderRadius: '12px', padding: '16px',
-              display: 'flex', alignItems: 'center', gap: '14px',
+              display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap',
               boxShadow: m.is_active ? '0 0 0 3px rgba(59,130,246,0.08)' : 'none',
             }}>
               {/* Thumbnail of emoji */}
@@ -321,7 +321,7 @@ export default function TabMeldingen() {
                 </div>
                 <p style={{ fontSize: '13px', color: 'var(--z-tekst-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.message}</p>
               </div>
-              <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+              <div className="z-actieknoppen" style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                 <button
                   onClick={() => toggleActief(m)}
                   style={{ background: m.is_active ? '#fef3c7' : 'var(--z-winst-bg)', color: m.is_active ? 'var(--z-gelijk)' : 'var(--z-winst)', border: 'none', borderRadius: '8px', padding: '7px 12px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}

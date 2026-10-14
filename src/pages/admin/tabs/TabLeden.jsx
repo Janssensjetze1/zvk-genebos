@@ -275,6 +275,7 @@ function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
           padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '14px',
           cursor: 'pointer', transition: 'background 0.1s',
         }}
+        className="z-leden-rij"
         onMouseEnter={e => e.currentTarget.style.background = 'var(--z-vlak)'}
         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
       >
@@ -299,10 +300,10 @@ function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
         </div>
 
         {/* Laatst online */}
-        <div style={{ flexShrink: 0, textAlign: 'right', minWidth: '110px' }}>
+        <div className="z-leden-online" style={{ flexShrink: 0, textAlign: 'right', minWidth: '110px' }}>
           {lastSeen ? (
             <div style={{ fontSize: '12px', color: 'var(--z-tekst-3)' }}>
-              <span style={{ display: 'block', fontSize: '10px', color: 'var(--z-lijn-sterk)', fontWeight: '500', marginBottom: '1px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <span className="z-leden-online-label" style={{ display: 'block', fontSize: '10px', color: 'var(--z-lijn-sterk)', fontWeight: '500', marginBottom: '1px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Laatst online
               </span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>

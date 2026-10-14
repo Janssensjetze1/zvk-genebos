@@ -193,7 +193,7 @@ export default function TabTeams() {
                   background: 'var(--z-kaart)',
                   border: `1px solid ${bewerkId === team.id ? '#93c5fd' : 'var(--z-lijn)'}`,
                   borderRadius: bewerkId === team.id ? '10px 10px 0 0' : '10px',
-                  padding: '11px 16px', display: 'flex', alignItems: 'center', gap: '12px',
+                  padding: '11px 16px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
                 }}>
                   {/* Initiaal */}
                   <div style={{
@@ -206,7 +206,7 @@ export default function TabTeams() {
 
                   <span style={{ flex: 1, fontSize: '14px', fontWeight: '500', color: 'var(--z-tekst)' }}>{team.name}</span>
 
-                  <div style={{ display: 'flex', gap: '6px' }}>
+                  <div className="z-actieknoppen" style={{ display: 'flex', gap: '6px' }}>
                     <button
                       onClick={() => bewerkId === team.id ? stopBewerken() : startBewerken(team)}
                       style={{

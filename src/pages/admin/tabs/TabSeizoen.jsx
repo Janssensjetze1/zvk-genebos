@@ -132,7 +132,7 @@ export default function TabSeizoen() {
                   background: 'var(--z-kaart)',
                   border: `1px solid ${bewerkId === s.id ? '#93c5fd' : isActief ? 'var(--z-blauw-200)' : 'var(--z-lijn)'}`,
                   borderRadius: bewerkId === s.id ? '10px 10px 0 0' : '10px',
-                  padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px',
+                  padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap',
                   background: isActief ? '#f0f9ff' : 'var(--z-kaart)',
                 }}>
                   {/* Icoon */}
@@ -156,13 +156,13 @@ export default function TabSeizoen() {
                       )}
                     </div>
                     <div style={{ fontSize: '12px', color: 'var(--z-tekst-4)', marginTop: '2px' }}>
-                      {new Date(s.start_date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'short', year: 'numeric' })}
-                      {' · '}
-                      {new Date(s.end_date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {[s.start_date, s.end_date].filter(Boolean)
+                        .map(d => new Date(d).toLocaleDateString('nl-BE', { day: 'numeric', month: 'short', year: 'numeric' }))
+                        .join(' · ')}
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <div className="z-actieknoppen" style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                     {!isActief && (
                       <button
                         onClick={() => switchSeizoen(s)}

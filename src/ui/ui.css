@@ -1250,3 +1250,71 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
 .z-db-sleutel { width: 18px; flex-shrink: 0; font-size: 9px; font-weight: 800; text-align: center; }
 .z-db-naam { flex: 1; min-width: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--z-tekst-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .z-db-type { flex-shrink: 0; font-size: 11px; color: var(--z-tekst-4); }
+
+/* ─── Beheer in de app ──────────────────────────────────────────────────── */
+
+.z-beheer-alles-bij {
+  display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+  border-radius: var(--z-r); background: var(--z-winst-bg); border: 1px solid var(--z-winst-rand);
+  color: var(--z-winst); font-size: 14px; font-weight: 600;
+}
+.z-beheer-aandacht {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 52px; padding: 12px 14px;
+  border-radius: var(--z-r); border: 1px solid; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.z-beheer-aandacht-blauw  { background: var(--z-blauw-50);  border-color: var(--z-blauw-200);  color: var(--z-blauw); }
+.z-beheer-aandacht-gelijk { background: var(--z-gelijk-bg); border-color: var(--z-gelijk-rand); color: var(--z-gelijk); }
+.z-beheer-aandacht-paars  { background: var(--z-paars-bg);  border-color: var(--z-paars-bg);    color: var(--z-paars); }
+.z-beheer-actie {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px;
+  border-radius: var(--z-r); border: 1px solid var(--z-lijn); background: var(--z-kaart);
+  box-shadow: var(--z-schaduw-s); font: inherit; font-size: 14px; font-weight: 600; color: var(--z-tekst);
+  text-align: left; cursor: pointer;
+}
+.z-beheer-groep { font-size: 13px; font-weight: 600; color: var(--z-tekst-3); margin: 4px 4px 8px; }
+.z-beheer-rij-knop { width: 100%; border: none; background: transparent; font: inherit; padding: 12px 14px; }
+.z-beheer-terug {
+  display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; height: 36px; padding: 0 10px 0 4px;
+  margin-bottom: -6px; border: none; border-radius: 99px; background: transparent;
+  font: inherit; font-size: 15px; font-weight: 600; color: var(--z-blauw); cursor: pointer;
+}
+
+/* ─── Beheer op een smal scherm ─────────────────────────────────────────── */
+@media (max-width: 600px) {
+  /* Rijen met knoppen: de knoppen schuiven onder de naam */
+  .z-actierij { flex-wrap: wrap; }
+  .z-actieknoppen { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
+  .z-tabkop-acties { width: 100%; }
+  .z-tabkop-acties > input { flex: 1; width: auto !important; }
+
+  /* Ledenbeheer: compacter, zonder het label "laatst online" */
+  .z-leden-rij { padding: 12px 14px !important; gap: 12px !important; }
+  .z-leden-online { min-width: 0 !important; }
+  .z-leden-online-label { display: none !important; }
+
+  /* Segmenten mogen scrollen in plaats van te breken */
+  .z-segment { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .z-segment::-webkit-scrollbar { display: none; }
+  .z-segment button { white-space: nowrap; flex-shrink: 0; }
+
+  /* Wedstrijdbeheer */
+  .z-beheer-rij { gap: 10px; padding: 12px; }
+  .z-beheer-acties { width: auto; margin-left: auto; margin-top: -4px; }
+  .z-beheer-info { flex: 1 1 200px; }
+
+  /* Wedstrijdblad: elk doelpunt op twee regels (scorer, dan assist en minuut) */
+  .z-doelpunt { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; }
+  .z-doelpunt > select:first-of-type { flex: 1 1 calc(100% - 34px) !important; }
+  .z-doelpunt > svg { margin-left: 26px; }
+  .z-doelpunt > select:last-of-type { flex: 1 1 0 !important; }
+  .z-beheer-rij > svg.z-chevron, .z-beheer-rij > span:empty { display: none; }
+  .z-zoekveld { max-width: none; }
+
+  /* Gebruik: om de week een datum onder de grafiek */
+  .z-gebruik-grafiek { gap: 4px; }
+  .z-gebruik-kolom:nth-child(even) > small { visibility: hidden; }
+
+  /* Database: één kolom en geen lijnen, de FK-labels tonen het verband */
+  .z-db-vlak { grid-template-columns: minmax(0, 1fr); padding: 14px; }
+  .z-db-lijnen { display: none; }
+}

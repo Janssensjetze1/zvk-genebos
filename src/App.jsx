@@ -35,6 +35,7 @@ import PWAFeedback from './pwa/PWAFeedback'
 import PWAPronostiek from './pwa/PWAPronostiek'
 import PWAWedstrijdDetail from './pwa/PWAWedstrijdDetail'
 import Invullen from './pages/Invullen'
+import PWABeheer, { PWABeheerOnderdeel } from './pwa/PWABeheer'
 import Badges from './pages/Badges'
 import Stats from './pages/Stats'
 import Pronostiek from './pages/Pronostiek'
@@ -117,6 +118,16 @@ function AppRoutes() {
         <Route path="/app/invullen" element={
           <AdminRoute>
             <PWALayout><Invullen /></PWALayout>
+          </AdminRoute>
+        } />
+        <Route path="/app/beheer" element={
+          <AdminRoute>
+            <PWALayout><PWABeheer /></PWALayout>
+          </AdminRoute>
+        } />
+        <Route path="/app/beheer/:onderdeel" element={
+          <AdminRoute>
+            <PWALayout><PWABeheerOnderdeel /></PWALayout>
           </AdminRoute>
         } />
 

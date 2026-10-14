@@ -151,6 +151,13 @@ function MeerMenu({ open, onClose, isAdmin, onNieuweWedstrijd }) {
         )}
 
         <div className="z-kaart z-lijst" style={{ overflow: 'hidden' }}>
+          {isAdmin && (
+            <div className="z-rij z-rij-klik" onClick={() => ga('/app/beheer')} style={{ padding: '10px 16px', minHeight: '52px' }}>
+              <span className="z-icoonvak" style={{ background: 'var(--z-blauw)', color: 'white' }}><Icoon naam="beheer" grootte={18} /></span>
+              <span style={{ flex: 1, fontSize: '15px', fontWeight: 600, color: 'var(--z-tekst)' }}>Beheer</span>
+              <Icoon naam="chevron" grootte={16} dikte={2} className="z-chevron" />
+            </div>
+          )}
           {MEER_ITEMS.map(item => (
             <div
               key={item.path}
@@ -184,6 +191,12 @@ export default function PWALayout({ children }) {
   const [splashKlaar, setSplashKlaar] = useState(() => !!sessionStorage.getItem('splash_done'))
   const [meerOpen, setMeerOpen] = useState(false)
   const [nieuweWedstrijd, setNieuweWedstrijd] = useState(false)
+  // Ook te openen vanuit het beheer (knop "Wedstrijd toevoegen")
+  useEffect(() => {
+    const open = () => setNieuweWedstrijd(true)
+    window.addEventListener('zvk:nieuwe-wedstrijd', open)
+    return () => window.removeEventListener('zvk:nieuwe-wedstrijd', open)
+  }, [])
   const navigate = useNavigate()
 
   const mainRef = useRef(null)
@@ -192,7 +205,7 @@ export default function PWALayout({ children }) {
   const progress = Math.min(pullDist / PULL_THRESHOLD, 1)
 
   // Meer-tab oplichten op de schermen die je via Meer bereikt
-  const viaMeer = MEER_ITEMS.some(i => pathname.startsWith(i.path)) || pathname.startsWith('/app/invullen')
+  const viaMeer = MEER_ITEMS.some(i => pathname.startsWith(i.path)) || pathname.startsWith('/app/invullen') || pathname.startsWith('/app/beheer')
 
   return (
     <div className="z-app">

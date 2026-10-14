@@ -189,7 +189,7 @@ export default function TabSpelers() {
           {spelers.map(speler => (
             <div key={speler.id}>
               {/* Speler rij */}
-              <div style={{
+              <div className="z-actierij" style={{
                 background: 'var(--z-kaart)', border: `1px solid ${bewerkId === speler.id ? '#93c5fd' : 'var(--z-lijn)'}`,
                 borderRadius: (bewerkId === speler.id || badgePaneel === speler.id) ? '10px 10px 0 0' : '10px',
                 padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px',
@@ -205,7 +205,7 @@ export default function TabSpelers() {
 
                 <span style={{ flex: 1, fontSize: '14px', fontWeight: '500', color: 'var(--z-tekst)' }}>{speler.name}</span>
 
-                <div style={{ display: 'flex', gap: '6px' }}>
+                <div className="z-actieknoppen" style={{ display: 'flex', gap: '6px' }}>
                   <button
                     onClick={() => setBadgePaneel(p => p === speler.id ? null : speler.id)}
                     title="Handmatige badges toekennen"

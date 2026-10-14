@@ -130,7 +130,7 @@ export default function TabQuotes() {
           value={zoek}
           onChange={e => setZoek(e.target.value)}
           placeholder="Zoek op tekst of auteur"
-          style={{ ...inputStijl, width: '220px', padding: '8px 12px' }}
+          style={{ ...inputStijl, width: '220px', maxWidth: '100%', padding: '8px 12px' }}
         />
         <Knop
           soort={toonFormulier ? 'rand' : 'vol'}
@@ -198,7 +198,7 @@ export default function TabQuotes() {
                 background: 'var(--z-kaart)',
                 border: `1px solid ${bewerkId === q.id ? '#93c5fd' : 'var(--z-lijn)'}`,
                 borderRadius: bewerkId === q.id ? '10px 10px 0 0' : '10px',
-                padding: '13px 16px', display: 'flex', alignItems: 'flex-start', gap: '14px',
+                padding: '13px 16px', display: 'flex', alignItems: 'flex-start', gap: '14px', flexWrap: 'wrap',
                 opacity: q.actief ? 1 : 0.6,
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -216,7 +216,7 @@ export default function TabQuotes() {
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
+                <div className="z-actieknoppen" style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
                   <button
                     onClick={() => toggleActief(q)}
                     title={q.actief ? 'Uit de rotatie halen' : 'Terug in de rotatie zetten'}

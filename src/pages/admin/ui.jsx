@@ -40,7 +40,7 @@ export function TabKop({ titel, subtitel, children }) {
         <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--z-tekst)', letterSpacing: '-0.01em', margin: '0 0 4px' }}>{titel}</h2>
         {subtitel && <p style={{ fontSize: '13px', color: 'var(--z-tekst-3)', margin: 0 }}>{subtitel}</p>}
       </div>
-      {children && <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>{children}</div>}
+      {children && <div className="z-tabkop-acties" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>{children}</div>}
     </div>
   )
 }
