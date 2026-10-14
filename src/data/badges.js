@@ -82,6 +82,18 @@ export const BADGES = [
     conditieTekst: '10 voorspellingen',
     veld: 'voorspellingen', min: 10, zonderFiche: true,
   }),
+  drempel({
+    id: 'supporter', naam: 'Supporter', emoji: '👀', categorie: 'brons',
+    beschrijving: 'Je kwam een wedstrijd van ZVK Genebos aanmoedigen.',
+    conditieTekst: '1 wedstrijd komen kijken',
+    veld: 'wedstrijdenBekeken', min: 1, zonderFiche: true,
+  }),
+  drempel({
+    id: 'eerste-reactie', naam: 'Duimpje Omhoog', emoji: '👍', categorie: 'brons',
+    beschrijving: 'Je reageerde voor het eerst op een uitslag.',
+    conditieTekst: '1 reactie op een uitslag',
+    veld: 'reacties', min: 1, zonderFiche: true,
+  }),
 
   // ─── Zilver ──────────────────────────────────────────────────
   drempel({
@@ -114,6 +126,18 @@ export const BADGES = [
     beschrijving: 'Je had de exacte score van een wedstrijd juist.',
     conditieTekst: '1 exacte score',
     veld: 'exacteVoorspellingen', min: 1, zonderFiche: true,
+  }),
+  drempel({
+    id: 'vaste-supporter', naam: 'Vaste Supporter', emoji: '📣', categorie: 'zilver',
+    beschrijving: 'Vijf keer langs de kant gestaan. De ploeg hoort je wel.',
+    conditieTekst: '5 wedstrijden komen kijken',
+    veld: 'wedstrijdenBekeken', min: 5, zonderFiche: true,
+  }),
+  drempel({
+    id: 'reageerkampioen', naam: 'Reageerkampioen', emoji: '💬', categorie: 'zilver',
+    beschrijving: 'Na elke uitslag ben jij er als eerste bij.',
+    conditieTekst: '15 reacties op uitslagen',
+    veld: 'reacties', min: 15, zonderFiche: true,
   }),
 
   // ─── Goud ────────────────────────────────────────────────────
@@ -154,6 +178,12 @@ export const BADGES = [
     conditieTekst: '3 durfbonussen',
     veld: 'durfbonussen', min: 3, zonderFiche: true,
   }),
+  drempel({
+    id: 'twaalfde-man', naam: 'De Twaalfde Man', emoji: '🧣', categorie: 'goud',
+    beschrijving: 'Vijftien wedstrijden komen supporteren. Zonder jou geen thuisvoordeel.',
+    conditieTekst: '15 wedstrijden komen kijken',
+    veld: 'wedstrijdenBekeken', min: 15, zonderFiche: true,
+  }),
 
   // ─── Platina ─────────────────────────────────────────────────
   drempel({
@@ -186,6 +216,12 @@ export const BADGES = [
     beschrijving: 'Honderd punten verzameld met de pronostiek.',
     conditieTekst: '100 pronostiekpunten',
     veld: 'pronostiekPunten', min: 100, zonderFiche: true,
+  }),
+  drempel({
+    id: 'tribunekoning', naam: 'Tribunekoning', emoji: '🏟️', categorie: 'platina',
+    beschrijving: 'Dertig wedstrijden langs de kant. De zaal kent je naam.',
+    conditieTekst: '30 wedstrijden komen kijken',
+    veld: 'wedstrijdenBekeken', min: 30, zonderFiche: true,
   }),
 
   // ─── Legendary ─────────────────────────────────────────────
@@ -236,7 +272,7 @@ export const verborgen = badge =>
   !!badge.placeholder || (badge.categorie === 'geheim' && !badge.verdiend)
 
 // Zonder spelersfiche vallen de speelbadges weg, die kan je niet verdienen.
-// De pronostiekbadges hangen aan het account en blijven dus wél staan.
+// De pronostiek- en supporterbadges hangen aan het account en blijven staan.
 export const badgesVoor = heeftSpelersfiche =>
   heeftSpelersfiche ? BADGES : BADGES.filter(b => b.zonderFiche)
 

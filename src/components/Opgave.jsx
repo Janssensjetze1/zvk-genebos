@@ -95,15 +95,6 @@ export default function Opgave({ wedstrijd }) {
         </div>
       ) : null}
 
-      {gebruikerId && !magMeedoen && (
-        <div style={{
-          fontSize: '12px', color: 'var(--z-tekst-4)', background: 'var(--z-vlak)',
-          border: '1px solid var(--z-lijn)', borderRadius: '10px', padding: '10px 12px',
-        }}>
-          Je hangt nog niet aan een spelersfiche. Vraag een admin om je te koppelen.
-        </div>
-      )}
-
       {/* Foutmelding */}
       {fout && (
         <div style={{

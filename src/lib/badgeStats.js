@@ -1,10 +1,11 @@
 import { supabase } from './supabase'
+import { vandaagISO } from './wedstrijd'
 
 // ─── Badge-statistieken ──────────────────────────────────────────────────────
 // Eén implementatie, gebruikt door zowel de desktop- als de PWA-badgepagina.
 // Wijzig je hier iets, dan verandert het op beide plaatsen mee.
 
-export function computeStats({ goalsArr, assistsArr, matchesArr, seizoenId, userCreatedAt, pronostiek }) {
+export function computeStats({ goalsArr, assistsArr, matchesArr, seizoenId, userCreatedAt, pronostiek, supporter }) {
   const goalsByMatch   = {}
   const assistsByMatch = {}
   goalsArr.forEach(g => { if (g.match_id) goalsByMatch[g.match_id] = (goalsByMatch[g.match_id] || 0) + 1 })
@@ -38,6 +39,9 @@ export function computeStats({ goalsArr, assistsArr, matchesArr, seizoenId, user
     exacteVoorspellingen: pronostiek?.exacte ?? 0,
     durfbonussen:         pronostiek?.durfbonussen ?? 0,
     pronostiekPunten:     pronostiek?.punten ?? 0,
+    // Supporter: hangt ook aan het account, dus ook voor leden zonder fiche
+    wedstrijdenBekeken:   supporter?.bekeken ?? 0,
+    reacties:             supporter?.reacties ?? 0,
 
     aantalWedstrijdenRij: 0, maxWedstrijdenRij: 0,
     seizoenenVolledigAanwezig: 0, topScorerSeizoenen: 0,
@@ -51,12 +55,13 @@ export function computeStats({ goalsArr, assistsArr, matchesArr, seizoenId, user
 // blijven enkel de pronostiekstatistieken over.
 export async function haalBadgeData({ playerId, seizoenId, userCreatedAt, userId }) {
   const leeg = { data: [] }
-  const [goalsRes, assistsRes, matchesRes, dbRes, pronoRes] = await Promise.all([
+  const [goalsRes, assistsRes, matchesRes, dbRes, pronoRes, supporterRes] = await Promise.all([
     playerId ? supabase.from('goals').select('id, match_id, match:match_id(season_id)').eq('scorer_id', playerId) : leeg,
     playerId ? supabase.from('goals').select('id, match_id, match:match_id(season_id)').eq('assist_id', playerId) : leeg,
     playerId ? supabase.from('match_players').select('match_id, match:match_id(season_id, home_score, away_score, home_team:home_team_id(is_zvk), away_team:away_team_id(is_zvk))').eq('player_id', playerId) : leeg,
     playerId ? supabase.from('player_badges').select('badge_id').eq('player_id', playerId) : leeg,
     haalPronostiekStats({ userId }),
+    haalSupporterStats({ userId }),
   ])
 
   return {
@@ -67,6 +72,7 @@ export async function haalBadgeData({ playerId, seizoenId, userCreatedAt, userId
       seizoenId,
       userCreatedAt,
       pronostiek:    pronoRes,
+      supporter:     supporterRes,
     }),
     dbBadgeIds: new Set((dbRes.data ?? []).map(r => r.badge_id)),
   }
@@ -82,6 +88,27 @@ export async function haalPronostiekStats({ userId, playerId }) {
   query = userId ? query.eq('user_id', userId) : query.eq('player_id', playerId)
   const { data } = await query.maybeSingle()
   return data ?? null
+}
+
+// Supportertotalen van één account: hoe vaak kwam je kijken naar een
+// gespeelde wedstrijd (opgave "kijken") en hoe vaak reageerde je op een
+// uitslag. Zoek op userId (jezelf) of playerId (een ploegmaat).
+export async function haalSupporterStats({ userId, playerId }) {
+  let id = userId
+  if (!id && playerId) {
+    const { data } = await supabase.from('profiles').select('id').eq('player_id', playerId).maybeSingle()
+    id = data?.id
+  }
+  if (!id) return null
+  const vandaag = vandaagISO()
+  const [kijkRes, reactieRes] = await Promise.all([
+    supabase.from('match_availability').select('match_id, match:match_id(date)').eq('user_id', id).eq('status', 'kijken'),
+    supabase.from('match_reactions').select('match_id', { count: 'exact', head: true }).eq('user_id', id),
+  ])
+  return {
+    bekeken: (kijkRes.data ?? []).filter(k => k.match?.date && k.match.date < vandaag).length,
+    reacties: reactieRes.count ?? 0,
+  }
 }
 
 // Combineert de badge-definities met wat deze speler verdiend heeft

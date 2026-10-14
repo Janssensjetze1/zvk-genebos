@@ -124,22 +124,6 @@ export default function Badges() {
         ondertitel={loading ? 'Berekenen…' : totaal === 0 ? 'Binnenkort beschikbaar' : `${aantalVerdiend} van ${totaal} verdiend`}
       />
 
-      {/* Zonder spelersfiche zie je enkel wat aan je account hangt */}
-      {!heeftFiche && !loading && (
-        <div style={{
-          background: 'var(--z-blauw-50)', border: '1px solid var(--z-blauw-200)', borderRadius: 'var(--z-r)',
-          padding: '14px 18px', marginBottom: '20px', maxWidth: '560px',
-        }}>
-          <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--z-blauw)', marginBottom: '3px' }}>
-            🔗 Nog geen spelersfiche gekoppeld
-          </div>
-          <p style={{ fontSize: '13px', color: 'var(--z-blauw-500)', margin: 0, lineHeight: 1.55 }}>
-            De badges voor wedstrijden, goals en assists komen zodra een admin je koppelt. De pronostiekbadges
-            hieronder kan je nu al verdienen.
-          </p>
-        </div>
-      )}
-
       {/* Voortgang: enkel tonen als er badges zijn */}
       {totaal > 0 && (
         <div style={{

@@ -1,42 +1,55 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useConfirm } from '../../../components/ConfirmDialog'
 import { supabase } from '../../../lib/supabase'
 import { useSeason } from '../../../context/SeasonContext'
-import { useAuth } from '../../../context/AuthContext'
 import { opgaveNatuurlijkOpen, opgaveOpentOp } from '../../../hooks/useOpgave'
 import { useVerslag } from '../../../hooks/useVerslag'
+import { heeftResultaat, isGespeeld, perWeekend } from '../../../lib/wedstrijd'
 import VerslagPaneel from '../../../components/VerslagPaneel'
-import WedstrijdFormulier from '../../../components/WedstrijdFormulier'
-import { Knop } from '../../../ui'
+import WedstrijdFormulier, { ScoreRij } from '../../../components/WedstrijdFormulier'
+import ScoreInvullen from '../../../components/ScoreInvullen'
+import PloegLogo from '../../../components/PloegLogo'
+import { Chip, Icoon, Knop, LegeStaat, Laden, Segment, TypeChip, UitslagLetter, hoofdletter } from '../../../ui'
 
-const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
-const TYPE_COLORS = {
-  competitie: { bg: 'var(--z-blauw-50)', color: 'var(--z-blauw)' },
-  beker: { bg: '#fdf4ff', color: '#9333ea' },
-  vriendschappelijk: { bg: 'var(--z-winst-bg)', color: 'var(--z-winst)' },
-}
+// Beheer van alle wedstrijden van het seizoen, van ZVK en van de andere
+// ploegen, in één lijst per speelweek. Bovenaan staat wat nog moet gebeuren
+// (wedstrijdblad, uitslag, aftrapuur), zodat je niet hoeft te zoeken. Elke
+// regel heeft één duidelijke actie; de rest zit in het menu (⋯).
 
-// Opgave vooraf door de spelers zelf (tabel match_availability)
-const OPGAVE_EMOJI = { mee: '✅', niet: '❌', kijken: '👀' }
+const OPGAVE_KLEUR = { mee: 'var(--z-winst)', niet: 'var(--z-verlies)', kijken: 'var(--z-tekst-4)' }
 const OPGAVE_TITEL = { mee: 'Gaf zich op: doet mee', niet: 'Gaf zich op: doet niet mee', kijken: 'Gaf zich op: komt kijken' }
+
+const isZvk = w => !!(w.home_team?.is_zvk || w.away_team?.is_zvk)
+
+// Wat moet er nog gebeuren met deze wedstrijd? null = niets
+function teDoen(w) {
+  const gespeeld = isGespeeld(w)
+  if (isZvk(w)) {
+    if (gespeeld && !(w.match_players?.length > 0 || w.goals?.length > 0)) return 'Wedstrijdblad invullen'
+  } else if (gespeeld && !heeftResultaat(w)) {
+    return 'Uitslag invullen'
+  }
+  if (!gespeeld && !w.time) return 'Aftrapuur ontbreekt'
+  return null
+}
 
 export default function TabWedstrijden() {
   const { bevestig, ConfirmUI } = useConfirm()
   const { actief: seizoen } = useSeason()
-  const { user } = useAuth()
   const [wedstrijden, setWedstrijden] = useState([])
-  const [teams, setTeams] = useState([])
   const [spelers, setSpelers] = useState([])
   const [loading, setLoading] = useState(true)
-  // Formulier: null = dicht, {} = nieuwe wedstrijd, { wedstrijd } = bewerken
+  const [filter, setFilter] = useState(null) // null = nog kiezen na het laden
+  const [zoek, setZoek] = useState('')
+  // Vensters: formulier { wedstrijd? }, wedstrijdblad, uitslag van andere ploegen
   const [formulier, setFormulier] = useState(null)
-  const [wedstrijdblad, setWedstrijdblad] = useState(null)
+  const [blad, setBlad] = useState(null)
+  const [score, setScore] = useState(null)
 
-  useEffect(() => { fetchAlles() }, [seizoen])
+  useEffect(() => { fetchAlles() }, [seizoen]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function fetchAlles() {
-    setLoading(true)
-    const [{ data: wData }, { data: tData }, { data: sData }] = await Promise.all([
+    const [{ data: wData }, { data: sData }] = await Promise.all([
       seizoen
         ? supabase.from('matches').select(`
             *,
@@ -47,183 +60,406 @@ export default function TabWedstrijden() {
             report
           `).eq('season_id', seizoen.id).order('date', { ascending: false })
         : { data: [] },
-      supabase.from('teams').select('*').order('name'),
       supabase.from('players').select('*').order('name'),
     ])
     setWedstrijden(wData ?? [])
-    setTeams(tData ?? [])
     setSpelers(sData ?? [])
     setLoading(false)
   }
 
-  const zvkTeam = teams.find(t => t.is_zvk)
-  const tegenstanders = teams.filter(t => !t.is_zvk)
-  const zvkWedstrijden = wedstrijden.filter(w => w.home_team?.is_zvk || w.away_team?.is_zvk)
-  const andereWedstrijden = wedstrijden.filter(w => !w.home_team?.is_zvk && !w.away_team?.is_zvk)
+  async function verwijder(w) {
+    const naam = `${w.home_team?.name ?? '?'} – ${w.away_team?.name ?? '?'}`
+    if (!await bevestig(`${naam} verwijderen? Doelpunten en spelers van deze wedstrijd verdwijnen mee.`, { gevaar: true, bevestigLabel: 'Verwijderen' })) return
+    await supabase.from('matches').delete().eq('id', w.id)
+    fetchAlles()
+  }
 
-  if (!seizoen) return (
-    <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '48px', textAlign: 'center' }}>
-      <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Selecteer eerst een seizoen via Beheer → Seizoenen.</p>
-    </div>
-  )
+  const todo = useMemo(() => wedstrijden.filter(teDoen), [wedstrijden])
+  const actieveFilter = filter ?? (todo.length > 0 ? 'todo' : 'aankomend')
 
-  if (loading) return <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Laden...</p>
+  const groepen = useMemo(() => {
+    const term = zoek.trim().toLowerCase()
+    const lijst = wedstrijden.filter(w => {
+      if (term && !`${w.home_team?.name} ${w.away_team?.name} ${w.location ?? ''}`.toLowerCase().includes(term)) return false
+      if (actieveFilter === 'todo') return !!teDoen(w)
+      if (actieveFilter === 'aankomend') return !isGespeeld(w)
+      if (actieveFilter === 'gespeeld') return isGespeeld(w)
+      return true
+    })
+    return perWeekend(lijst, { nieuwsteEerst: actieveFilter !== 'aankomend' })
+  }, [wedstrijden, zoek, actieveFilter])
+
+  if (!seizoen) return <LegeStaat titel="Geen seizoen" tekst="Maak eerst een seizoen aan via Beheer → Seizoenen." icoon="kalender" />
+  if (loading) return <Laden regels={6} />
+
+  const aantalAankomend = wedstrijden.filter(w => !isGespeeld(w)).length
+  const opties = [
+    { waarde: 'todo', label: <>Te doen{todo.length > 0 && <span className="z-teller">{todo.length}</span>}</> },
+    { waarde: 'aankomend', label: <>Aankomend<span className="z-teller z-teller-stil">{aantalAankomend}</span></> },
+    { waarde: 'gespeeld', label: 'Gespeeld' },
+    { waarde: 'alles', label: 'Alles' },
+  ]
 
   return (
     <>
-    {ConfirmUI}
-    <div>
-      {/* Toolbar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '20px' }}>
-        <p style={{ fontSize: '14px', color: 'var(--z-tekst-3)' }}>{wedstrijden.length} wedstrijd{wedstrijden.length !== 1 ? 'en' : ''} in {seizoen.name}</p>
-        <Knop icoon="plus" soort="primair" onClick={() => { setFormulier({}); setWedstrijdblad(null) }}>
+      {ConfirmUI}
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
+        <Segment opties={opties} waarde={actieveFilter} onChange={setFilter} />
+        <div className="z-zoekveld">
+          <Icoon naam="zoek" grootte={16} dikte={2} />
+          <input value={zoek} onChange={e => setZoek(e.target.value)} placeholder="Zoek een ploeg" aria-label="Zoek een ploeg" />
+        </div>
+        <Knop icoon="plus" soort="primair" onClick={() => setFormulier({})} style={{ marginLeft: 'auto' }}>
           Wedstrijd toevoegen
         </Knop>
       </div>
 
+      {groepen.length === 0 ? (
+        actieveFilter === 'todo' && !zoek ? (
+          <LegeStaat icoon="vink" titel="Alles is bij" tekst="Elk wedstrijdblad en elke uitslag is ingevuld." />
+        ) : (
+          <LegeStaat titel="Geen wedstrijden" tekst={zoek ? `Niets gevonden voor "${zoek}".` : 'Voeg een wedstrijd toe met de knop hierboven.'} />
+        )
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+          {groepen.map(g => (
+            <section key={g.sleutel}>
+              <div className="z-sectiekop" style={{ marginBottom: '8px' }}>
+                <h2 className="z-titel" style={{ fontSize: '14px' }}>{g.titel}</h2>
+                <span className="z-sectiekop-meta">{g.lijst.length} wedstrijd{g.lijst.length === 1 ? '' : 'en'}</span>
+              </div>
+              <div className="z-kaart z-lijst" style={{ overflow: 'visible' }}>
+                {g.lijst.map(w => isZvk(w) ? (
+                  <ZvkRij
+                    key={w.id}
+                    wedstrijd={w}
+                    spelers={spelers}
+                    onBewerken={() => setFormulier({ wedstrijd: w })}
+                    onBlad={() => setBlad(w)}
+                    onVerwijderen={() => verwijder(w)}
+                  />
+                ) : (
+                  <AndereRij
+                    key={w.id}
+                    wedstrijd={w}
+                    onBewerken={() => setFormulier({ wedstrijd: w })}
+                    onScore={() => setScore(w)}
+                    onVerwijderen={() => verwijder(w)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
+
       {formulier && (
-        <WedstrijdFormulier
-          wedstrijd={formulier.wedstrijd}
-          onSluiten={() => setFormulier(null)}
-          onOpgeslagen={fetchAlles}
-        />
+        <WedstrijdFormulier wedstrijd={formulier.wedstrijd} onSluiten={() => setFormulier(null)} onOpgeslagen={fetchAlles} />
       )}
-
-      {/* Wedstrijdblad */}
-      {wedstrijdblad && (
+      {blad && (
         <Wedstrijdblad
-          wedstrijd={wedstrijdblad}
-          zvkTeam={zvkTeam}
-          tegenstanders={tegenstanders}
+          wedstrijd={blad}
           spelers={spelers}
-          onSluiten={() => setWedstrijdblad(null)}
-          onOpgeslagen={() => { setWedstrijdblad(null); fetchAlles() }}
+          onSluiten={() => setBlad(null)}
+          onOpgeslagen={() => { setBlad(null); fetchAlles() }}
         />
       )}
-
-      {/* ZVK wedstrijden */}
-      <div style={{ marginBottom: '28px' }}>
-        <h2 style={{ fontSize: '13px', fontWeight: '600', color: 'var(--z-tekst-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
-          ZVK Wedstrijden
-        </h2>
-        {zvkWedstrijden.length === 0 ? (
-          <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
-            <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Nog geen wedstrijden. Voeg de eerste toe met de knop hierboven.</p>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {zvkWedstrijden.map(w => (
-              <WedstrijdKaart
-                key={w.id}
-                wedstrijd={w}
-                zvkTeam={zvkTeam}
-                spelers={spelers}
-                user={user}
-                actief={formulier?.wedstrijd?.id === w.id || wedstrijdblad?.id === w.id}
-                onBewerken={() => { setFormulier({ wedstrijd: w }); setWedstrijdblad(null) }}
-                onWedstrijdblad={() => { setWedstrijdblad(w); setFormulier(null) }}
-                onVerwijderen={async () => {
-                  if (!await bevestig('Wedstrijd verwijderen?', { gevaar: true, bevestigLabel: 'Verwijderen' })) return
-                  await supabase.from('matches').delete().eq('id', w.id)
-                  fetchAlles()
-                }}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Andere wedstrijden */}
-      <div>
-        <h2 style={{ fontSize: '13px', fontWeight: '600', color: 'var(--z-tekst-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
-          Andere Wedstrijden
-          <span style={{ fontSize: '11px', fontWeight: '400', color: 'var(--z-tekst-4)', textTransform: 'none', marginLeft: '8px', letterSpacing: 0 }}>
-            voor het klassement
-          </span>
-        </h2>
-        {andereWedstrijden.length === 0 ? (
-          <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
-            <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Nog geen andere wedstrijden ingegeven.</p>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {andereWedstrijden.map(w => (
-              <AndereWedstrijdKaart
-                key={w.id}
-                wedstrijd={w}
-                actief={formulier?.wedstrijd?.id === w.id}
-                onBewerken={() => { setFormulier({ wedstrijd: w }); setWedstrijdblad(null) }}
-                onVerwijderen={async () => {
-                  if (!await bevestig('Wedstrijd verwijderen?', { gevaar: true, bevestigLabel: 'Verwijderen' })) return
-                  await supabase.from('matches').delete().eq('id', w.id)
-                  fetchAlles()
-                }}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+      {score && <ScoreInvullen wedstrijd={score} onSluiten={() => setScore(null)} onOpgeslagen={fetchAlles} />}
     </>
   )
 }
 
-// ─── Wedstrijdblad (score + spelers + doelpunten) ────────────────────────────
+// ─── Gedeelde bouwstenen van een regel ───────────────────────────────────────
 
-function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluiten, onOpgeslagen }) {
+function DatumBlok({ datum }) {
+  const d = new Date(`${datum}T00:00:00`)
+  return (
+    <div style={{ width: '40px', textAlign: 'center', flexShrink: 0 }}>
+      <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--z-tekst-4)', textTransform: 'uppercase' }}>
+        {d.toLocaleDateString('nl-BE', { weekday: 'short' }).replace('.', '')}
+      </div>
+      <div className="z-tab-nums" style={{ fontSize: '18px', fontWeight: 700, color: 'var(--z-tekst)', lineHeight: 1.1 }}>{d.getDate()}</div>
+      <div style={{ fontSize: '11px', color: 'var(--z-tekst-4)' }}>
+        {d.toLocaleDateString('nl-BE', { month: 'short' }).replace('.', '')}
+      </div>
+    </div>
+  )
+}
+
+function Ploegen({ wedstrijd: w, metScore }) {
+  const rij = (team, score) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '9px', minWidth: 0 }}>
+      <PloegLogo team={team} grootte={20} />
+      <span style={{
+        flex: 1, minWidth: 0, fontSize: '14px',
+        fontWeight: team?.is_zvk ? 700 : 500,
+        color: team?.is_zvk ? 'var(--z-blauw)' : 'var(--z-tekst)',
+        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+      }}>{team?.name ?? '?'}</span>
+      {metScore && (
+        <span className="z-tab-nums" style={{ width: '22px', textAlign: 'right', fontSize: '15px', fontWeight: 700, color: 'var(--z-tekst)' }}>{score}</span>
+      )}
+    </div>
+  )
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
+      {rij(w.home_team, w.home_score)}
+      {rij(w.away_team, w.away_score)}
+    </div>
+  )
+}
+
+function Meta({ wedstrijd: w }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', fontSize: '12px', color: 'var(--z-tekst-4)' }}>
+      {w.type !== 'competitie' && <TypeChip type={w.type} />}
+      {w.time
+        ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Icoon naam="klok" grootte={13} /> {w.time.slice(0, 5)}</span>
+        : !isGespeeld(w) && <Chip toon="gelijk">Geen aftrapuur</Chip>}
+      {w.location && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Icoon naam="locatie" grootte={13} /> {w.location}</span>}
+    </div>
+  )
+}
+
+// Menu met de minder gebruikte acties
+function Menu({ items }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  useEffect(() => {
+    if (!open) return
+    const dicht = e => { if (!ref.current?.contains(e.target)) setOpen(false) }
+    const toets = e => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', dicht)
+    window.addEventListener('keydown', toets)
+    return () => { document.removeEventListener('mousedown', dicht); window.removeEventListener('keydown', toets) }
+  }, [open])
+
+  return (
+    <div ref={ref} style={{ position: 'relative', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+      <button type="button" className="z-knop z-knop-stil z-knop-klein" aria-label="Meer acties" aria-expanded={open}
+        onClick={() => setOpen(o => !o)} style={{ width: '32px', padding: 0 }}>
+        <Icoon naam="meer" grootte={18} dikte={3} />
+      </button>
+      {open && (
+        <div className="z-menu" role="menu">
+          {items.filter(Boolean).map(it => (
+            <button key={it.label} type="button" role="menuitem" className={it.gevaar ? 'z-menu-gevaar' : ''}
+              disabled={it.disabled} onClick={() => { setOpen(false); it.actie() }}>
+              <Icoon naam={it.icoon} grootte={16} />
+              {it.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── ZVK-wedstrijd ───────────────────────────────────────────────────────────
+
+function ZvkRij({ wedstrijd: w, spelers, onBewerken, onBlad, onVerwijderen }) {
+  const [open, setOpen] = useState(false)
+  const verslagState = useVerslag(w)
+  const gespeeld = isGespeeld(w)
+  const bladIngevuld = w.match_players?.length > 0 || w.goals?.length > 0
   const isThuis = w.home_team?.is_zvk
+  const wij = isThuis ? w.home_score : w.away_score
+  const zij = isThuis ? w.away_score : w.home_score
+  const uitslag = wij > zij ? 'W' : wij < zij ? 'V' : 'G'
+
+  // Opgave: gaat standaard woensdag van de matchweek open, admin kan vervroegen
+  const [opgaveVervroegd, setOpgaveVervroegd] = useState(w.availability_opens_at ?? null)
+  const [opgaveBezig, setOpgaveBezig] = useState(false)
+  const natuurlijkOpen = opgaveNatuurlijkOpen(w)
+  const opentOp = opgaveOpentOp({ date: w.date })?.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })
+
+  async function wisselOpgave() {
+    setOpgaveBezig(true)
+    const nieuw = opgaveVervroegd ? null : new Date().toISOString()
+    setOpgaveVervroegd(nieuw)
+    await supabase.from('matches').update({ availability_opens_at: nieuw }).eq('id', w.id)
+    setOpgaveBezig(false)
+  }
+
+  function genereerVerslag() {
+    setOpen(true)
+    verslagState.genereer()
+  }
+
+  let actie
+  if (gespeeld && !bladIngevuld) {
+    actie = <Knop soort="primair" klein icoon="invullen" onClick={onBlad}>Wedstrijdblad invullen</Knop>
+  } else if (gespeeld) {
+    actie = (
+      <span style={{ fontSize: '12px', color: 'var(--z-tekst-4)', whiteSpace: 'nowrap' }}>
+        {w.match_players?.length ?? 0} spelers · {w.goals?.length ?? 0} goals
+        {verslagState.verslag && ' · verslag'}
+      </span>
+    )
+  } else if (natuurlijkOpen) {
+    actie = <Chip toon="winst" style={{ height: '28px', padding: '0 10px' }}><Icoon naam="vink" grootte={13} dikte={2.4} /> Opgave open</Chip>
+  } else {
+    actie = (
+      <Knop klein icoon={opgaveVervroegd ? 'vink' : 'slot'} disabled={opgaveBezig} onClick={wisselOpgave}
+        title={opgaveVervroegd ? `Terug naar de vaste regel: opent dan op ${opentOp}` : `Gaat vanzelf open op ${opentOp}`}
+        className={opgaveVervroegd ? 'z-knop-winst' : ''}>
+        {opgaveVervroegd ? 'Opgave vervroegd open' : 'Opgave nu openen'}
+      </Knop>
+    )
+  }
+
+  return (
+    <div>
+      <div className="z-beheer-rij z-rij-klik" onClick={() => (gespeeld ? setOpen(o => !o) : onBewerken())}>
+        <DatumBlok datum={w.date} />
+        <div className="z-beheer-info">
+          <Ploegen wedstrijd={w} metScore={gespeeld && heeftResultaat(w)} />
+          <Meta wedstrijd={w} />
+        </div>
+        <div className="z-beheer-acties" onClick={e => e.stopPropagation()}>
+          {gespeeld && bladIngevuld && <UitslagLetter uitslag={uitslag} />}
+          {actie}
+          <Menu items={[
+            { label: bladIngevuld ? 'Wedstrijdblad aanpassen' : 'Wedstrijdblad invullen', icoon: 'invullen', actie: onBlad },
+            { label: 'Datum of ploegen wijzigen', icoon: 'kalender', actie: onBewerken },
+            gespeeld && { label: verslagState.verslag ? 'Verslag opnieuw genereren' : 'Verslag genereren', icoon: 'vonk', actie: genereerVerslag, disabled: verslagState.genereert },
+            !gespeeld && !natuurlijkOpen && { label: opgaveVervroegd ? 'Opgave terug dicht' : 'Opgave nu openen', icoon: 'slot', actie: wisselOpgave },
+            { label: 'Verwijderen', icoon: 'prullenbak', actie: onVerwijderen, gevaar: true },
+          ]} />
+        </div>
+        <Icoon naam="chevronOmlaag" grootte={16} className="z-chevron" style={{
+          visibility: gespeeld ? 'visible' : 'hidden',
+          transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s',
+        }} />
+      </div>
+
+      {open && gespeeld && (
+        <div style={{ background: 'var(--z-vlak)', borderTop: '1px solid var(--z-lijn-zacht)' }}>
+          <div style={{ padding: '16px 20px 16px 74px', display: 'flex', gap: '28px', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '200px' }}>
+              <div className="z-veldlabel">Doelpunten</div>
+              {w.goals?.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {w.goals.map(g => (
+                    <div key={g.id} style={{ fontSize: '13px', color: 'var(--z-tekst-2)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Icoon naam="bal" grootte={14} style={{ color: 'var(--z-tekst-4)' }} />
+                      <span style={{ fontWeight: 600 }}>{g.scorer?.name}</span>
+                      {g.assist && <span style={{ color: 'var(--z-tekst-4)' }}>assist {g.assist.name}</span>}
+                      {g.minute && <span style={{ color: 'var(--z-tekst-4)', marginLeft: 'auto' }}>{g.minute}'</span>}
+                    </div>
+                  ))}
+                </div>
+              ) : <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)' }}>Geen doelpunten ingevuld.</p>}
+            </div>
+            <div style={{ flex: 1, minWidth: '200px' }}>
+              <div className="z-veldlabel">Speelden mee</div>
+              {w.match_players?.length > 0 ? (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                  {w.match_players.map(mp => {
+                    const s = spelers.find(x => x.id === mp.player_id)
+                    return s ? <Chip key={mp.player_id}>{s.name}</Chip> : null
+                  })}
+                </div>
+              ) : <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)' }}>Nog niet ingevuld.</p>}
+            </div>
+          </div>
+          <div style={{ borderTop: '1px solid var(--z-lijn-zacht)' }}>
+            <VerslagPaneel verslagState={verslagState} variant="admin" toonGenereren={false} />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Wedstrijd van twee andere ploegen ───────────────────────────────────────
+
+function AndereRij({ wedstrijd: w, onBewerken, onScore, onVerwijderen }) {
+  const gespeeld = isGespeeld(w)
+  const metUitslag = gespeeld && heeftResultaat(w)
+
+  return (
+    <div className="z-beheer-rij z-rij-klik" onClick={gespeeld ? onScore : onBewerken}>
+      <DatumBlok datum={w.date} />
+      <div className="z-beheer-info">
+        <Ploegen wedstrijd={w} metScore={metUitslag} />
+        <Meta wedstrijd={w} />
+      </div>
+      <div className="z-beheer-acties" onClick={e => e.stopPropagation()}>
+        {gespeeld && !metUitslag && <Knop soort="primair" klein icoon="invullen" onClick={onScore}>Uitslag invullen</Knop>}
+        <Menu items={[
+          gespeeld && { label: metUitslag ? 'Uitslag aanpassen' : 'Uitslag invullen', icoon: 'invullen', actie: onScore },
+          { label: 'Datum of ploegen wijzigen', icoon: 'kalender', actie: onBewerken },
+          { label: 'Verwijderen', icoon: 'prullenbak', actie: onVerwijderen, gevaar: true },
+        ]} />
+      </div>
+      <span style={{ width: '16px', flexShrink: 0 }} />
+    </div>
+  )
+}
+
+// ─── Wedstrijdblad: uitslag, spelers en doelpunten op één blad ──────────────
+
+function Wedstrijdblad({ wedstrijd: w, spelers, onSluiten, onOpgeslagen }) {
+  const isThuis = w.home_team?.is_zvk
+  const wij = isThuis ? w.home_team : w.away_team
   const tegenstander = isThuis ? w.away_team : w.home_team
 
-  const [stap, setStap] = useState(1)
-  const [opslaan, setOpslaan] = useState(false)
-  const [fout, setFout] = useState('')
-
-  const [zvkScore, setZvkScore] = useState(isThuis ? w.home_score : w.away_score)
-  const [tegScore, setTegScore] = useState(isThuis ? w.away_score : w.home_score)
+  const [thuisScore, setThuisScore] = useState(w.home_score ?? 0)
+  const [uitScore, setUitScore] = useState(w.away_score ?? 0)
   const [aanwezig, setAanwezig] = useState(new Set(w.match_players.map(mp => mp.player_id)))
   const [doelpunten, setDoelpunten] = useState(
-    w.goals.map(g => ({ id: g.id, scorerId: g.scorer_id, assistId: g.assist_id ?? '', minuut: g.minute ?? '' }))
+    w.goals.map(g => ({ scorerId: g.scorer_id, assistId: g.assist_id ?? '', minuut: g.minute ?? '' }))
   )
-
   const [opgaves, setOpgaves] = useState([])
+  const [bezig, setBezig] = useState(false)
+  const [fout, setFout] = useState('')
+
+  const zvkScore = isThuis ? thuisScore : uitScore
 
   useEffect(() => {
     let levend = true
-    supabase
-      .from('match_availability')
-      .select('player_id, status')
-      .eq('match_id', w.id)
-      .then(({ data }) => {
-        if (!levend) return
-        const rijen = data ?? []
-        setOpgaves(rijen)
-        // Voorvullen als suggestie: enkel zolang er nog niks geregistreerd is
-        if (w.match_players.length === 0) {
-          const mee = rijen.filter(o => o.status === 'mee').map(o => o.player_id)
-          if (mee.length > 0) setAanwezig(new Set(mee))
-        }
-      })
+    supabase.from('match_availability').select('player_id, status').eq('match_id', w.id).then(({ data }) => {
+      if (!levend) return
+      const rijen = data ?? []
+      setOpgaves(rijen)
+      // Voorvullen met de opgave, zolang er nog niemand geregistreerd is
+      if (w.match_players.length === 0) {
+        const mee = rijen.filter(o => o.status === 'mee' && o.player_id).map(o => o.player_id)
+        if (mee.length > 0) setAanwezig(new Set(mee))
+      }
+    })
     return () => { levend = false }
-  }, [w.id])
+  }, [w.id, w.match_players.length])
 
-  // Kijkers zonder spelersfiche hebben geen player_id, die horen hier niet thuis
+  useEffect(() => {
+    const vorige = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const toets = e => { if (e.key === 'Escape') onSluiten() }
+    window.addEventListener('keydown', toets)
+    return () => { document.body.style.overflow = vorige; window.removeEventListener('keydown', toets) }
+  }, [onSluiten])
+
+  // Kijkers zonder spelersfiche hebben geen player_id, die horen hier niet
   const opgaveMap = Object.fromEntries(opgaves.filter(o => o.player_id).map(o => [o.player_id, o.status]))
   const meeIds = opgaves.filter(o => o.status === 'mee' && o.player_id).map(o => o.player_id)
+  const aanwezigen = spelers.filter(s => aanwezig.has(s.id))
+  const kiesbaar = aanwezigen.length > 0 ? aanwezigen : spelers
+  const naam = id => spelers.find(s => s.id === id)?.name ?? '?'
 
-  const aanwezigeLijst = spelers.filter(s => aanwezig.has(s.id))
-
-  function toggleAanwezig(id) {
+  function wisselSpeler(id) {
     setAanwezig(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
   }
 
-  async function handleOpslaan() {
-    setFout(''); setOpslaan(true)
+  function zetDoelpunt(idx, veld, waarde) {
+    setDoelpunten(prev => prev.map((d, i) => i === idx ? { ...d, [veld]: waarde } : d))
+  }
 
-    const homeScore = isThuis ? zvkScore : tegScore
-    const awayScore = isThuis ? tegScore : zvkScore
-
-    const { error } = await supabase.from('matches').update({ home_score: homeScore, away_score: awayScore }).eq('id', w.id)
-    if (error) { setFout('Opslaan mislukt: ' + error.message); setOpslaan(false); return }
+  async function opslaan() {
+    setFout(''); setBezig(true)
+    const { error } = await supabase.from('matches').update({ home_score: thuisScore, away_score: uitScore }).eq('id', w.id)
+    if (error) { setFout('Opslaan mislukt: ' + error.message); setBezig(false); return }
 
     await supabase.from('match_players').delete().eq('match_id', w.id)
     if (aanwezig.size > 0) {
@@ -240,533 +476,151 @@ function Wedstrijdblad({ wedstrijd: w, zvkTeam, tegenstanders, spelers, onSluite
         minute: d.minuut ? parseInt(d.minuut) : null,
       })))
     }
-
-    setOpslaan(false)
+    setBezig(false)
     onOpgeslagen()
   }
 
-  const datum = new Date(w.date).toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })
+  const datum = hoofdletter(new Date(`${w.date}T00:00:00`).toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' }))
+  const verschil = zvkScore - doelpunten.length
 
   return (
-    <div style={{
-      background: 'white', border: '2px solid var(--z-tekst)', borderRadius: '14px',
-      marginBottom: '20px', overflow: 'hidden',
-    }}>
-      {/* Header */}
-      <div style={{ background: 'var(--z-tekst)', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>
-            Wedstrijdblad
+    <>
+      <div className="z-sheet-achter" onClick={onSluiten} />
+      <div className="z-paneel z-paneel-breed" role="dialog" aria-label="Wedstrijdblad">
+        <div className="z-paneel-kop">
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2>Wedstrijdblad</h2>
+            <div style={{ fontSize: '13px', color: 'var(--z-tekst-3)', marginTop: '2px' }}>
+              {wij?.name} tegen {tegenstander?.name} · {datum} · {isThuis ? 'thuis' : 'uit'}
+            </div>
           </div>
-          <div style={{ fontSize: '15px', fontWeight: '700', color: 'white' }}>
-            {zvkTeam?.name} vs {tegenstander?.name}
-          </div>
-          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginTop: '2px', textTransform: 'capitalize' }}>
-            {datum} · {isThuis ? 'Thuis' : 'Uit'} · {TYPE_LABELS[w.type]}
-          </div>
+          <button type="button" className="z-knop z-knop-stil" onClick={onSluiten} aria-label="Sluiten" style={{ width: '36px', padding: 0 }}>
+            <Icoon naam="sluit" grootte={18} dikte={2} />
+          </button>
         </div>
-        <button onClick={onSluiten} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontSize: '18px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
-      </div>
 
-      {/* Stapper */}
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--z-lijn-zacht)' }}>
-        {['Uitslag & Spelers', 'Doelpunten'].map((label, i) => {
-          const nr = i + 1
-          const actief = stap === nr
-          const klaar = stap > nr
-          return (
-            <button
-              key={nr}
-              onClick={() => setStap(nr)}
-              style={{
-                flex: 1, padding: '12px', border: 'none', cursor: 'pointer',
-                background: actief ? 'white' : 'var(--z-vlak)',
-                borderBottom: actief ? '2px solid var(--z-tekst)' : '2px solid transparent',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-              }}
-            >
-              <div style={{
-                width: '22px', height: '22px', borderRadius: '50%',
-                background: klaar ? 'var(--z-tekst)' : actief ? 'var(--z-tekst)' : 'var(--z-lijn)',
-                color: klaar || actief ? 'white' : 'var(--z-tekst-4)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '11px', fontWeight: '700', flexShrink: 0,
-              }}>
-                {klaar ? '✓' : nr}
-              </div>
-              <span style={{ fontSize: '13px', fontWeight: actief ? '600' : '400', color: actief ? 'var(--z-tekst)' : 'var(--z-tekst-4)' }}>
-                {label}
+        <div className="z-paneel-inhoud">
+          {/* 1. Uitslag */}
+          <section>
+            <span className="z-veldlabel">Uitslag</span>
+            <div className="z-kaart" style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <ScoreRij naam={w.home_team?.name} waarde={thuisScore} onChange={setThuisScore} />
+              <ScoreRij naam={w.away_team?.name} waarde={uitScore} onChange={setUitScore} />
+            </div>
+          </section>
+
+          {/* 2. Spelers */}
+          <section>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '8px' }}>
+              <span className="z-veldlabel" style={{ margin: 0 }}>Wie speelde mee?</span>
+              <span style={{ fontSize: '13px', color: 'var(--z-tekst-4)' }}>{aanwezig.size} geselecteerd</span>
+              <span style={{ marginLeft: 'auto', display: 'flex', gap: '4px' }}>
+                {meeIds.length > 0 && (
+                  <Knop klein soort="stil" onClick={() => setAanwezig(new Set(meeIds))}>Opgave overnemen ({meeIds.length})</Knop>
+                )}
+                {aanwezig.size > 0 && <Knop klein soort="stil" onClick={() => setAanwezig(new Set())}>Wissen</Knop>}
               </span>
-            </button>
-          )
-        })}
-      </div>
-
-      <div style={{ padding: '24px' }}>
-        {/* Stap 1 */}
-        {stap === 1 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {/* Score */}
-            <div>
-              <label style={labelStijl}>Eindstand</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '12px', color: 'var(--z-tekst-3)', marginBottom: '8px', fontWeight: '600' }}>{zvkTeam?.name ?? 'ZVK'}</div>
-                  <input
-                    type="number" min="0" value={zvkScore}
-                    onChange={e => setZvkScore(parseInt(e.target.value) || 0)}
-                    style={{ ...inputStijl, width: '80px', textAlign: 'center', fontSize: '28px', fontWeight: '800', padding: '12px 8px', height: 'auto' }}
-                  />
-                </div>
-                <span style={{ fontSize: '24px', color: 'var(--z-lijn)', marginTop: '22px' }}>–</span>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '12px', color: 'var(--z-tekst-3)', marginBottom: '8px', fontWeight: '600' }}>{tegenstander?.name}</div>
-                  <input
-                    type="number" min="0" value={tegScore}
-                    onChange={e => setTegScore(parseInt(e.target.value) || 0)}
-                    style={{ ...inputStijl, width: '80px', textAlign: 'center', fontSize: '28px', fontWeight: '800', padding: '12px 8px', height: 'auto' }}
-                  />
-                </div>
-              </div>
             </div>
-
-            {/* Spelers */}
-            <div>
-              <label style={{ ...labelStijl, marginBottom: '10px' }}>
-                Wie speelde mee? <span style={{ color: 'var(--z-tekst-4)', fontWeight: '400' }}>({aanwezig.size} geselecteerd)</span>
-              </label>
-              {meeIds.length > 0 && (
-                <div style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
-                  background: 'var(--z-winst-bg)', border: '1px solid var(--z-winst-rand)', borderRadius: '10px',
-                  padding: '10px 14px', marginBottom: '12px',
-                }}>
-                  <span style={{ fontSize: '12px', color: 'var(--z-winst)' }}>
-                    ✋ {meeIds.length} {meeIds.length === 1 ? 'speler gaf' : 'spelers gaven'} zich vooraf op als "doet mee".
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setAanwezig(new Set(meeIds))}
-                    style={{
-                      flexShrink: 0, background: 'white', border: '1px solid var(--z-winst-rand)', color: 'var(--z-winst)',
-                      borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
-                    }}
-                  >
-                    Opgave overnemen
+            <div className="z-keuzes">
+              {spelers.map(s => {
+                const status = opgaveMap[s.id]
+                return (
+                  <button key={s.id} type="button" className="z-keuze" aria-pressed={aanwezig.has(s.id)} onClick={() => wisselSpeler(s.id)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    {status && (
+                      <span title={OPGAVE_TITEL[status]} style={{
+                        width: '7px', height: '7px', borderRadius: '50%', background: OPGAVE_KLEUR[status],
+                        boxShadow: aanwezig.has(s.id) ? '0 0 0 1.5px white' : 'none',
+                      }} />
+                    )}
+                    {s.name}
                   </button>
-                </div>
-              )}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {spelers.map(s => {
-                  const ok = aanwezig.has(s.id)
-                  return (
-                    <button key={s.id} type="button" onClick={() => toggleAanwezig(s.id)} style={{
-                      display: 'flex', alignItems: 'center', gap: '6px',
-                      padding: '7px 14px', borderRadius: '20px', cursor: 'pointer',
-                      fontSize: '13px', fontWeight: '500', border: 'none',
-                      background: ok ? 'var(--z-tekst)' : 'var(--z-lijn-zacht)',
-                      color: ok ? 'white' : 'var(--z-tekst-2)',
-                      transition: 'all 0.12s',
-                    }}>
-                      {ok && <span style={{ fontSize: '10px' }}>✓</span>}
-                      {s.name}
-                      {opgaveMap[s.id] && (
-                        <span title={OPGAVE_TITEL[opgaveMap[s.id]]} style={{ fontSize: '11px', opacity: 0.9 }}>
-                          {OPGAVE_EMOJI[opgaveMap[s.id]]}
-                        </span>
-                      )}
+                )
+              })}
+            </div>
+            {opgaves.length > 0 && (
+              <div style={{ display: 'flex', gap: '14px', marginTop: '8px', fontSize: '12px', color: 'var(--z-tekst-4)' }}>
+                {Object.entries(OPGAVE_KLEUR).map(([k, kleur]) => (
+                  <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: kleur }} />
+                    {k === 'mee' ? 'gaf zich op' : k === 'niet' ? 'meldde zich af' : 'komt kijken'}
+                  </span>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* 3. Doelpunten */}
+          <section>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '8px' }}>
+              <span className="z-veldlabel" style={{ margin: 0 }}>Doelpunten van {wij?.name ?? 'ZVK'}</span>
+              <span style={{ fontSize: '13px', color: verschil === 0 ? 'var(--z-winst)' : 'var(--z-tekst-4)' }}>
+                {doelpunten.length} van {zvkScore}
+              </span>
+            </div>
+
+            {doelpunten.length > 0 && (
+              <div className="z-kaart z-lijst" style={{ marginBottom: '12px' }}>
+                {doelpunten.map((d, idx) => (
+                  <div key={idx} className="z-doelpunt">
+                    <span className="z-tab-nums" style={{ width: '18px', fontSize: '13px', fontWeight: 700, color: 'var(--z-tekst-4)' }}>{idx + 1}</span>
+                    <select value={d.scorerId} onChange={e => zetDoelpunt(idx, 'scorerId', e.target.value)} aria-label="Doelpuntenmaker" style={{ flex: 2 }}>
+                      <option value="">Kies de scorer</option>
+                      {d.scorerId && !kiesbaar.some(s => s.id === d.scorerId) && <option value={d.scorerId}>{naam(d.scorerId)}</option>}
+                      {kiesbaar.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                    <Icoon naam="assist" grootte={14} style={{ color: 'var(--z-tekst-4)', flexShrink: 0 }} />
+                    <select value={d.assistId} onChange={e => zetDoelpunt(idx, 'assistId', e.target.value)} aria-label="Assist" style={{ flex: 2 }}>
+                      <option value="">Geen assist</option>
+                      {d.assistId && !kiesbaar.some(s => s.id === d.assistId) && <option value={d.assistId}>{naam(d.assistId)}</option>}
+                      {kiesbaar.filter(s => s.id !== d.scorerId).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                    <input type="number" min="1" max="60" inputMode="numeric" value={d.minuut} placeholder="min"
+                      onChange={e => zetDoelpunt(idx, 'minuut', e.target.value)} aria-label="Minuut"
+                      style={{ width: '64px', flex: 'none', textAlign: 'center' }} />
+                    <button type="button" className="z-knop z-knop-stil z-knop-klein" aria-label="Doelpunt verwijderen"
+                      onClick={() => setDoelpunten(prev => prev.filter((_, i) => i !== idx))} style={{ width: '32px', padding: 0, color: 'var(--z-tekst-4)' }}>
+                      <Icoon naam="sluit" grootte={16} dikte={2} />
                     </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button onClick={() => setStap(2)} style={knopStijl(false)}>Volgende: Doelpunten →</button>
-            </div>
-          </div>
-        )}
-
-        {/* Stap 2 */}
-        {stap === 2 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <label style={{ ...labelStijl, marginBottom: '2px' }}>Doelpunten ZVK</label>
-                <p style={{ fontSize: '12px', color: 'var(--z-tekst-4)', margin: 0 }}>Score ZVK: {zvkScore} · Tegenstander: {tegScore}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setDoelpunten(prev => [...prev, { id: null, scorerId: '', assistId: '', minuut: '' }])}
-                style={{ fontSize: '13px', fontWeight: '600', color: 'var(--z-blauw-500)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-              >
-                + Doelpunt toevoegen
-              </button>
-            </div>
-
-            {doelpunten.length === 0 && (
-              <div style={{ background: 'var(--z-vlak)', border: '1px dashed var(--z-lijn)', borderRadius: '10px', padding: '24px', textAlign: 'center' }}>
-                <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)', margin: 0 }}>Nog geen doelpunten. Klik "+ Doelpunt toevoegen" om te starten.</p>
+                  </div>
+                ))}
               </div>
             )}
 
-            {doelpunten.map((d, idx) => (
-              <div key={idx} style={{
-                background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)', borderRadius: '10px',
-                padding: '14px 16px', display: 'flex', gap: '10px', alignItems: 'flex-end', flexWrap: 'wrap',
-              }}>
-                <div style={{ fontSize: '22px', paddingBottom: '8px', flexShrink: 0 }}>⚽</div>
-                <div style={{ flex: 2, minWidth: '140px' }}>
-                  <label style={labelStijl}>Doelpuntenmaker *</label>
-                  <select value={d.scorerId} onChange={e => setDoelpunten(prev => prev.map((x, i) => i === idx ? { ...x, scorerId: e.target.value } : x))} style={inputStijl}>
-                    <option value="">Kies speler</option>
-                    {(aanwezigeLijst.length > 0 ? aanwezigeLijst : spelers).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                  </select>
-                </div>
-                <div style={{ flex: 2, minWidth: '140px' }}>
-                  <label style={labelStijl}>Assist (optioneel)</label>
-                  <select value={d.assistId} onChange={e => setDoelpunten(prev => prev.map((x, i) => i === idx ? { ...x, assistId: e.target.value } : x))} style={inputStijl}>
-                    <option value="">Geen assist</option>
-                    {(aanwezigeLijst.length > 0 ? aanwezigeLijst : spelers).filter(s => s.id !== d.scorerId).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                  </select>
-                </div>
-                <div style={{ width: '72px' }}>
-                  <label style={labelStijl}>Minuut</label>
-                  <input type="number" min="1" max="120" value={d.minuut}
-                    onChange={e => setDoelpunten(prev => prev.map((x, i) => i === idx ? { ...x, minuut: e.target.value } : x))}
-                    placeholder="-" style={{ ...inputStijl, textAlign: 'center' }} />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setDoelpunten(prev => prev.filter((_, i) => i !== idx))}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--z-lijn-sterk)', fontSize: '20px', padding: '0 4px', paddingBottom: '8px' }}
-                  onMouseEnter={e => e.target.style.color = 'var(--z-verlies)'}
-                  onMouseLeave={e => e.target.style.color = 'var(--z-lijn-sterk)'}
-                >×</button>
-              </div>
-            ))}
-
-            {fout && <p style={{ fontSize: '13px', color: 'var(--z-verlies)' }}>{fout}</p>}
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
-              <button type="button" onClick={() => setStap(1)} style={knopSecundairStijl}>← Vorige</button>
-              <button onClick={handleOpslaan} disabled={opslaan} style={knopStijl(opslaan)}>
-                {opslaan ? 'Opslaan...' : 'Wedstrijdblad opslaan ✓'}
-              </button>
+            <div style={{ fontSize: '12px', color: 'var(--z-tekst-3)', marginBottom: '8px' }}>
+              {doelpunten.length === 0 ? 'Tik op wie scoorde, één keer per doelpunt.' : 'Nog een doelpunt? Tik op de scorer.'}
             </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
+            <div className="z-keuzes">
+              {kiesbaar.map(s => (
+                <button key={s.id} type="button" className="z-keuze" onClick={() => setDoelpunten(prev => [...prev, { scorerId: s.id, assistId: '', minuut: '' }])}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                  <Icoon naam="plus" grootte={13} dikte={2.2} /> {s.name}
+                </button>
+              ))}
+            </div>
 
-// ─── Wedstrijd kaart ─────────────────────────────────────────────────────────
+            {verschil > 0 && doelpunten.length > 0 && (
+              <p style={{ fontSize: '13px', color: 'var(--z-gelijk)', marginTop: '10px' }}>
+                Nog {verschil} doelpunt{verschil === 1 ? '' : 'en'} zonder scorer.
+              </p>
+            )}
+            {verschil < 0 && (
+              <p style={{ fontSize: '13px', color: 'var(--z-verlies)', marginTop: '10px' }}>
+                Er staan meer doelpunten dan de score van {wij?.name ?? 'ZVK'} ({zvkScore}). Klopt de uitslag?
+              </p>
+            )}
+          </section>
 
-function WedstrijdKaart({ wedstrijd: w, zvkTeam, spelers, user, actief, onBewerken, onWedstrijdblad, onVerwijderen }) {
-  const [open, setOpen] = useState(false)
-  const [opgaveOverride, setOpgaveOverride] = useState(w.availability_opens_at ?? null)
-  const [opgaveBezig, setOpgaveBezig] = useState(false)
-  const verslagState = useVerslag(w)
-  const isThuis = w.home_team?.is_zvk
-  const zvkScore = isThuis ? w.home_score : w.away_score
-  const tegScore = isThuis ? w.away_score : w.home_score
-  const tegenstander = isThuis ? w.away_team : w.home_team
-  const isPast = new Date(w.date) <= new Date()
-  const heeftData = w.match_players?.length > 0 || w.goals?.length > 0
-
-  // Opgave gaat standaard open op woensdag van de matchweek; admin kan vervroegen
-  const natuurlijkOpen = opgaveNatuurlijkOpen(w)
-  const standaardOpening = opgaveOpentOp({ date: w.date })
-  const openingLabel = standaardOpening?.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })
-
-  async function toggleOpgave() {
-    if (opgaveBezig) return
-    setOpgaveBezig(true)
-    const nieuw = opgaveOverride ? null : new Date().toISOString()
-    setOpgaveOverride(nieuw)
-    await supabase.from('matches').update({ availability_opens_at: nieuw }).eq('id', w.id)
-    setOpgaveBezig(false)
-  }
-  const gewonnen = zvkScore > tegScore
-  const verloren = zvkScore < tegScore
-  const resultaatKleur = gewonnen ? 'var(--z-winst)' : verloren ? 'var(--z-verlies)' : 'var(--z-tekst-3)'
-  const resultaatLabel = gewonnen ? 'W' : verloren ? 'V' : 'G'
-
-  return (
-    <div style={{
-      background: 'white',
-      border: `1px solid ${actief ? '#93c5fd' : 'var(--z-lijn)'}`,
-      borderRadius: '10px', overflow: 'hidden',
-    }}>
-      <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-        {/* Datum */}
-        <div style={{ width: '44px', textAlign: 'center', flexShrink: 0 }}>
-          <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--z-tekst)', lineHeight: 1 }}>
-            {new Date(w.date).getDate()}
-          </div>
-          <div style={{ fontSize: '11px', color: 'var(--z-tekst-4)', textTransform: 'uppercase' }}>
-            {new Date(w.date).toLocaleDateString('nl-BE', { month: 'short' })}
-          </div>
+          {fout && <p style={{ fontSize: '13px', color: 'var(--z-verlies)' }}>{fout}</p>}
         </div>
 
-        <div style={{ width: '1px', height: '32px', background: 'var(--z-lijn-zacht)', flexShrink: 0 }} />
-
-        {/* Info */}
-        <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => setOpen(v => !v)}>
-          <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--z-tekst)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {zvkTeam?.name} {isThuis ? '' : '(uit)'} vs {tegenstander?.name}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px', flexWrap: 'wrap' }}>
-            <span style={{
-              fontSize: '11px', fontWeight: '600', padding: '1px 7px', borderRadius: '10px',
-              background: TYPE_COLORS[w.type]?.bg, color: TYPE_COLORS[w.type]?.color,
-            }}>{TYPE_LABELS[w.type]}</span>
-            {w.time && <span style={{ fontSize: '11px', color: 'var(--z-tekst-4)' }}>🕐 {w.time.slice(0,5)}</span>}
-            {w.location && <span style={{ fontSize: '11px', color: 'var(--z-tekst-4)' }}>📍 {w.location}</span>}
-          </div>
-        </div>
-
-        {/* Score of gepland */}
-        <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {isPast ? (
-            <>
-              <div style={{
-                fontSize: '16px', fontWeight: '700', color: 'var(--z-tekst)',
-                background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)',
-                borderRadius: '8px', padding: '4px 12px', lineHeight: 1.5,
-              }}>
-                {zvkScore} – {tegScore}
-              </div>
-              <div style={{
-                width: '24px', height: '24px', borderRadius: '50%',
-                background: resultaatKleur, color: 'white',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '11px', fontWeight: '700',
-              }}>{resultaatLabel}</div>
-            </>
-          ) : (
-            <span style={{
-              fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-3)',
-              background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)',
-              borderRadius: '8px', padding: '4px 10px',
-            }}>Gepland</span>
-          )}
-        </div>
-
-        {/* Acties */}
-        <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-          {/* Opgave: enkel zinvol bij aankomende wedstrijden */}
-          {!isPast && (natuurlijkOpen ? (
-            <span
-              title="De opgave staat open volgens de vaste regel: woensdag 10u van de matchweek"
-              style={{
-                display: 'flex', alignItems: 'center', gap: '5px',
-                background: 'var(--z-winst-bg)', color: 'var(--z-winst)', border: '1px solid var(--z-winst-rand)',
-                borderRadius: '7px', padding: '5px 11px', fontSize: '12px', fontWeight: '600',
-              }}
-            >✋ Opgave open</span>
-          ) : (
-            <button
-              onClick={toggleOpgave}
-              disabled={opgaveBezig}
-              title={opgaveOverride
-                ? `Terug naar de vaste regel, opent dan op ${openingLabel}`
-                : `Opgave nu al openzetten, gaat anders open op ${openingLabel}`}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '5px',
-                background: opgaveOverride ? 'var(--z-winst-bg)' : 'white',
-                color: opgaveOverride ? 'var(--z-winst)' : 'var(--z-tekst-3)',
-                border: `1px solid ${opgaveOverride ? 'var(--z-winst-rand)' : 'var(--z-lijn)'}`,
-                borderRadius: '7px', padding: '5px 11px',
-                fontSize: '12px', fontWeight: '600',
-                cursor: opgaveBezig ? 'not-allowed' : 'pointer',
-                opacity: opgaveBezig ? 0.6 : 1,
-              }}
-            >
-              {opgaveOverride ? '✋ Vervroegd open' : '🔒 Opgave openen'}
-            </button>
-          ))}
-          {/* Wedstrijdblad knop: prominent als nog niet ingevuld */}
-          <button
-            onClick={onWedstrijdblad}
-            title="Wedstrijdblad invullen"
-            style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              background: heeftData ? 'white' : 'var(--z-tekst)',
-              color: heeftData ? 'var(--z-tekst-2)' : 'white',
-              border: heeftData ? '1px solid var(--z-lijn)' : 'none',
-              borderRadius: '7px', padding: '5px 12px',
-              fontSize: '12px', fontWeight: '600', cursor: 'pointer',
-            }}
-          >
-            <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            {heeftData ? 'Blad bewerken' : 'Invullen'}
+        <div className="z-paneel-voet">
+          <button type="button" className="z-knop" onClick={onSluiten} style={{ flex: 1, height: '44px' }}>Annuleren</button>
+          <button type="button" className="z-knop z-knop-primair" disabled={bezig} onClick={opslaan} style={{ flex: 2, height: '44px' }}>
+            {bezig ? 'Opslaan…' : 'Wedstrijdblad opslaan'}
           </button>
-          {/* Verslag knop: enkel voor gespeelde wedstrijden */}
-          {isPast && (
-            <button
-              onClick={() => { setOpen(true); verslagState.genereer() }}
-              disabled={verslagState.genereert}
-              title={verslagState.verslag ? 'Verslag opnieuw genereren' : 'Verslag genereren'}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '5px',
-                background: verslagState.verslag ? 'var(--z-winst-bg)' : '#faf5ff',
-                color: verslagState.verslag ? 'var(--z-winst)' : '#7c3aed',
-                border: `1px solid ${verslagState.verslag ? 'var(--z-winst-rand)' : '#e9d5ff'}`,
-                borderRadius: '7px', padding: '5px 11px',
-                fontSize: '12px', fontWeight: '600', cursor: verslagState.genereert ? 'not-allowed' : 'pointer',
-                opacity: verslagState.genereert ? 0.7 : 1,
-              }}
-            >
-              {verslagState.genereert ? '⏳' : verslagState.verslag ? '📰' : '✨'}
-              {verslagState.genereert ? 'Genereert...' : verslagState.verslag ? 'Hergeneer' : 'Verslag'}
-            </button>
-          )}
-          <button
-            onClick={onBewerken}
-            title="Wedstrijd bewerken"
-            style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '7px', padding: '5px 10px', fontSize: '12px', color: 'var(--z-tekst-3)', cursor: 'pointer' }}
-          >
-            ✎
-          </button>
-          <button
-            onClick={onVerwijderen}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: 'var(--z-lijn-sterk)', padding: '5px 8px', borderRadius: '7px' }}
-            onMouseEnter={e => e.target.style.color = 'var(--z-verlies)'}
-            onMouseLeave={e => e.target.style.color = 'var(--z-lijn-sterk)'}
-          >✕</button>
         </div>
-
-        <svg
-          onClick={() => setOpen(v => !v)}
-          width="14" height="14" fill="none" stroke="#94a3b8" strokeWidth="2" viewBox="0 0 24 24"
-          style={{ flexShrink: 0, cursor: 'pointer', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
       </div>
-
-      {/* Detail uitklappen */}
-      {open && (
-        <div style={{ borderTop: '1px solid var(--z-lijn-zacht)', background: '#fafafa' }}>
-          <div style={{ padding: '14px 16px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: '180px' }}>
-              <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--z-tekst-3)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Doelpunten ZVK</p>
-              {w.goals?.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  {w.goals.map(g => (
-                    <div key={g.id} style={{ fontSize: '13px', color: 'var(--z-tekst-2)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>⚽</span>
-                      <span style={{ fontWeight: '500' }}>{g.scorer?.name}</span>
-                      {g.assist && <span style={{ color: 'var(--z-tekst-4)' }}>({g.assist.name})</span>}
-                      {g.minute && <span style={{ color: 'var(--z-tekst-4)', fontSize: '12px' }}>{g.minute}'</span>}
-                    </div>
-                  ))}
-                </div>
-              ) : <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)' }}>Nog niet ingevuld.</p>}
-            </div>
-            <div style={{ flex: 1, minWidth: '180px' }}>
-              <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--z-tekst-3)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Aanwezige spelers</p>
-              {w.match_players?.length > 0 ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                  {w.match_players.map(mp => {
-                    const s = spelers.find(x => x.id === mp.player_id)
-                    return s ? <span key={mp.player_id} style={{ fontSize: '12px', padding: '3px 9px', borderRadius: '20px', background: 'var(--z-lijn-zacht)', color: 'var(--z-tekst-2)' }}>{s.name}</span> : null
-                  })}
-                </div>
-              ) : <p style={{ fontSize: '13px', color: 'var(--z-tekst-4)' }}>Nog niet ingevuld.</p>}
-            </div>
-          </div>
-          {/* Verslag sectie: lezen, zelf schrijven of aanpassen */}
-          {isPast && (
-            <div style={{ borderTop: '1px solid var(--z-lijn-zacht)' }}>
-              <VerslagPaneel verslagState={verslagState} variant="admin" toonGenereren={false} />
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+    </>
   )
 }
-
-// ─── Andere wedstrijd (score only) ───────────────────────────────────────────
-
-// ─── Andere wedstrijd kaart ───────────────────────────────────────────────────
-
-function AndereWedstrijdKaart({ wedstrijd: w, actief, onBewerken, onVerwijderen }) {
-  const gewonnen = w.home_score > w.away_score
-  const gelijk = w.home_score === w.away_score
-
-  return (
-    <div style={{
-      background: 'white',
-      border: `1px solid ${actief ? '#93c5fd' : 'var(--z-lijn)'}`,
-      borderRadius: '10px', padding: '10px 16px',
-      display: 'flex', alignItems: 'center', gap: '14px',
-    }}>
-      {/* Datum */}
-      <div style={{ width: '40px', textAlign: 'center', flexShrink: 0 }}>
-        <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--z-tekst)', lineHeight: 1 }}>
-          {new Date(w.date).getDate()}
-        </div>
-        <div style={{ fontSize: '11px', color: 'var(--z-tekst-4)', textTransform: 'uppercase' }}>
-          {new Date(w.date).toLocaleDateString('nl-BE', { month: 'short' })}
-        </div>
-      </div>
-
-      <div style={{ width: '1px', height: '28px', background: 'var(--z-lijn-zacht)', flexShrink: 0 }} />
-
-      {/* Teams */}
-      <div style={{ flex: 1, fontSize: '13px', color: 'var(--z-tekst-2)', display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flexWrap: 'wrap' }}>
-        <span style={{ fontWeight: '600' }}>{w.home_team?.name}</span>
-        <span style={{
-          fontSize: '13px', fontWeight: '700', color: 'var(--z-tekst)',
-          background: 'var(--z-vlak)', border: '1px solid var(--z-lijn)',
-          borderRadius: '6px', padding: '2px 10px',
-        }}>
-          {w.home_score} – {w.away_score}
-        </span>
-        <span style={{ fontWeight: '600' }}>{w.away_team?.name}</span>
-        <span style={{
-          fontSize: '11px', fontWeight: '600', padding: '1px 7px', borderRadius: '10px',
-          background: TYPE_COLORS[w.type]?.bg, color: TYPE_COLORS[w.type]?.color,
-        }}>{TYPE_LABELS[w.type]}</span>
-        {w.time ? (
-          <span style={{ fontSize: '11px', color: 'var(--z-tekst-4)' }}>🕐 {w.time.slice(0, 5)}</span>
-        ) : (
-          <span
-            title="Zonder uur rekent de pronostiek met 20:00 als aftrap"
-            style={{
-              fontSize: '11px', fontWeight: '600', padding: '1px 7px', borderRadius: '10px',
-              background: 'var(--z-gelijk-bg)', color: '#d97706', border: '1px solid var(--z-gelijk-rand)',
-            }}
-          >geen uur</span>
-        )}
-      </div>
-
-      {/* Acties */}
-      <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-        <button onClick={onBewerken} style={{
-          background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '6px',
-          padding: '4px 10px', fontSize: '12px', color: 'var(--z-tekst-3)', cursor: 'pointer',
-        }}>✎</button>
-        <button
-          onClick={onVerwijderen}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: 'var(--z-lijn-sterk)', padding: '4px 6px', borderRadius: '6px' }}
-          onMouseEnter={e => e.target.style.color = 'var(--z-verlies)'}
-          onMouseLeave={e => e.target.style.color = 'var(--z-lijn-sterk)'}
-        >✕</button>
-      </div>
-    </div>
-  )
-}
-
-// ─── Stijlen ─────────────────────────────────────────────────────────────────
-
-const labelStijl = { display: 'block', fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-3)', marginBottom: '5px' }
-const inputStijl = { width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px', padding: '9px 12px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'white', boxSizing: 'border-box' }
-const knopStijl = (disabled) => ({ background: 'var(--z-tekst)', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 22px', fontSize: '13px', fontWeight: '600', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 })
-const knopSecundairStijl = { background: 'white', color: 'var(--z-tekst-2)', border: '1px solid var(--z-lijn)', borderRadius: '8px', padding: '9px 18px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }

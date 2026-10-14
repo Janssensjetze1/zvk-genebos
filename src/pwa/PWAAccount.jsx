@@ -216,12 +216,6 @@ export default function PWAAccount() {
               style={{ ...inputStijl(gebdatumDirty), colorScheme: 'light' }}
             />
           </FormRij>
-          {!speler && (
-            <div style={{ padding: '10px 16px 14px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '13px' }}>ℹ️</span>
-              <span style={{ fontSize: '12px', color: 'var(--z-tekst-4)' }}>Nog niet gekoppeld aan een spelersfiche. Een admin doet dat.</span>
-            </div>
-          )}
         </div>
 
         {/* Account sectie */}

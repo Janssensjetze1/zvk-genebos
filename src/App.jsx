@@ -5,6 +5,7 @@ import { TopscorerProvider } from './context/TopscorerContext'
 import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import PWALayout from './pwa/PWALayout'
+import Pintjes from './components/Pintjes'
 import { useIsMobile } from './hooks/useIsMobile'
 import { useIsPWA } from './hooks/useIsPWA'
 
@@ -184,6 +185,7 @@ export default function App() {
         <TopscorerProvider>
           <BrowserRouter>
             <AppRoutes />
+            <Pintjes />
           </BrowserRouter>
         </TopscorerProvider>
       </SeasonProvider>

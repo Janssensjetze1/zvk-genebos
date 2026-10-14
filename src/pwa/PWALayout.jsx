@@ -45,8 +45,24 @@ function usePullToRefresh(mainRef) {
       currentDist.current = 0
     }
 
+    // Een veeg in een venster bovenop de pagina (badge, bottom sheet, formulier)
+    // mag nooit verversen: dat venster scrollt zelf, terwijl de pagina eronder
+    // gewoon bovenaan blijft staan. Hetzelfde voor elk eigen scrollvak dat niet
+    // helemaal bovenaan staat.
+    function inVensterOfScrollvak(doel) {
+      if (document.body.style.overflow === 'hidden') return true
+      for (let el = doel; el && el !== document.body; el = el.parentElement) {
+        if (el === mainRef.current) break
+        if (el.closest?.('.z-app-balk')) return false
+        const stijl = getComputedStyle(el)
+        if (stijl.position === 'fixed') return true
+        if (/(auto|scroll)/.test(stijl.overflowY) && el.scrollHeight > el.clientHeight && el.scrollTop > 0) return true
+      }
+      return false
+    }
+
     function onTouchStart(e) {
-      if (isAtTop()) {
+      if (isAtTop() && !inVensterOfScrollvak(e.target)) {
         touchStartY.current = e.touches[0].clientY
         isTracking.current  = true
       }

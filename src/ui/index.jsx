@@ -46,6 +46,10 @@ const PADEN = {
   slot: 'M6 11h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Zm2 0V7a4 4 0 0 1 8 0v4',
   wissel: 'M7 4v16m0 0-3-3m3 3 3-3M17 20V4m0 0-3 3m3-3 3 3',
   plus: 'M12 5v14M5 12h14',
+  min: 'M5 12h14',
+  prullenbak: 'M4 7h16M10 11v6m4-6v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3',
+  document: 'M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5Zm0 0v5h5M9 13h6m-6 4h6',
+  vonk: 'M12 3v4m0 10v4M3 12h4m10 0h4M6 6l2.5 2.5m7 7L18 18M6 18l2.5-2.5m7-7L18 6',
   leden: 'M15 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M8.5 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19 8v6m3-3h-6',
 }
 
@@ -231,18 +235,37 @@ export function Avatar({ naam, foto, grootte = 36, className = '', style }) {
 
 // ─── Schil voor login en registratie ─────────────────────────────────────────
 
-export function AuthSchil({ children }) {
+// Op desktop: links een blauw merkvlak met het logo schuin in de achtergrond,
+// rechts het formulier. Op telefoon wordt het hele scherm blauw en zweeft het
+// formulier erop.
+export function AuthSchil({ titel, ondertitel, children }) {
   return (
     <div className="z-auth">
       <aside className="z-auth-merk">
-        <img src="/logo.png" alt="ZVK Genebos" style={{ width: '88px', height: '88px', objectFit: 'contain' }} />
-        <div>
-          <h2>ZVK GENEBOS</h2>
+        <img src="/logo.png" alt="" aria-hidden="true" className="z-auth-watermerk" />
+        <div className="z-auth-merkrij">
+          <img src="/logo.png" alt="ZVK Genebos" />
+          <div>
+            <div className="z-auth-naam">ZVK GENEBOS</div>
+            <div className="z-auth-sub">Sinds 1991</div>
+          </div>
+        </div>
+        <div className="z-auth-slogan">
+          <h2>Elke zondag,<br />samen op het veld.</h2>
           <p>Wedstrijden, klassement, statistieken en pronostiek van de ploeg, allemaal op één plek.</p>
         </div>
-        <div className="z-auth-voet">Zaalvoetbal · sinds 1991</div>
       </aside>
-      <main className="z-auth-formulier">{children}</main>
+      <main className="z-auth-formulier">
+        <div className="z-auth-inhoud">
+          {titel && (
+            <div className="z-auth-kop">
+              <h1>{titel}</h1>
+              {ondertitel && <p>{ondertitel}</p>}
+            </div>
+          )}
+          {children}
+        </div>
+      </main>
     </div>
   )
 }

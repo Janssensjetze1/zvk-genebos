@@ -5,8 +5,8 @@ import { useSeason } from '../context/SeasonContext'
 import { useAuth } from '../context/AuthContext'
 import Opgave from '../components/Opgave'
 import { opgaveIsOpen } from '../hooks/useOpgave'
-import { isGespeeld, andereUitslagen, andereProgramma } from '../lib/wedstrijd'
-import WedstrijdenPerDag from '../components/WedstrijdenPerDag'
+import { isGespeeld } from '../lib/wedstrijd'
+import { WedstrijdenPerWeekend } from '../components/WedstrijdenPerDag'
 import { Chip, Icoon, Kaart, Knop, Laden, LegeStaat, PaginaKop, Rij, Sectie, Segment, TypeChip, UitslagLetter } from '../ui'
 import WedstrijdFormulier from '../components/WedstrijdFormulier'
 
@@ -16,7 +16,7 @@ export default function Wedstrijden() {
   const { actief: seizoen } = useSeason()
   const [wedstrijden, setWedstrijden] = useState([])
   const [loading, setLoading] = useState(true)
-  const [weergave, setWeergave] = useState('zvk') // 'zvk' | 'andere'
+  const [weergave, setWeergave] = useState('zvk') // 'zvk' | 'alle'
   const [formulierOpen, setFormulierOpen] = useState(false)
   const { isAdmin } = useAuth()
 
@@ -40,8 +40,9 @@ export default function Wedstrijden() {
   }
 
   const zvkWedstrijden = wedstrijden.filter(w => w.home_team?.is_zvk || w.away_team?.is_zvk)
-  const andereGespeeld = andereUitslagen(wedstrijden)
-  const andereAankomend = andereProgramma(wedstrijden)
+  // Alle wedstrijden van de competitie, die van ZVK inbegrepen
+  const alleGespeeld = wedstrijden.filter(w => isGespeeld(w))
+  const alleAankomend = wedstrijden.filter(w => !isGespeeld(w))
 
   const aankomend = zvkWedstrijden.filter(w => !isGespeeld(w)).reverse() // chronologisch
   const gespeeld = zvkWedstrijden.filter(w => isGespeeld(w)) // meest recent eerst
@@ -63,7 +64,7 @@ export default function Wedstrijden() {
         <Segment
           waarde={weergave}
           onChange={setWeergave}
-          opties={[{ waarde: 'zvk', label: 'ZVK Genebos' }, { waarde: 'andere', label: 'Andere ploegen' }]}
+          opties={[{ waarde: 'zvk', label: 'ZVK Genebos' }, { waarde: 'alle', label: 'Alle wedstrijden' }]}
         />
         {isAdmin && (
           <Knop soort="primair" icoon="plus" onClick={() => setFormulierOpen(true)}>Wedstrijd toevoegen</Knop>
@@ -98,15 +99,15 @@ export default function Wedstrijden() {
         </div>
       ) : (
         <div className="z-raster z-raster-2" style={{ alignItems: 'start' }}>
-          <Sectie titel="Uitslagen">
-            {andereGespeeld.length > 0
-              ? <WedstrijdenPerDag wedstrijden={andereGespeeld} variant="desktop" />
-              : <LegeStaat tekst="Nog geen uitslagen van andere ploegen." icoon="bal" />}
-          </Sectie>
           <Sectie titel="Programma">
-            {andereAankomend.length > 0
-              ? <WedstrijdenPerDag wedstrijden={andereAankomend} variant="desktop" />
+            {alleAankomend.length > 0
+              ? <WedstrijdenPerWeekend wedstrijden={alleAankomend} variant="desktop" />
               : <LegeStaat tekst="Geen wedstrijden meer gepland." icoon="kalender" />}
+          </Sectie>
+          <Sectie titel="Uitslagen">
+            {alleGespeeld.length > 0
+              ? <WedstrijdenPerWeekend wedstrijden={alleGespeeld} variant="desktop" nieuwsteEerst />
+              : <LegeStaat tekst="Nog geen uitslagen." icoon="bal" />}
           </Sectie>
         </div>
       )}

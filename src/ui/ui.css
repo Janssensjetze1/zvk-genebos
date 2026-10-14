@@ -531,38 +531,89 @@
 .z-auth {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   background: var(--z-achtergrond);
 }
 .z-auth-merk {
   position: relative;
   overflow: hidden;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 48px;
+  padding: 44px 52px;
   color: white;
   background: radial-gradient(120% 90% at 100% 0%, #2a4fb8 0%, #13234d 45%, #0c1a3d 100%);
 }
-.z-auth-merk h2 {
-  font-family: var(--z-font-merk);
-  font-size: 40px;
-  line-height: 1.1;
-  letter-spacing: 0.02em;
-  margin: 28px 0 12px;
+/* Het logo groot en schuin in de achtergrond, zoals op het blauwe wedstrijdkaartje */
+.z-auth-watermerk {
+  position: absolute;
+  z-index: -1;
+  right: -90px;
+  bottom: -110px;
+  width: min(560px, 75%);
+  opacity: 0.16;
+  transform: rotate(-14deg);
+  filter: saturate(0.7) brightness(0.85);
+  pointer-events: none;
 }
-.z-auth-merk p { font-size: 15px; color: rgba(255, 255, 255, 0.65); max-width: 360px; line-height: 1.6; }
-.z-auth-voet { font-size: 13px; color: rgba(255, 255, 255, 0.4); }
+.z-auth-merkrij { display: flex; align-items: center; gap: 18px; }
+.z-auth-merkrij img { width: 72px; height: 72px; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.3)); }
+.z-auth-naam { font-family: var(--z-font-merk); font-size: 30px; line-height: 1.1; letter-spacing: 0.04em; }
+.z-auth-sub { font-size: 14px; color: rgba(255, 255, 255, 0.55); margin-top: 3px; }
+.z-auth-slogan h2 {
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  margin: 0 0 16px;
+}
+.z-auth-slogan p { font-size: 15px; color: rgba(255, 255, 255, 0.65); max-width: 380px; line-height: 1.6; margin: 0 0 40px; }
+
 .z-auth-formulier {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px 20px;
+  padding: 32px 20px;
 }
+.z-auth-inhoud { width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: stretch; }
+.z-auth-inhoud > div { max-width: none !important; }
+.z-auth-kop { margin-bottom: 24px; }
+.z-auth-kop h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.025em; color: var(--z-tekst); margin: 0 0 6px; }
+.z-auth-kop p { font-size: 14px; color: var(--z-tekst-3); margin: 0; }
+
+/* Telefoon: het hele scherm blauw met het logo in de achtergrond */
 @media (max-width: 900px) {
-  .z-auth { grid-template-columns: minmax(0, 1fr); }
-  .z-auth-merk { display: none; }
+  .z-auth {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    background: radial-gradient(130% 70% at 100% 0%, #2a4fb8 0%, #13234d 50%, #0c1a3d 100%);
+    background-attachment: fixed;
+  }
+  .z-auth-merk {
+    position: static;
+    overflow: visible;
+    background: none;
+    padding: calc(28px + env(safe-area-inset-top)) 24px 0;
+  }
+  .z-auth-watermerk {
+    position: fixed;
+    width: 340px;
+    right: -80px;
+    bottom: -70px;
+    opacity: 0.14;
+  }
+  .z-auth-slogan { display: none; }
+  .z-auth-merkrij { justify-content: center; flex-direction: column; text-align: center; gap: 10px; }
+  .z-auth-merkrij img { width: 76px; height: 76px; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.35)); }
+  .z-auth-naam { font-size: 22px; }
+  .z-auth-formulier { justify-content: flex-start; padding: 28px 18px calc(32px + env(safe-area-inset-bottom)); }
+  .z-auth-kop { text-align: center; margin-bottom: 18px; }
+  .z-auth-kop h1 { color: white; font-size: 24px; }
+  .z-auth-kop p { color: rgba(255, 255, 255, 0.65); }
+  .z-auth-inhoud > div:not(.z-auth-kop) { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35) !important; border: none !important; }
 }
 
 /* ─── PWA ───────────────────────────────────────────────────────────────── */
@@ -971,3 +1022,131 @@
 .z-mini tr.z-mini-wij td { background: var(--z-blauw-50); }
 .z-mini tr.z-mini-wij td:first-child { box-shadow: inset 3px 0 0 var(--z-blauw); }
 .z-mini tr.z-mini-wij .z-mini-naam, .z-mini tr.z-mini-wij td.z-mini-ptn { color: var(--z-blauw); }
+
+/* ─── Beheer: wedstrijden ───────────────────────────────────────────────── */
+
+.z-teller {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px;
+  border-radius: 99px; background: var(--z-blauw); color: white;
+  font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.z-teller-stil { background: var(--z-lijn); color: var(--z-tekst-3); }
+.z-segment button { display: inline-flex; align-items: center; }
+
+.z-zoekveld {
+  position: relative; display: flex; align-items: center;
+  flex: 1; min-width: 160px; max-width: 260px; color: var(--z-tekst-4);
+}
+.z-zoekveld svg { position: absolute; left: 11px; pointer-events: none; }
+.z-zoekveld input { width: 100%; height: 38px; padding-left: 34px !important; }
+
+.z-beheer-rij { display: flex; align-items: center; gap: 14px; padding: 12px 16px 12px 14px; }
+.z-beheer-info { flex: 1; min-width: 0; max-width: 340px; display: flex; flex-direction: column; gap: 6px; margin-right: auto; }
+.z-beheer-acties { display: flex; align-items: center; gap: 8px; flex-shrink: 0; cursor: default; }
+.z-lijst > div:first-child .z-beheer-rij { border-radius: var(--z-r) var(--z-r) 0 0; }
+.z-lijst > div:last-child .z-beheer-rij, .z-lijst > .z-beheer-rij:last-child { border-radius: 0 0 var(--z-r) var(--z-r); }
+@media (max-width: 760px) {
+  .z-beheer-rij { flex-wrap: wrap; }
+  .z-beheer-info { max-width: none; }
+  .z-beheer-acties { width: 100%; justify-content: flex-end; }
+}
+
+.z-knop-winst { background: var(--z-winst-bg); border-color: var(--z-winst-rand); color: var(--z-winst); }
+
+.z-menu {
+  position: absolute; right: 0; top: calc(100% + 4px); z-index: 50;
+  min-width: 240px; padding: 5px;
+  background: var(--z-kaart); border: 1px solid var(--z-lijn);
+  border-radius: var(--z-r); box-shadow: var(--z-schaduw-l);
+  display: flex; flex-direction: column;
+}
+.z-menu button {
+  display: flex; align-items: center; gap: 10px;
+  height: 36px; padding: 0 10px; border: none; border-radius: 6px;
+  background: transparent; font: inherit; font-size: 13px; font-weight: 500;
+  color: var(--z-tekst-2); text-align: left; cursor: pointer; white-space: nowrap;
+}
+.z-menu button svg { color: var(--z-tekst-4); }
+.z-menu button:hover:not(:disabled) { background: var(--z-vlak); color: var(--z-tekst); }
+.z-menu button:disabled { opacity: 0.5; cursor: default; }
+.z-menu .z-menu-gevaar { color: var(--z-verlies); margin-top: 4px; position: relative; }
+.z-menu .z-menu-gevaar::before { content: ''; position: absolute; left: 6px; right: 6px; top: -3px; border-top: 1px solid var(--z-lijn-zacht); }
+.z-menu .z-menu-gevaar svg { color: var(--z-verlies); }
+.z-menu .z-menu-gevaar:hover:not(:disabled) { background: var(--z-verlies-bg); color: var(--z-verlies); }
+
+.z-doelpunt { display: flex; align-items: center; gap: 8px; padding: 8px 10px 8px 14px; }
+.z-doelpunt select { min-width: 0; height: 36px; }
+.z-doelpunt input { height: 36px; }
+
+@media (min-width: 700px) {
+  .z-paneel-breed { width: 720px; }
+}
+
+
+/* ─── Easter egg: klinkende pintjes ─────────────────────────────────────── */
+
+.z-pintjes {
+  position: fixed; inset: 0; z-index: 2000; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  background: radial-gradient(circle at center, rgba(12,26,61,0.55) 0%, rgba(12,26,61,0) 60%);
+  animation: z-pintjes-scherm 2.2s ease both;
+}
+.z-pintjes-duo { position: relative; width: 200px; height: 150px; }
+.z-pint { position: absolute; top: 10px; width: 104px; height: 135px; filter: drop-shadow(0 10px 18px rgba(0,0,0,0.35)); }
+.z-pint-links  { left: 6px;  transform-origin: 50% 100%; animation: z-pint-links 2.2s cubic-bezier(0.3, 0.7, 0.3, 1) both; }
+.z-pint-rechts { right: 6px; transform-origin: 50% 100%; animation: z-pint-rechts 2.2s cubic-bezier(0.3, 0.7, 0.3, 1) both; }
+
+@keyframes z-pint-links {
+  0%   { transform: translateX(-60vw) rotate(-35deg); }
+  28%  { transform: translateX(-10px) rotate(-6deg); }
+  36%  { transform: translateX(2px) rotate(12deg); }   /* klink */
+  46%  { transform: translateX(-6px) rotate(-5deg); }
+  56%  { transform: translateX(0) rotate(3deg); }
+  80%  { transform: translateX(0) rotate(0); }
+  100% { transform: translateX(0) rotate(0); }
+}
+@keyframes z-pint-rechts {
+  0%   { transform: translateX(60vw) rotate(35deg); }
+  28%  { transform: translateX(10px) rotate(6deg); }
+  36%  { transform: translateX(-2px) rotate(-12deg); }
+  46%  { transform: translateX(6px) rotate(5deg); }
+  56%  { transform: translateX(0) rotate(-3deg); }
+  80%  { transform: translateX(0) rotate(0); }
+  100% { transform: translateX(0) rotate(0); }
+}
+@keyframes z-pintjes-scherm {
+  0% { opacity: 0; } 8% { opacity: 1; } 82% { opacity: 1; } 100% { opacity: 0; }
+}
+
+/* Schuimspatten op het moment dat de glazen elkaar raken */
+.z-pintjes-spat { position: absolute; left: 50%; top: 30px; width: 0; height: 0; }
+.z-pintjes-spat span {
+  position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; border-radius: 50%;
+  background: #fffbeb; opacity: 0;
+  animation: z-pintjes-spat 0.9s ease-out 0.78s both;
+}
+.z-pintjes-spat span:nth-child(even) { width: 7px; height: 7px; background: #fde68a; }
+@keyframes z-pintjes-spat {
+  0%   { opacity: 1; transform: rotate(var(--hoek)) translateY(0) scale(1); }
+  100% { opacity: 0; transform: rotate(var(--hoek)) translateY(calc(var(--afstand) * -1)) scale(0.4); }
+}
+
+.z-pint-bel { animation: z-pint-bel 1.2s ease-in infinite; }
+@keyframes z-pint-bel { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-50px); opacity: 0; } }
+
+.z-pintjes-tekst {
+  font-size: 34px; font-weight: 800; letter-spacing: -0.02em; color: white;
+  text-shadow: 0 3px 14px rgba(0,0,0,0.4);
+  animation: z-pintjes-tekst 2.2s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes z-pintjes-tekst {
+  0%, 34% { opacity: 0; transform: scale(0.4) translateY(10px); }
+  48%     { opacity: 1; transform: scale(1.1) translateY(0); }
+  58%, 100% { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .z-pint-links, .z-pint-rechts, .z-pint-bel, .z-pintjes-spat span { animation: none; }
+  .z-pintjes-tekst { animation: z-pintjes-scherm 2.2s ease both; }
+}

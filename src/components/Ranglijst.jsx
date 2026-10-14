@@ -3,20 +3,18 @@ import EerKronen from './EerKronen'
 import { RING_KLASSE } from '../lib/eer'
 import { Avatar, Kaart, Laden, LegeStaat } from '../ui'
 
-// Ranglijst van spelers met een balkje per aantal: topschutters, assists, ...
+// Ranglijst van spelers met hun aantal: topschutters, assists, ...
 // Gebruikt op het desktopoverzicht en de statspagina van de app.
 // spelers: [{ id, name, photo_url, [sleutel]: aantal }], al gesorteerd
 
 
 const MEDAILLE = ['#d4a017', '#9aa5b5', '#b8733a']
 
-// start: plaats van de eerste speler (bv. 4 onder een podium), max: hoogste aantal voor de balkjes
-export default function Ranglijst({ spelers, sleutel, eenheid, loading, leeg = 'Nog geen data dit seizoen.', start = 1, max: maxAantal }) {
+// start: plaats van de eerste speler (bv. 4 onder een podium)
+export default function Ranglijst({ spelers, sleutel, eenheid, loading, leeg = 'Nog geen data dit seizoen.', start = 1 }) {
   const { eer } = useTopscorer()
   if (loading) return <Laden regels={3} />
   if (spelers.length === 0) return <LegeStaat tekst={leeg} />
-
-  const max = maxAantal ?? Math.max(...spelers.map(s => s[sleutel]), 1)
 
   return (
     <Kaart>
@@ -46,12 +44,6 @@ export default function Ranglijst({ spelers, sleutel, eenheid, loading, leeg = '
                 }}>
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{speler.name}</span>
                   {eretitel && <EerKronen eer={eretitel} grootte={12} />}
-                </div>
-                <div style={{ marginTop: '6px', height: '4px', borderRadius: '99px', background: 'var(--z-lijn-zacht)', overflow: 'hidden' }}>
-                  <div style={{
-                    width: `${(aantal / max) * 100}%`, height: '100%', borderRadius: '99px',
-                    background: start + i === 1 ? 'var(--z-blauw)' : 'var(--z-blauw-200)',
-                  }} />
                 </div>
               </div>
 

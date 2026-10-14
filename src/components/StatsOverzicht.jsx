@@ -74,7 +74,7 @@ function Klassering({ spelers, sleutel, eenheid, loading, leeg }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
       <Podium spelers={spelers} sleutel={sleutel} eenheid={eenheid} />
       {spelers.length > 3 && (
-        <Ranglijst spelers={spelers.slice(3)} sleutel={sleutel} eenheid={eenheid} start={4} max={spelers[0][sleutel]} />
+        <Ranglijst spelers={spelers.slice(3)} sleutel={sleutel} eenheid={eenheid} start={4} />
       )}
     </div>
   )

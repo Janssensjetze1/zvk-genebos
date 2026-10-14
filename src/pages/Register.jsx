@@ -48,25 +48,7 @@ export default function Register() {
   )
 
   return (
-    <AuthSchil>
-      {/* Logo */}
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <div style={{
-          width: '72px', height: '72px', borderRadius: '20px',
-          background: 'white', border: '1px solid var(--z-lijn)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 18px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-        }}>
-          <img src="/logo.png" alt="ZVK" style={{ width: '52px', height: '52px', objectFit: 'contain' }} />
-        </div>
-        <h1 style={{ color: 'var(--z-tekst)', fontSize: '26px', fontWeight: '700', letterSpacing: '-0.5px', marginBottom: '6px' }}>
-          Word lid!
-        </h1>
-        <p style={{ color: 'var(--z-tekst-4)', fontSize: '14px' }}>
-          Maak uw account aan voor ZVK Genebos
-        </p>
-      </div>
-
+    <AuthSchil titel="Word lid" ondertitel="Maak je account aan voor ZVK Genebos.">
       {/* Card */}
       <div style={{
         width: '100%', maxWidth: '400px',

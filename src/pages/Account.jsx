@@ -252,12 +252,6 @@ export default function Account() {
             <input type="date" value={geboortedatum} onChange={e => setGeboortedatum(e.target.value)} style={inputStijl} />
           </Veld>
 
-          {!speler && (
-            <p style={{ fontSize: '12px', color: 'var(--z-tekst-4)', marginTop: '-8px' }}>
-              Je account is nog niet gekoppeld aan een spelersfiche. Een admin doet dit voor je.
-            </p>
-          )}
-
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button type="submit" disabled={naamOpslaan} style={knopStijl(naamOpslaan)}>
               {naamOpslaan ? 'Opslaan...' : 'Opslaan'}

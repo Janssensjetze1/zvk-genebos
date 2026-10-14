@@ -144,23 +144,6 @@ export default function PWABadges() {
         </p>
       </div>
 
-      {/* Zonder spelersfiche zie je enkel de badges die aan je account hangen */}
-      {!heeftFiche && !loading && (
-        <div style={{
-          marginTop: '14px',
-          background: 'var(--z-blauw-50)', border: '1px solid var(--z-blauw-200)', borderRadius: '12px',
-          padding: '12px 14px',
-        }}>
-          <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--z-blauw)', marginBottom: '3px' }}>
-            🔗 Nog geen spelersfiche
-          </div>
-          <p style={{ fontSize: '12px', color: 'var(--z-blauw-500)', margin: 0, lineHeight: 1.5 }}>
-            De badges voor wedstrijden, goals en assists komen zodra een admin je koppelt. De pronostiekbadges
-            hieronder kan je nu al verdienen.
-          </p>
-        </div>
-      )}
-
       {/* Progress bar */}
       {totaal > 0 && (
         <div style={{ height: '5px', background: 'var(--z-lijn)', borderRadius: '99px', margin: '16px 0 28px', overflow: 'hidden' }}>
