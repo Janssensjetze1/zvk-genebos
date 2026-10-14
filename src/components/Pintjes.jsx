@@ -38,8 +38,14 @@ export default function Pintjes() {
 
   if (!toon) return null
 
+  // Op telefoon neemt het toetsenbord de onderkant van het scherm in: centreer
+  // de pintjes in het stuk dat nog zichtbaar is (visualViewport), niet in het
+  // hele scherm.
+  const vv = window.visualViewport
+  const zichtbaar = vv ? { top: `${vv.offsetTop}px`, height: `${vv.height}px`, bottom: 'auto' } : undefined
+
   return (
-    <div key={toon} className="z-pintjes" aria-hidden="true">
+    <div key={toon} className="z-pintjes" aria-hidden="true" style={zichtbaar}>
       <div className="z-pintjes-duo">
         <div className="z-pint z-pint-links"><Pint gespiegeld /></div>
         <div className="z-pint z-pint-rechts"><Pint /></div>

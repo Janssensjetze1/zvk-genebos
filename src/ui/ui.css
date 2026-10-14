@@ -584,13 +584,18 @@
 .z-auth-kop h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.025em; color: var(--z-tekst); margin: 0 0 6px; }
 .z-auth-kop p { font-size: 14px; color: var(--z-tekst-3); margin: 0; }
 
+/* Zolang het inlogscherm open staat is ook de pagina zelf navy. Anders komt
+   op een iPhone bovenaan wit tevoorschijn: bij het naar beneden trekken, en
+   omdat Safari de kleur van de statusbalk van de pagina overneemt. */
+html:has(.z-auth),
+html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
+
 /* Telefoon: het hele scherm blauw met het logo in de achtergrond */
 @media (max-width: 900px) {
   .z-auth {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto 1fr;
     background: radial-gradient(130% 70% at 100% 0%, #2a4fb8 0%, #13234d 50%, #0c1a3d 100%);
-    background-attachment: fixed;
   }
   .z-auth-merk {
     position: static;
@@ -1144,6 +1149,16 @@
   0%, 34% { opacity: 0; transform: scale(0.4) translateY(10px); }
   48%     { opacity: 1; transform: scale(1.1) translateY(0); }
   58%, 100% { opacity: 1; transform: scale(1); }
+}
+
+/* Telefoon: iets hoger dan het midden, zodat het ruim boven het toetsenbord blijft */
+@media (max-width: 700px) {
+  .z-pintjes {
+    justify-content: flex-start; padding-top: max(12%, calc(env(safe-area-inset-top) + 64px));
+    background: radial-gradient(circle at 50% 22%, rgba(12,26,61,0.55) 0%, rgba(12,26,61,0) 55%);
+  }
+  .z-pintjes-duo { transform: scale(0.85); transform-origin: center top; margin-bottom: -18px; }
+  .z-pintjes-tekst { font-size: 30px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

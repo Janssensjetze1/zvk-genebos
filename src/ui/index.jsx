@@ -251,7 +251,7 @@ export function AuthSchil({ titel, ondertitel, children }) {
           </div>
         </div>
         <div className="z-auth-slogan">
-          <h2>Elke zondag,<br />samen op het veld.</h2>
+          <h2>Eerst de punten,<br />dan de pinten.</h2>
           <p>Wedstrijden, klassement, statistieken en pronostiek van de ploeg, allemaal op één plek.</p>
         </div>
       </aside>
