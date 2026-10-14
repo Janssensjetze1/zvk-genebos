@@ -28,7 +28,7 @@ export default function Login() {
       {/* Card */}
       <div style={{
         width: '100%', maxWidth: '380px',
-        background: 'white',
+        background: 'var(--z-kaart)',
         border: '1px solid var(--z-lijn)',
         borderRadius: 'var(--z-r-l)',
         padding: '28px 24px',
@@ -79,7 +79,7 @@ function Input({ label, type, value, onChange, placeholder }) {
       <input
         type={type} value={value} onChange={onChange} placeholder={placeholder} required
         style={{
-          width: '100%', background: 'white',
+          width: '100%', background: 'var(--z-kaart)',
           border: '1px solid var(--z-lijn)', borderRadius: '10px',
           padding: '12px 14px', fontSize: '15px', color: 'var(--z-tekst)',
           outline: 'none', boxSizing: 'border-box',

@@ -195,7 +195,7 @@ export default function TabQuotes() {
           {zichtbaar.map(q => (
             <div key={q.id}>
               <div style={{
-                background: 'white',
+                background: 'var(--z-kaart)',
                 border: `1px solid ${bewerkId === q.id ? '#93c5fd' : 'var(--z-lijn)'}`,
                 borderRadius: bewerkId === q.id ? '10px 10px 0 0' : '10px',
                 padding: '13px 16px', display: 'flex', alignItems: 'flex-start', gap: '14px',
@@ -233,7 +233,7 @@ export default function TabQuotes() {
                   <button
                     onClick={() => bewerkId === q.id ? stopBewerken() : startBewerken(q)}
                     style={{
-                      background: bewerkId === q.id ? 'var(--z-lijn-zacht)' : 'white',
+                      background: bewerkId === q.id ? 'var(--z-lijn-zacht)' : 'var(--z-kaart)',
                       border: '1px solid var(--z-lijn)', borderRadius: '6px',
                       padding: '5px 12px', fontSize: '13px', fontWeight: '500',
                       color: 'var(--z-tekst-2)', cursor: 'pointer',

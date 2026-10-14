@@ -50,12 +50,11 @@ select {
   font-size: 14px;
   font-family: inherit;
   color: var(--z-tekst);
-  background: white;
+  background: var(--z-kaart);
   border: 1px solid var(--z-lijn);
   border-radius: var(--z-r-s);
   outline: none;
   box-sizing: border-box;
-  color-scheme: light;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
@@ -64,12 +63,11 @@ textarea {
   font-size: 14px;
   font-family: inherit;
   color: var(--z-tekst);
-  background: white;
+  background: var(--z-kaart);
   border: 1px solid var(--z-lijn);
   border-radius: var(--z-r-s);
   outline: none;
   box-sizing: border-box;
-  color-scheme: light;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
@@ -430,7 +428,7 @@ button:active:not(:disabled) {
 }
 
 .admin-nav-knop[aria-current='true'] {
-  background: white;
+  background: var(--z-kaart);
   border-color: var(--z-lijn);
   color: var(--z-blauw);
   font-weight: 600;

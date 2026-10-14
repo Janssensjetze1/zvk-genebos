@@ -150,7 +150,7 @@ function AandachtStrook({ tellers, ga }) {
             onClick={() => ga(p.tab)}
             style={{
               alignSelf: 'flex-start',
-              background: 'white', border: `1px solid ${p.kleur.rand}`, borderRadius: 'var(--z-r-s)',
+              background: 'var(--z-kaart)', border: `1px solid ${p.kleur.rand}`, borderRadius: 'var(--z-r-s)',
               padding: '5px 12px', fontSize: '12px', fontWeight: '600',
               color: p.kleur.tekst, cursor: 'pointer',
             }}

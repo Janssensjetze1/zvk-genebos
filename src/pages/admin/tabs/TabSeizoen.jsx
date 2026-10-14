@@ -78,7 +78,7 @@ export default function TabSeizoen() {
         <button
           onClick={() => { setToonFormulier(v => !v); setFout('') }}
           style={{
-            background: toonFormulier ? 'white' : 'var(--z-tekst)',
+            background: toonFormulier ? 'var(--z-kaart)' : 'var(--z-donker)',
             color: toonFormulier ? 'var(--z-tekst-3)' : 'white',
             border: toonFormulier ? '1px solid var(--z-lijn)' : 'none',
             borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
@@ -119,7 +119,7 @@ export default function TabSeizoen() {
 
       {/* Seizoenenlijst */}
       {seizoenen.length === 0 ? (
-        <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
+        <div style={{ background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
           <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Nog geen seizoenen. Voeg het eerste toe!</p>
         </div>
       ) : (
@@ -129,11 +129,11 @@ export default function TabSeizoen() {
             return (
               <div key={s.id}>
                 <div style={{
-                  background: 'white',
+                  background: 'var(--z-kaart)',
                   border: `1px solid ${bewerkId === s.id ? '#93c5fd' : isActief ? 'var(--z-blauw-200)' : 'var(--z-lijn)'}`,
                   borderRadius: bewerkId === s.id ? '10px 10px 0 0' : '10px',
                   padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px',
-                  background: isActief ? '#f0f9ff' : 'white',
+                  background: isActief ? '#f0f9ff' : 'var(--z-kaart)',
                 }}>
                   {/* Icoon */}
                   <div style={{
@@ -177,7 +177,7 @@ export default function TabSeizoen() {
                     <button
                       onClick={() => bewerkId === s.id ? stopBewerken() : startBewerken(s)}
                       style={{
-                        background: bewerkId === s.id ? 'var(--z-lijn-zacht)' : 'white',
+                        background: bewerkId === s.id ? 'var(--z-lijn-zacht)' : 'var(--z-kaart)',
                         border: '1px solid var(--z-lijn)', borderRadius: '6px',
                         padding: '5px 12px', fontSize: '13px', fontWeight: '500', color: 'var(--z-tekst-2)', cursor: 'pointer',
                       }}
@@ -233,5 +233,5 @@ export default function TabSeizoen() {
 }
 
 const labelStijl = { display: 'block', fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-3)', marginBottom: '5px' }
-const inputStijl = { width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px', padding: '9px 12px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'white', boxSizing: 'border-box' }
-const knopStijl = (disabled) => ({ background: 'var(--z-tekst)', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 20px', fontSize: '13px', fontWeight: '600', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 })
+const inputStijl = { width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px', padding: '9px 12px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'var(--z-kaart)', boxSizing: 'border-box' }
+const knopStijl = (disabled) => ({ background: 'var(--z-donker)', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 20px', fontSize: '13px', fontWeight: '600', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 })

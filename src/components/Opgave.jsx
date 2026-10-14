@@ -76,7 +76,7 @@ export default function Opgave({ wedstrijd }) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   borderRadius: '12px',
                   border: `1.5px solid ${actief ? s.rand : 'var(--z-lijn)'}`,
-                  background: actief ? s.bg : geblokkeerd ? 'var(--z-vlak)' : 'white',
+                  background: actief ? s.bg : geblokkeerd ? 'var(--z-vlak)' : 'var(--z-kaart)',
                   boxShadow: actief ? `inset 0 0 0 1px ${s.rand}` : 'none',
                   cursor: uit ? 'not-allowed' : 'pointer',
                   opacity: bezig ? 0.6 : geblokkeerd ? 0.45 : 1,

@@ -8,7 +8,7 @@ function Sectie({ emoji, titel, standaardOpen = false, children }) {
 
   return (
     <div style={{
-      background: 'white', borderRadius: 'var(--z-r)', border: '1px solid var(--z-lijn)',
+      background: 'var(--z-kaart)', borderRadius: 'var(--z-r)', border: '1px solid var(--z-lijn)',
       boxShadow: 'var(--z-schaduw-s)', overflow: 'hidden',
     }}>
       <button

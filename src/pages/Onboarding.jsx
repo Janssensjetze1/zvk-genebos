@@ -91,7 +91,7 @@ export default function Onboarding() {
         </div>
 
         {/* Kaart */}
-        <div style={{ background: 'white', borderRadius: '16px', padding: '32px', boxShadow: '0 24px 48px rgba(0,0,0,0.3)' }}>
+        <div style={{ background: 'var(--z-kaart)', borderRadius: '16px', padding: '32px', boxShadow: '0 24px 48px rgba(0,0,0,0.3)' }}>
 
           {/* Stapper */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0', marginBottom: '28px' }}>
@@ -104,7 +104,7 @@ export default function Onboarding() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div style={{
                       width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0,
-                      background: klaar ? 'var(--z-tekst)' : actief ? 'var(--z-tekst)' : 'var(--z-lijn)',
+                      background: klaar ? 'var(--z-donker)' : actief ? 'var(--z-donker)' : 'var(--z-lijn)',
                       color: klaar || actief ? 'white' : 'var(--z-tekst-4)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: '12px', fontWeight: '700',
@@ -116,7 +116,7 @@ export default function Onboarding() {
                     </span>
                   </div>
                   {i === 0 && (
-                    <div style={{ flex: 1, height: '1px', background: stap > 1 ? 'var(--z-tekst)' : 'var(--z-lijn)', margin: '0 12px' }} />
+                    <div style={{ flex: 1, height: '1px', background: stap > 1 ? 'var(--z-donker)' : 'var(--z-lijn)', margin: '0 12px' }} />
                   )}
                 </div>
               )
@@ -248,7 +248,7 @@ export default function Onboarding() {
 }
 
 const knopStijl = {
-  width: '100%', background: 'var(--z-tekst)', color: 'white', border: 'none',
+  width: '100%', background: 'var(--z-donker)', color: 'white', border: 'none',
   borderRadius: '8px', padding: '12px', fontSize: '14px', fontWeight: '600',
   cursor: 'pointer',
 }
@@ -260,5 +260,5 @@ const labelStijl = {
 const inputStijl = {
   width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px',
   padding: '10px 14px', fontSize: '14px', color: 'var(--z-tekst)',
-  outline: 'none', background: 'white', boxSizing: 'border-box',
+  outline: 'none', background: 'var(--z-kaart)', boxSizing: 'border-box',
 }

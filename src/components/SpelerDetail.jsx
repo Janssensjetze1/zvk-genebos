@@ -174,7 +174,7 @@ function BadgesTab({ badgesMetStatus, geselecteerdeBadge, setGeselecteerdeBadge 
                     key={badge.id}
                     onClick={() => setGeselecteerdeBadge(isSelected ? null : badge)}
                     style={{
-                      background: 'white',
+                      background: 'var(--z-kaart)',
                       border: `1.5px solid ${isSelected ? c.lc : badge.verdiend ? c.lbo : 'var(--z-lijn)'}`,
                       borderRadius: '11px', padding: '9px 5px 7px',
                       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
@@ -304,7 +304,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
           onClick={() => { setTab(t.id); setGeselecteerdeBadge(null) }}
           style={{
             flex: 1, padding: '9px', borderRadius: '9px', border: 'none',
-            background: tab === t.id ? 'white' : 'transparent',
+            background: tab === t.id ? 'var(--z-kaart)' : 'transparent',
             color: tab === t.id ? 'var(--z-tekst)' : 'var(--z-tekst-3)',
             fontSize: '13px', fontWeight: tab === t.id ? '700' : '500',
             cursor: 'pointer',
@@ -351,7 +351,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
         <div style={{
           position: 'fixed', top: '50%', left: '50%', zIndex: 401,
           transform: 'translate(-50%, -50%)',
-          background: 'white', borderRadius: '28px',
+          background: 'var(--z-kaart)', borderRadius: '28px',
           padding: '36px 28px 28px',
           width: 'min(340px, calc(100vw - 32px))',
           boxShadow: '0 32px 80px rgba(0,0,0,0.3)',
@@ -405,7 +405,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
         <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.55)' }} />
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 301,
-          background: 'white', borderRadius: '24px 24px 0 0',
+          background: 'var(--z-kaart)', borderRadius: '24px 24px 0 0',
           maxHeight: '90vh', display: 'flex', flexDirection: 'column',
           boxShadow: '0 -12px 48px rgba(0,0,0,0.25)',
         }}>
@@ -434,7 +434,7 @@ export default function SpelerDetail({ speler, seizoenId, onClose, variant = 'sh
       <div style={{
         position: 'fixed', top: '50%', left: '50%', zIndex: 301,
         transform: 'translate(-50%, -50%)',
-        background: 'white', borderRadius: '22px',
+        background: 'var(--z-kaart)', borderRadius: '22px',
         width: '500px', maxWidth: 'calc(100vw - 32px)',
         maxHeight: '85vh', display: 'flex', flexDirection: 'column',
         boxShadow: '0 24px 64px rgba(0,0,0,0.18)',

@@ -175,7 +175,7 @@ export default function TabMeldingen() {
               onClick={stuurPush}
               disabled={pushBezig || !pushTitel.trim() || !pushBericht.trim()}
               style={{
-                background: 'var(--z-tekst)', color: 'white', border: 'none',
+                background: 'var(--z-donker)', color: 'white', border: 'none',
                 borderRadius: '8px', padding: '9px 20px',
                 fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                 opacity: (pushBezig || !pushTitel.trim() || !pushBericht.trim()) ? 0.5 : 1,
@@ -195,7 +195,7 @@ export default function TabMeldingen() {
         </div>
         <button
           onClick={() => setFormulier(f => !f)}
-          style={{ background: 'var(--z-tekst)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
+          style={{ background: 'var(--z-donker)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
         >
           + Nieuwe melding
         </button>
@@ -214,7 +214,7 @@ export default function TabMeldingen() {
                 <button key={e} onClick={() => setEmoji(e)} style={{
                   width: '40px', height: '40px', borderRadius: '8px', border: 'none',
                   fontSize: '20px', cursor: 'pointer',
-                  background: emoji === e ? 'var(--z-tekst)' : 'var(--z-lijn)',
+                  background: emoji === e ? 'var(--z-donker)' : 'var(--z-lijn)',
                   transition: 'background 0.15s',
                 }}>{e}</button>
               ))}
@@ -243,7 +243,7 @@ export default function TabMeldingen() {
                 onClick={() => fotoRef.current?.click()}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
-                  background: 'white', border: '1.5px dashed var(--z-lijn-sterk)', borderRadius: '10px',
+                  background: 'var(--z-kaart)', border: '1.5px dashed var(--z-lijn-sterk)', borderRadius: '10px',
                   padding: '10px 16px', cursor: 'pointer', fontSize: '13px', color: 'var(--z-tekst-3)',
                 }}
               >
@@ -282,7 +282,7 @@ export default function TabMeldingen() {
             <button
               onClick={handleOpslaan}
               disabled={opslaan || !titel.trim() || !bericht.trim()}
-              style={{ background: 'var(--z-tekst)', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', opacity: opslaan ? 0.6 : 1 }}
+              style={{ background: 'var(--z-donker)', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', opacity: opslaan ? 0.6 : 1 }}
             >
               {opslaan ? 'Uploaden...' : 'Opslaan & activeren'}
             </button>
@@ -294,14 +294,14 @@ export default function TabMeldingen() {
       {loading ? (
         <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Laden...</p>
       ) : meldingen.length === 0 ? (
-        <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
+        <div style={{ background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
           <p style={{ color: 'var(--z-tekst-4)', fontSize: '14px' }}>Nog geen meldingen aangemaakt.</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {meldingen.map(m => (
             <div key={m.id} style={{
-              background: 'white', border: `1px solid ${m.is_active ? 'var(--z-blauw-200)' : 'var(--z-lijn)'}`,
+              background: 'var(--z-kaart)', border: `1px solid ${m.is_active ? 'var(--z-blauw-200)' : 'var(--z-lijn)'}`,
               borderRadius: '12px', padding: '16px',
               display: 'flex', alignItems: 'center', gap: '14px',
               boxShadow: m.is_active ? '0 0 0 3px rgba(59,130,246,0.08)' : 'none',
@@ -342,4 +342,4 @@ export default function TabMeldingen() {
 }
 
 const labelStijl = { fontSize: '12px', fontWeight: '600', color: 'var(--z-tekst-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }
-const inputStijl = { width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px', padding: '9px 12px', fontSize: '14px', boxSizing: 'border-box', outline: 'none', background: 'white' }
+const inputStijl = { width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px', padding: '9px 12px', fontSize: '14px', boxSizing: 'border-box', outline: 'none', background: 'var(--z-kaart)' }

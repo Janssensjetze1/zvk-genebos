@@ -12,7 +12,7 @@ export default function MobileGate() {
       {/* Logo */}
       <div style={{
         width: '88px', height: '88px', borderRadius: '22px',
-        background: 'white', display: 'flex', alignItems: 'center',
+        background: 'var(--z-kaart)', display: 'flex', alignItems: 'center',
         justifyContent: 'center', marginBottom: '28px',
         boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
       }}>

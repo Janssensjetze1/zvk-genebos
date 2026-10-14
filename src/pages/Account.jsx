@@ -3,9 +3,11 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { useTopscorer } from '../context/TopscorerContext'
 import { RING_KLASSE } from '../lib/eer'
-import { PaginaKop } from '../ui'
+import { PaginaKop, Segment } from '../ui'
+import { THEMA_OPTIES, useThema } from '../lib/thema'
 
 export default function Account() {
+  const [thema, zetThema] = useThema()
   const { user, profile, patchProfile } = useAuth()
 
   const { eer } = useTopscorer()
@@ -262,6 +264,11 @@ export default function Account() {
       </Sectie>
 
 
+      {/* Weergave */}
+      <Sectie titel="Weergave" beschrijving="Licht, donker, of volg de instelling van je toestel">
+        <Segment opties={THEMA_OPTIES} waarde={thema} onChange={zetThema} />
+      </Sectie>
+
       {/* E-mail */}
       <Sectie titel="E-mailadres" beschrijving="Het adres waarmee je inlogt">
         <form onSubmit={handleEmailOpslaan} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -355,7 +362,7 @@ function WachtwoordVeld({ value, onChange, toon, onToggle, placeholder, required
         style={{
           width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px',
           padding: '9px 42px 9px 14px', fontSize: '14px', color: 'var(--z-tekst)',
-          outline: 'none', background: 'white', boxSizing: 'border-box',
+          outline: 'none', background: 'var(--z-kaart)', boxSizing: 'border-box',
         }}
       />
       <button
@@ -396,7 +403,7 @@ function Bericht({ bericht }) {
 
 const inputStijl = {
   width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px',
-  padding: '9px 14px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'white',
+  padding: '9px 14px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'var(--z-kaart)',
 }
 
 const knopStijl = (disabled) => ({

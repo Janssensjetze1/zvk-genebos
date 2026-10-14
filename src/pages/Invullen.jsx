@@ -77,7 +77,7 @@ export default function Invullen() {
       {/* Header: enkel buiten PWA tonen, PWALayout heeft al een header */}
       {!isPWA && (
         <div style={{
-          background: 'white', borderBottom: '1px solid var(--z-lijn)',
+          background: 'var(--z-kaart)', borderBottom: '1px solid var(--z-lijn)',
           padding: '20px 20px 16px', position: 'sticky', top: 0, zIndex: 10,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
@@ -127,7 +127,7 @@ export default function Invullen() {
             </div>
           )
         ) : wedstrijden.length === 0 ? (
-          <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '16px', padding: '48px 24px', textAlign: 'center' }}>
+          <div style={{ background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: '16px', padding: '48px 24px', textAlign: 'center' }}>
             <div style={{ fontSize: '40px', marginBottom: '12px' }}>📋</div>
             <p style={{ color: 'var(--z-tekst-4)', fontSize: '14px' }}>Geen wedstrijden gevonden.</p>
           </div>
@@ -197,7 +197,7 @@ function WedstrijdKaart({ wedstrijd: w, zvkTeam, onSelecteer }) {
     <button
       onClick={onSelecteer}
       style={{
-        width: '100%', background: 'white', border: `1.5px solid ${ingevuld ? 'var(--z-winst-rand)' : isPast ? 'var(--z-verlies-rand)' : 'var(--z-lijn)'}`,
+        width: '100%', background: 'var(--z-kaart)', border: `1.5px solid ${ingevuld ? 'var(--z-winst-rand)' : isPast ? 'var(--z-verlies-rand)' : 'var(--z-lijn)'}`,
         borderRadius: '16px', padding: '16px', textAlign: 'left', cursor: 'pointer',
         display: 'flex', alignItems: 'center', gap: '14px',
         boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
@@ -320,7 +320,7 @@ function WedstrijdInvullen({ wedstrijd: w, zvkTeam, spelers, onTerug, onOpgeslag
   return (
     <div style={{ minHeight: '100vh', background: 'var(--z-vlak)', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{ background: 'var(--z-tekst)', padding: '16px 20px 20px', position: 'sticky', top: 0, zIndex: 10 }}>
+      <div style={{ background: 'var(--z-donker)', padding: '16px 20px 20px', position: 'sticky', top: 0, zIndex: 10 }}>
         <button onClick={onTerug} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '14px', padding: 0, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
           ← Terug
         </button>
@@ -347,7 +347,7 @@ function WedstrijdInvullen({ wedstrijd: w, zvkTeam, spelers, onTerug, onOpgeslag
               }}>
                 <span style={{
                   width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0,
-                  background: actief ? 'var(--z-tekst)' : klaar ? '#22c55e' : 'rgba(255,255,255,0.2)',
+                  background: actief ? 'var(--z-donker)' : klaar ? '#22c55e' : 'rgba(255,255,255,0.2)',
                   color: 'white', fontSize: '10px', fontWeight: '700',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
@@ -398,7 +398,7 @@ function WedstrijdInvullen({ wedstrijd: w, zvkTeam, spelers, onTerug, onOpgeslag
                     <button key={s.id} onClick={() => toggleAanwezig(s.id)} style={{
                       padding: '9px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '14px',
                       fontWeight: '500', border: 'none',
-                      background: ok ? 'var(--z-tekst)' : 'var(--z-lijn-zacht)',
+                      background: ok ? 'var(--z-donker)' : 'var(--z-lijn-zacht)',
                       color: ok ? 'white' : 'var(--z-tekst-2)',
                     }}>
                       {ok ? '✓ ' : ''}{s.name}
@@ -484,10 +484,10 @@ function WedstrijdInvullen({ wedstrijd: w, zvkTeam, spelers, onTerug, onOpgeslag
 
 const emptyStijl = { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }
 const spinnerStijl = { width: '32px', height: '32px', border: '3px solid var(--z-lijn)', borderTop: '3px solid var(--z-blauw-500)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }
-const kaartStijl = { background: 'white', border: '1px solid var(--z-lijn)', borderRadius: 'var(--z-r)', padding: '18px', boxShadow: 'var(--z-schaduw-s)' }
+const kaartStijl = { background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: 'var(--z-r)', padding: '18px', boxShadow: 'var(--z-schaduw-s)' }
 const sectieTitelStijl = { fontSize: '15px', fontWeight: '600', color: 'var(--z-tekst)', marginBottom: '14px' }
 const labelStijl = { display: 'block', fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-3)', marginBottom: '5px' }
-const selectStijl = { width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '10px', padding: '11px 12px', fontSize: '15px', color: 'var(--z-tekst)', background: 'white', outline: 'none', boxSizing: 'border-box' }
-const scoreKnopStijl = { width: '40px', height: '40px', borderRadius: '50%', border: '1.5px solid var(--z-lijn)', background: 'white', fontSize: '20px', cursor: 'pointer', color: 'var(--z-tekst)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '300' }
+const selectStijl = { width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '10px', padding: '11px 12px', fontSize: '15px', color: 'var(--z-tekst)', background: 'var(--z-kaart)', outline: 'none', boxSizing: 'border-box' }
+const scoreKnopStijl = { width: '40px', height: '40px', borderRadius: '50%', border: '1.5px solid var(--z-lijn)', background: 'var(--z-kaart)', fontSize: '20px', cursor: 'pointer', color: 'var(--z-tekst)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '300' }
 const hoofdKnopStijl = { background: 'var(--z-blauw)', color: 'white', border: 'none', borderRadius: 'var(--z-r)', padding: '16px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', width: '100%' }
-const secundairKnopStijl = { background: 'white', color: 'var(--z-tekst-2)', border: '1px solid var(--z-lijn)', borderRadius: 'var(--z-r)', padding: '16px 20px', fontSize: '15px', fontWeight: '600', cursor: 'pointer' }
+const secundairKnopStijl = { background: 'var(--z-kaart)', color: 'var(--z-tekst-2)', border: '1px solid var(--z-lijn)', borderRadius: 'var(--z-r)', padding: '16px 20px', fontSize: '15px', fontWeight: '600', cursor: 'pointer' }

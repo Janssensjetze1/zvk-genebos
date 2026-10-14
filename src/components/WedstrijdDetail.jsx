@@ -139,7 +139,7 @@ export default function WedstrijdDetail({ variant = 'pwa' }) {
         <ScorebordCompact w={w} gespeeld={gespeeld} datum={datum} />
       ) : (
       <div style={{
-        background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '18px',
+        background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: '18px',
         padding: '18px 20px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>

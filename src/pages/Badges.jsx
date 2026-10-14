@@ -127,7 +127,7 @@ export default function Badges() {
       {/* Voortgang: enkel tonen als er badges zijn */}
       {totaal > 0 && (
         <div style={{
-          background: 'white', border: '1px solid var(--z-lijn)', borderRadius: 'var(--z-r)',
+          background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: 'var(--z-r)',
           padding: '20px 24px', marginBottom: '28px', boxShadow: 'var(--z-schaduw-s)',
           display: 'flex', alignItems: 'center', gap: '20px',
         }}>
@@ -205,7 +205,7 @@ export default function Badges() {
                     key={badge.id}
                     onClick={() => setGeselecteerd(badge)}
                     style={{
-                      background: badge.verdiend ? c.lb : 'white',
+                      background: badge.verdiend ? c.lb : 'var(--z-kaart)',
                       border: `1.5px solid ${badge.verdiend ? c.lbo : 'var(--z-lijn)'}`,
                       borderRadius: '20px', padding: '24px 16px 18px',
                       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
@@ -274,7 +274,7 @@ export default function Badges() {
             <div style={{
               position: 'fixed', top: '50%', left: '50%', zIndex: 201,
               transform: 'translate(-50%, -50%)',
-              background: 'white', borderRadius: '24px',
+              background: 'var(--z-kaart)', borderRadius: '24px',
               padding: '36px 40px', width: '380px', maxWidth: 'calc(100vw - 32px)',
               boxShadow: '0 24px 64px rgba(0,0,0,0.2)',
             }}>

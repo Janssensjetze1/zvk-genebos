@@ -73,7 +73,7 @@ export default function TabFeedback({ onGelezen }) {
                 display: 'flex', alignItems: 'center', gap: '6px',
                 padding: '7px 14px', borderRadius: '20px',
                 border: `1px solid ${actief ? 'var(--z-tekst)' : 'var(--z-lijn)'}`,
-                background: actief ? 'var(--z-tekst)' : 'white',
+                background: actief ? 'var(--z-donker)' : 'var(--z-kaart)',
                 color: actief ? 'white' : 'var(--z-tekst-3)',
                 fontSize: '13px', fontWeight: actief ? '600' : '500',
                 cursor: 'pointer', transition: 'all 0.12s',
@@ -93,7 +93,7 @@ export default function TabFeedback({ onGelezen }) {
 
       {zichtbaar.length === 0 ? (
         <div style={{
-          background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px',
+          background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: '12px',
           padding: '48px', textAlign: 'center',
         }}>
           <div style={{ fontSize: '28px', marginBottom: '10px' }}>📭</div>
@@ -122,7 +122,7 @@ function BerichtKaart({ bericht: f, isNieuw }) {
 
   return (
     <div style={{
-      background: 'white',
+      background: 'var(--z-kaart)',
       border: `1px solid ${isNieuw ? 'var(--z-blauw-200)' : 'var(--z-lijn)'}`,
       borderRadius: '12px', padding: '16px 18px',
       display: 'flex', gap: '14px', alignItems: 'flex-start',

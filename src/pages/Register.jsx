@@ -52,7 +52,7 @@ export default function Register() {
       {/* Card */}
       <div style={{
         width: '100%', maxWidth: '400px',
-        background: 'white',
+        background: 'var(--z-kaart)',
         border: '1px solid var(--z-lijn)',
         borderRadius: '20px', padding: '28px 24px',
         boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
@@ -106,7 +106,7 @@ function Input({ label, type, value, onChange, placeholder, minLength }) {
       <input
         type={type} value={value} onChange={onChange} placeholder={placeholder} required minLength={minLength}
         style={{
-          width: '100%', background: 'white',
+          width: '100%', background: 'var(--z-kaart)',
           border: '1px solid var(--z-lijn)', borderRadius: '10px',
           padding: '11px 13px', fontSize: '15px', color: 'var(--z-tekst)',
           outline: 'none', boxSizing: 'border-box',

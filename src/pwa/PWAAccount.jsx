@@ -5,10 +5,12 @@ import { usePush } from '../hooks/usePush'
 import { useTopscorer } from '../context/TopscorerContext'
 import EerKronen from '../components/EerKronen'
 import { RING_KLASSE } from '../lib/eer'
-import { Icoon } from '../ui'
+import { Icoon, Segment } from '../ui'
+import { THEMA_OPTIES, useThema } from '../lib/thema'
 
 // ── Hoofd component ─────────────────────────────────────────────────────────
 export default function PWAAccount() {
+  const [thema, zetThema] = useThema()
   const { user, profile, patchProfile, signOut } = useAuth()
   const { eer } = useTopscorer()
   const { status: pushStatus, fout: pushFout, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePush()
@@ -213,7 +215,7 @@ export default function PWAAccount() {
             <input
               type="date" value={gebdatum}
               onChange={e => { setGebdatum(e.target.value); setBericht(null) }}
-              style={{ ...inputStijl(gebdatumDirty), colorScheme: 'light' }}
+              style={inputStijl(gebdatumDirty)}
             />
           </FormRij>
         </div>
@@ -262,6 +264,12 @@ export default function PWAAccount() {
               )}
             </div>
           )}
+        </div>
+
+        {/* Weergave */}
+        <SectieLabel>Weergave</SectieLabel>
+        <div style={{ ...kaartStijl, padding: '12px' }}>
+          <Segment vol opties={THEMA_OPTIES} waarde={thema} onChange={zetThema} />
         </div>
 
         {/* Push notificaties */}
@@ -318,7 +326,7 @@ export default function PWAAccount() {
           onClick={signOut}
           style={{
             width: '100%', padding: '15px 16px',
-            background: 'white', border: '1px solid var(--z-lijn)', borderRadius: 'var(--z-r)',
+            background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: 'var(--z-r)',
             fontSize: '15px', fontWeight: '600', color: 'var(--z-verlies)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
@@ -335,7 +343,7 @@ export default function PWAAccount() {
       {isDirty && (
         <div style={{
           position: 'fixed', bottom: '90px', left: '16px', right: '16px', zIndex: 100,
-          background: 'var(--z-tekst)', borderRadius: '18px',
+          background: 'var(--z-donker)', borderRadius: '18px',
           padding: '13px 16px', display: 'flex', alignItems: 'center', gap: '14px',
           boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
         }}>
@@ -370,7 +378,7 @@ export default function PWAAccount() {
 
 // ── Hulpcomponenten ─────────────────────────────────────────────────────────
 const kaartStijl = {
-  background: 'white',
+  background: 'var(--z-kaart)',
   border: '1px solid var(--z-lijn)',
   borderRadius: 'var(--z-r)',
   overflow: 'hidden',
@@ -422,7 +430,7 @@ function PwVeld({ label, value, onChange, toon, onToggle, placeholder, dirty }) 
             width: '100%', border: `1.5px solid ${dirty ? 'var(--z-blauw-500)' : 'var(--z-lijn)'}`,
             borderRadius: '12px', padding: '0 44px 0 14px', fontSize: '14px',
             color: 'var(--z-tekst)', outline: 'none',
-            background: dirty ? 'var(--z-blauw-50)' : '#fafafa',
+            background: dirty ? 'var(--z-blauw-50)' : 'var(--z-vlak)',
             boxSizing: 'border-box', height: '44px', fontFamily: 'inherit',
             transition: 'border-color 0.15s, background 0.15s',
           }}

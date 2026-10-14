@@ -5,6 +5,7 @@ import { useSeason } from '../context/SeasonContext'
 import { useMatchdayCountdown } from '../hooks/useMatchdayCountdown'
 import { AnnouncementPopup } from './AnnouncementPopup'
 import { Avatar, Icoon } from '../ui'
+import { useThema } from '../lib/thema'
 
 const NAV = [
   { label: 'Overzicht', path: '/', icoon: 'home' },
@@ -193,6 +194,23 @@ function SeizoenKiezer() {
   )
 }
 
+// Snel wisselen tussen licht en donker; "Systeem" kies je in Account
+function ThemaKnop() {
+  const [, zetKeuze, isDonker] = useThema()
+  return (
+    <button
+      type="button"
+      className="z-knop z-knop-stil"
+      onClick={() => zetKeuze(isDonker ? 'licht' : 'donker')}
+      title={isDonker ? 'Licht thema' : 'Donker thema'}
+      aria-label={isDonker ? 'Licht thema' : 'Donker thema'}
+      style={{ width: '38px', padding: 0 }}
+    >
+      <Icoon naam={isDonker ? 'zon' : 'maan'} grootte={18} />
+    </button>
+  )
+}
+
 // ─── Banners ─────────────────────────────────────────────────────────────────
 
 function MatchdayBanner() {
@@ -263,6 +281,7 @@ export default function Layout({ children }) {
             {titel && <><Icoon naam="chevron" grootte={14} dikte={2} /><strong>{titel}</strong></>}
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ThemaKnop />
             <SeizoenKiezer />
           </div>
         </header>

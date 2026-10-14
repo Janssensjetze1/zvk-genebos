@@ -145,7 +145,7 @@ export default function TabSpelers() {
         <button
           onClick={() => { setToonFormulier(v => !v); setFout('') }}
           style={{
-            background: toonFormulier ? 'white' : 'var(--z-tekst)',
+            background: toonFormulier ? 'var(--z-kaart)' : 'var(--z-donker)',
             color: toonFormulier ? 'var(--z-tekst-3)' : 'white',
             border: toonFormulier ? '1px solid var(--z-lijn)' : 'none',
             borderRadius: '8px', padding: '8px 16px',
@@ -167,13 +167,13 @@ export default function TabSpelers() {
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: 'var(--z-tekst-2)', marginBottom: '6px' }}>Naam *</label>
             <input type="text" value={naam} onChange={e => setNaam(e.target.value)} required placeholder="Voor- en achternaam"
-              style={{ width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px', padding: '9px 14px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'white' }} />
+              style={{ width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '8px', padding: '9px 14px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'var(--z-kaart)' }} />
           </div>
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: 'var(--z-tekst-2)', marginBottom: '6px' }}>Profielfoto (optioneel)</label>
             <input type="file" accept="image/*" onChange={e => setFotoBestand(e.target.files[0])} style={{ fontSize: '13px', color: 'var(--z-tekst-2)' }} />
           </div>
-          <button type="submit" disabled={opslaan} style={{ background: 'var(--z-tekst)', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', alignSelf: 'flex-start', opacity: opslaan ? 0.6 : 1 }}>
+          <button type="submit" disabled={opslaan} style={{ background: 'var(--z-donker)', color: 'white', border: 'none', borderRadius: '8px', padding: '9px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', alignSelf: 'flex-start', opacity: opslaan ? 0.6 : 1 }}>
             {opslaan ? 'Opslaan...' : 'Toevoegen'}
           </button>
         </form>
@@ -181,7 +181,7 @@ export default function TabSpelers() {
 
       {/* Spelerslijst */}
       {spelers.length === 0 ? (
-        <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
+        <div style={{ background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
           <p style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Nog geen spelers. Voeg de eerste toe!</p>
         </div>
       ) : (
@@ -190,7 +190,7 @@ export default function TabSpelers() {
             <div key={speler.id}>
               {/* Speler rij */}
               <div style={{
-                background: 'white', border: `1px solid ${bewerkId === speler.id ? '#93c5fd' : 'var(--z-lijn)'}`,
+                background: 'var(--z-kaart)', border: `1px solid ${bewerkId === speler.id ? '#93c5fd' : 'var(--z-lijn)'}`,
                 borderRadius: (bewerkId === speler.id || badgePaneel === speler.id) ? '10px 10px 0 0' : '10px',
                 padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px',
               }}>
@@ -211,7 +211,7 @@ export default function TabSpelers() {
                     title="Handmatige badges toekennen"
                     style={{
                       display: 'flex', alignItems: 'center', gap: '5px',
-                      background: badgePaneel === speler.id ? 'var(--z-lijn-zacht)' : 'white',
+                      background: badgePaneel === speler.id ? 'var(--z-lijn-zacht)' : 'var(--z-kaart)',
                       border: '1px solid var(--z-lijn)', borderRadius: '6px',
                       padding: '5px 12px', fontSize: '13px', fontWeight: '500',
                       color: 'var(--z-tekst-2)', cursor: 'pointer',
@@ -222,7 +222,7 @@ export default function TabSpelers() {
                       <span style={{
                         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                         minWidth: '17px', height: '17px', padding: '0 4px', borderRadius: '9px',
-                        background: 'var(--z-tekst)', color: 'white', fontSize: '10px', fontWeight: '700',
+                        background: 'var(--z-donker)', color: 'white', fontSize: '10px', fontWeight: '700',
                       }}>
                         {toegekend[speler.id].size}
                       </span>
@@ -231,7 +231,7 @@ export default function TabSpelers() {
                   <button
                     onClick={() => bewerkId === speler.id ? stopBewerken() : startBewerken(speler)}
                     style={{
-                      background: bewerkId === speler.id ? 'var(--z-lijn-zacht)' : 'white',
+                      background: bewerkId === speler.id ? 'var(--z-lijn-zacht)' : 'var(--z-kaart)',
                       border: '1px solid var(--z-lijn)', borderRadius: '6px',
                       padding: '5px 12px', fontSize: '13px', fontWeight: '500',
                       color: 'var(--z-tekst-2)', cursor: 'pointer',
@@ -279,7 +279,7 @@ export default function TabSpelers() {
                             display: 'flex', alignItems: 'center', gap: '9px',
                             padding: '9px 14px', borderRadius: '10px',
                             border: `1.5px solid ${heeft ? c.lbo : 'var(--z-lijn)'}`,
-                            background: heeft ? c.lb : 'white',
+                            background: heeft ? c.lb : 'var(--z-kaart)',
                             color: heeft ? c.lc : 'var(--z-tekst-3)',
                             fontSize: '13px', fontWeight: heeft ? '700' : '500',
                             cursor: bezig ? 'wait' : 'pointer',
@@ -320,7 +320,7 @@ export default function TabSpelers() {
                     <div style={{ flex: 1, minWidth: '200px' }}>
                       <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-3)', marginBottom: '5px' }}>Naam</label>
                       <input type="text" value={bewerkNaam} onChange={e => setBewerkNaam(e.target.value)} required
-                        style={{ width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '7px', padding: '8px 12px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'white' }} />
+                        style={{ width: '100%', border: '1px solid var(--z-lijn)', borderRadius: '7px', padding: '8px 12px', fontSize: '14px', color: 'var(--z-tekst)', outline: 'none', background: 'var(--z-kaart)' }} />
                     </div>
                     <div style={{ flex: 1, minWidth: '200px' }}>
                       <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: 'var(--z-tekst-3)', marginBottom: '5px' }}>Nieuwe foto (optioneel)</label>
@@ -330,7 +330,7 @@ export default function TabSpelers() {
                   </div>
 
                   <button type="submit" disabled={bewerkOpslaan} style={{
-                    background: 'var(--z-tekst)', color: 'white', border: 'none', borderRadius: '7px',
+                    background: 'var(--z-donker)', color: 'white', border: 'none', borderRadius: '7px',
                     padding: '8px 18px', fontSize: '13px', fontWeight: '600',
                     cursor: 'pointer', alignSelf: 'flex-start', opacity: bewerkOpslaan ? 0.6 : 1,
                   }}>

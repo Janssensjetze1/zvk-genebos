@@ -86,7 +86,7 @@ export default function TabTeams() {
           <TabKop titel="Eigen team" subtitel="De ploeg waar het klassement en de stats op slaan" />
           <div>
             <div style={{
-              background: 'white',
+              background: 'var(--z-kaart)',
               border: `1px solid ${bewerkId === zvkTeam.id ? '#93c5fd' : 'var(--z-lijn)'}`,
               borderRadius: bewerkId === zvkTeam.id ? '10px 10px 0 0' : '10px',
               padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px',
@@ -104,7 +104,7 @@ export default function TabTeams() {
               <button
                 onClick={() => bewerkId === zvkTeam.id ? stopBewerken() : startBewerken(zvkTeam)}
                 style={{
-                  background: bewerkId === zvkTeam.id ? 'var(--z-lijn-zacht)' : 'white',
+                  background: bewerkId === zvkTeam.id ? 'var(--z-lijn-zacht)' : 'var(--z-kaart)',
                   border: '1px solid var(--z-lijn)', borderRadius: '6px',
                   padding: '5px 12px', fontSize: '13px', fontWeight: '500',
                   color: 'var(--z-tekst-2)', cursor: 'pointer',
@@ -190,7 +190,7 @@ export default function TabTeams() {
             {tegenstanders.map(team => (
               <div key={team.id}>
                 <div style={{
-                  background: 'white',
+                  background: 'var(--z-kaart)',
                   border: `1px solid ${bewerkId === team.id ? '#93c5fd' : 'var(--z-lijn)'}`,
                   borderRadius: bewerkId === team.id ? '10px 10px 0 0' : '10px',
                   padding: '11px 16px', display: 'flex', alignItems: 'center', gap: '12px',
@@ -210,7 +210,7 @@ export default function TabTeams() {
                     <button
                       onClick={() => bewerkId === team.id ? stopBewerken() : startBewerken(team)}
                       style={{
-                        background: bewerkId === team.id ? 'var(--z-lijn-zacht)' : 'white',
+                        background: bewerkId === team.id ? 'var(--z-lijn-zacht)' : 'var(--z-kaart)',
                         border: '1px solid var(--z-lijn)', borderRadius: '6px',
                         padding: '5px 12px', fontSize: '13px', fontWeight: '500',
                         color: 'var(--z-tekst-2)', cursor: 'pointer',

@@ -19,6 +19,7 @@
   --z-tekst-2: #475569;
   --z-tekst-3: #64748b;
   --z-tekst-4: #94a3b8;
+  --z-donker:  #0f172a;   /* donkere vlakken met witte tekst (knoppen) */
 
   /* Vlakken en lijnen */
   --z-achtergrond: #f3f5f9;
@@ -47,6 +48,48 @@
   --z-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --z-font-merk: 'Roboto Slab', Georgia, serif;
 }
+
+/* ─── Donker thema ──────────────────────────────────────────────────────────
+   Aan via <html data-thema="donker">; zie src/lib/thema.js. Enkel de
+   variabelen wisselen, de componenten zelf blijven dezelfde. */
+
+:root[data-thema="donker"] {
+  color-scheme: dark;
+
+  --z-blauw-50:  #172449;
+  --z-blauw-100: #1c2d5c;
+  --z-blauw-200: #2c4385;
+  --z-blauw-500: #7aa0ff;
+  --z-blauw:     #4170f0;
+  --z-blauw-700: #3460e0;
+
+  --z-tekst:   #e7ecf6;
+  --z-tekst-2: #b7c1d6;
+  --z-tekst-3: #8e9ab3;
+  --z-tekst-4: #67738d;
+  --z-donker:  #2b3856;
+
+  --z-achtergrond: #0a111f;
+  --z-kaart:       #121b2d;
+  --z-vlak:        #172136;
+  --z-lijn-zacht:  #1b263d;
+  --z-lijn:        #25314b;
+  --z-lijn-sterk:  #36435f;
+
+  --z-winst:   #4ade80;  --z-winst-bg:   rgba(34, 197, 94, 0.12);  --z-winst-rand:   rgba(34, 197, 94, 0.3);
+  --z-gelijk:  #fbbf24;  --z-gelijk-bg:  rgba(245, 158, 11, 0.12); --z-gelijk-rand:  rgba(245, 158, 11, 0.3);
+  --z-verlies: #f87171;  --z-verlies-bg: rgba(239, 68, 68, 0.12);  --z-verlies-rand: rgba(239, 68, 68, 0.3);
+  --z-goud:    #fbbf24;
+  --z-paars:   #a78bfa;  --z-paars-bg:   rgba(139, 92, 246, 0.15);
+
+  --z-schaduw-s: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --z-schaduw:   0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --z-schaduw-l: 0 4px 12px rgba(0, 0, 0, 0.35), 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+:root[data-thema="donker"] body { background: var(--z-achtergrond); }
+:root[data-thema="donker"] .z-topbalk { background: rgba(10, 17, 31, 0.85); }
+:root[data-thema="donker"] .z-segment button[aria-pressed='true'] { background: var(--z-lijn-sterk); }
+:root[data-thema="donker"] .z-tabbalk { background: rgba(18, 27, 45, 0.92); }
 
 /* ─── Basis ─────────────────────────────────────────────────────────────── */
 
@@ -333,8 +376,8 @@
 
 .z-knop-primair { background: var(--z-blauw); border-color: var(--z-blauw); color: white; }
 .z-knop-primair:hover:not(:disabled) { background: var(--z-blauw-700); border-color: var(--z-blauw-700); }
-.z-knop-donker { background: var(--z-tekst); border-color: var(--z-tekst); color: white; }
-.z-knop-donker:hover:not(:disabled) { background: #1e293b; border-color: #1e293b; }
+.z-knop-donker { background: var(--z-donker); border-color: var(--z-donker); color: white; }
+.z-knop-donker:hover:not(:disabled) { filter: brightness(1.25); }
 .z-knop-gevaar { color: var(--z-verlies); border-color: var(--z-verlies-rand); }
 .z-knop-gevaar:hover:not(:disabled) { background: var(--z-verlies-bg); border-color: var(--z-verlies-rand); }
 .z-knop-stil { background: transparent; border-color: transparent; box-shadow: none; color: var(--z-tekst-3); }
@@ -454,7 +497,7 @@
   100% { background-position: calc(200px + 100%) 0; }
 }
 .z-skelet {
-  background: linear-gradient(90deg, var(--z-lijn-zacht) 0px, #f7f9fc 80px, var(--z-lijn-zacht) 160px);
+  background: linear-gradient(90deg, var(--z-lijn-zacht) 0px, var(--z-vlak) 80px, var(--z-lijn-zacht) 160px);
   background-size: 200px 100%;
   background-repeat: no-repeat;
   background-color: var(--z-lijn-zacht);
@@ -804,7 +847,7 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
   flex: 0 0 auto;
   padding: 12px 20px;
   background: rgba(255, 255, 255, 0.95);
-  color: var(--z-tekst);
+  color: #0f172a; /* de pil is altijd navy-wit, ook in het donkere thema */
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.22), inset 0 1px 0 #fff;
 }
 .z-pil[aria-current='page'] .z-pil-label { display: inline; }

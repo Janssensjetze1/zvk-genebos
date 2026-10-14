@@ -130,7 +130,7 @@ export default function TabLeden() {
         {goedgekeurd.length === 0 ? (
           <div style={{ fontSize: '14px', color: 'var(--z-tekst-4)' }}>Nog geen goedgekeurde leden.</div>
         ) : (
-          <div style={{ background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '14px', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: '14px', overflow: 'hidden' }}>
             {goedgekeurd.map((p, i) => (
               <LedenRij key={p.id} profiel={p} spelers={spelers}
                 isLast={i === goedgekeurd.length - 1}
@@ -198,7 +198,7 @@ function RolBadge({ role }) {
 // Selectbox stijl
 const selectStyle = {
   fontSize: '13px', border: '1px solid var(--z-lijn)', borderRadius: '8px',
-  padding: '6px 10px', color: 'var(--z-tekst-2)', background: 'white', outline: 'none', cursor: 'pointer',
+  padding: '6px 10px', color: 'var(--z-tekst-2)', background: 'var(--z-kaart)', outline: 'none', cursor: 'pointer',
 }
 
 // Kaart voor wachtende leden
@@ -241,13 +241,13 @@ function WachtendKaart({ profiel, spelers, onGoedkeuren, onWeigeren, onKoppelSpe
 
       <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
         <button onClick={onGoedkeuren} style={{
-          background: 'var(--z-tekst)', color: 'white', border: 'none',
+          background: 'var(--z-donker)', color: 'white', border: 'none',
           borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
         }}>
           Goedkeuren
         </button>
         <button onClick={onWeigeren} style={{
-          background: 'white', color: 'var(--z-verlies)', border: '1px solid var(--z-verlies-rand)',
+          background: 'var(--z-kaart)', color: 'var(--z-verlies)', border: '1px solid var(--z-verlies-rand)',
           borderRadius: '8px', padding: '8px 12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
         }}>
           Weigeren
@@ -275,7 +275,7 @@ function LedenRij({ profiel, spelers, isLast, onKoppelSpeler, onSetRol }) {
           padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '14px',
           cursor: 'pointer', transition: 'background 0.1s',
         }}
-        onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
+        onMouseEnter={e => e.currentTarget.style.background = 'var(--z-vlak)'}
         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
       >
         <Avatar naam={profiel.display_name || profiel.email} role={profiel.role} photoUrl={profiel.avatar_url} size={38} />

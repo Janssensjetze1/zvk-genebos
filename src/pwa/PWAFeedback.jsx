@@ -83,7 +83,7 @@ export default function PWAFeedback() {
           <button
             onClick={() => setVerzonden(false)}
             style={{
-              background: 'white', border: '1.5px solid var(--z-winst-rand)', color: 'var(--z-winst)',
+              background: 'var(--z-kaart)', border: '1.5px solid var(--z-winst-rand)', color: 'var(--z-winst)',
               borderRadius: '10px', padding: '9px 16px',
               fontSize: '13px', fontWeight: '600', cursor: 'pointer',
             }}
@@ -93,7 +93,7 @@ export default function PWAFeedback() {
         </div>
       ) : (
         <div style={{
-          background: 'white', borderRadius: '16px', border: '1.5px solid var(--z-lijn)',
+          background: 'var(--z-kaart)', borderRadius: '16px', border: '1.5px solid var(--z-lijn)',
           boxShadow: '0 1px 4px rgba(0,0,0,0.04)', padding: '16px', marginBottom: '24px',
           display: 'flex', flexDirection: 'column', gap: '14px',
         }}>
@@ -117,7 +117,7 @@ export default function PWAFeedback() {
                       display: 'flex', alignItems: 'center', gap: '10px',
                       padding: '11px 14px', borderRadius: '10px',
                       border: `1.5px solid ${actief ? c.rand : 'var(--z-lijn)'}`,
-                      background: actief ? c.bg : 'white',
+                      background: actief ? c.bg : 'var(--z-kaart)',
                       color: actief ? c.kleur : 'var(--z-tekst-3)',
                       fontSize: '13px', fontWeight: actief ? '700' : '500',
                       cursor: 'pointer', textAlign: 'left', width: '100%',
@@ -164,7 +164,7 @@ export default function PWAFeedback() {
                 border: '1.5px solid var(--z-lijn)', borderRadius: '10px',
                 padding: '12px', fontSize: '14px', color: 'var(--z-tekst)',
                 fontFamily: 'inherit', lineHeight: 1.6, resize: 'vertical',
-                outline: 'none', background: '#fafafa',
+                outline: 'none', background: 'var(--z-vlak)',
               }}
             />
           </div>
@@ -184,7 +184,7 @@ export default function PWAFeedback() {
             style={{
               width: '100%', padding: '13px',
               borderRadius: '12px', border: 'none',
-              background: !bericht.trim() || teLang ? 'var(--z-lijn)' : 'var(--z-tekst)',
+              background: !bericht.trim() || teLang ? 'var(--z-lijn)' : 'var(--z-donker)',
               color: !bericht.trim() || teLang ? 'var(--z-tekst-4)' : 'white',
               fontSize: '14px', fontWeight: '700',
               cursor: !bericht.trim() || teLang || versturen ? 'not-allowed' : 'pointer',
@@ -214,7 +214,7 @@ export default function PWAFeedback() {
               const cat = CATEGORIEEN.find(c => c.id === f.categorie) ?? CATEGORIEEN[2]
               return (
                 <div key={f.id} style={{
-                  background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px',
+                  background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: '12px',
                   padding: '12px 14px',
                 }}>
                   <div style={{

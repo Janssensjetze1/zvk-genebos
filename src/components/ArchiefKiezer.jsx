@@ -36,7 +36,7 @@ export function ArchiefKiezer() {
           display: 'flex', alignItems: 'center', gap: '7px',
           padding: '7px 13px', borderRadius: '8px', cursor: 'pointer',
           border: isArchief ? '1.5px solid var(--z-gelijk)' : '1px solid var(--z-lijn)',
-          background: isArchief ? '#fef3c7' : 'white',
+          background: isArchief ? '#fef3c7' : 'var(--z-kaart)',
           color: isArchief ? '#92400e' : 'var(--z-tekst-2)',
           fontSize: '13px', fontWeight: isArchief ? '700' : '500',
           transition: 'all 0.15s',
@@ -53,7 +53,7 @@ export function ArchiefKiezer() {
       {open && (
         <div style={{
           position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 200,
-          background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '12px',
+          background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: '12px',
           boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
           minWidth: '200px', overflow: 'hidden',
         }}>
@@ -69,7 +69,7 @@ export function ArchiefKiezer() {
               onClick={() => kies(s)}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
-                padding: '10px 14px', border: 'none', background: actief?.id === s.id ? '#fef3c7' : 'white',
+                padding: '10px 14px', border: 'none', background: actief?.id === s.id ? '#fef3c7' : 'var(--z-kaart)',
                 cursor: 'pointer', textAlign: 'left', fontSize: '13px',
                 color: actief?.id === s.id ? '#92400e' : 'var(--z-tekst-2)',
                 fontWeight: actief?.id === s.id ? '700' : '400',
@@ -77,7 +77,7 @@ export function ArchiefKiezer() {
                 borderBottom: '1px solid var(--z-vlak)',
               }}
               onMouseEnter={e => { if (actief?.id !== s.id) e.currentTarget.style.background = 'var(--z-vlak)' }}
-              onMouseLeave={e => { if (actief?.id !== s.id) e.currentTarget.style.background = 'white' }}
+              onMouseLeave={e => { if (actief?.id !== s.id) e.currentTarget.style.background = 'var(--z-kaart)' }}
             >
               <span style={{ fontSize: '14px' }}>📦</span>
               <span>{s.name}</span>

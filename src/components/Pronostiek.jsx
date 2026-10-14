@@ -17,7 +17,7 @@ function Stepper({ label, waarde, zet, disabled }) {
       aria-label={`${label} ${teken === '−' ? 'minder' : 'meer'}`}
       style={{
         width: '30px', height: '30px', borderRadius: '9px', flexShrink: 0,
-        border: '1px solid var(--z-lijn)', background: 'white',
+        border: '1px solid var(--z-lijn)', background: 'var(--z-kaart)',
         color: uit ? 'var(--z-lijn-sterk)' : 'var(--z-tekst-2)',
         fontSize: '16px', fontWeight: '700', lineHeight: 1,
         cursor: disabled || uit ? 'not-allowed' : 'pointer',

@@ -14,8 +14,8 @@ const MAAT = {
 
 function Knop({ soort = 'stil', onClick, disabled, children }) {
   const stijlen = {
-    vol:  { background: 'var(--z-tekst)', color: 'white', border: 'none' },
-    rand: { background: 'white', color: 'var(--z-tekst-2)', border: '1px solid var(--z-lijn)' },
+    vol:  { background: 'var(--z-donker)', color: 'white', border: 'none' },
+    rand: { background: 'var(--z-kaart)', color: 'var(--z-tekst-2)', border: '1px solid var(--z-lijn)' },
     stil: { background: 'none', color: 'var(--z-tekst-4)', border: 'none', textDecoration: 'underline', padding: '0' },
   }
   return (
@@ -82,7 +82,7 @@ export default function VerslagPaneel({ verslagState: v, variant = 'pwa', toonGe
               width: '100%', boxSizing: 'border-box',
               fontSize: maat.tekst, lineHeight: 1.7, color: 'var(--z-tekst-2)',
               fontFamily: 'inherit',
-              background: 'white', border: '1.5px solid var(--z-lijn)', borderRadius: '10px',
+              background: 'var(--z-kaart)', border: '1.5px solid var(--z-lijn)', borderRadius: '10px',
               padding: '12px', resize: 'vertical', outline: 'none',
             }}
           />

@@ -79,7 +79,7 @@ export function AnnouncementPopup() {
         transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s',
         width: 'calc(100% - 48px)',
         maxWidth: '400px',
-        background: 'white',
+        background: 'var(--z-kaart)',
         borderRadius: '20px',
         boxShadow: '0 24px 64px rgba(0,0,0,0.25)',
         overflow: 'hidden',
@@ -127,7 +127,7 @@ export function AnnouncementPopup() {
           <button
             onClick={handleSluiten}
             style={{
-              width: '100%', background: 'var(--z-tekst)', color: 'white',
+              width: '100%', background: 'var(--z-donker)', color: 'white',
               border: 'none', borderRadius: '12px', padding: '13px',
               fontSize: '14px', fontWeight: '700', cursor: 'pointer',
               transition: 'background 0.15s',

@@ -10,6 +10,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Slab:wght@700&display=swap" rel="stylesheet" />
     <title>ZVK Genebos</title>
+    <script>
+      // Thema zetten vóór de app start, zodat er niets licht flitst (zie src/lib/thema.js)
+      try {
+        var k = localStorage.getItem('zvk_thema') || 'licht'
+        var d = k === 'donker' || (k === 'systeem' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.thema = d ? 'donker' : 'licht'
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

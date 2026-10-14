@@ -17,7 +17,7 @@ const ACCENT = 'var(--z-blauw)'
 function Kaart({ children, style }) {
   return (
     <div style={{
-      background: 'white', border: '1px solid var(--z-lijn)', borderRadius: 'var(--z-r)',
+      background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: 'var(--z-r)',
       boxShadow: 'var(--z-schaduw-s)', overflow: 'hidden', ...style,
     }}>{children}</div>
   )
@@ -330,7 +330,7 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
                   display: 'grid', gridTemplateColumns: '28px 1fr 30px 30px 40px',
                   padding: '13px 14px', alignItems: 'center',
                   borderBottom: i < rijen.length - 1 ? '1px solid var(--z-vlak)' : 'none',
-                  background: ikzelf ? 'var(--z-blauw-50)' : 'white',
+                  background: ikzelf ? 'var(--z-blauw-50)' : 'var(--z-kaart)',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     {top3 ? (
@@ -381,7 +381,7 @@ export default function PronostiekOverzicht({ variant = 'pwa' }) {
                 <span style={{
                   flexShrink: 0, width: '30px', textAlign: 'center',
                   fontSize: '12px', fontWeight: '800', color: ACCENT,
-                  background: 'white', border: '1px solid var(--z-lijn)', borderRadius: '7px', padding: '2px 0',
+                  background: 'var(--z-kaart)', border: '1px solid var(--z-lijn)', borderRadius: '7px', padding: '2px 0',
                 }}>{p.punten}</span>
                 <span style={{ fontSize: '12px', color: 'var(--z-tekst-3)', lineHeight: 1.4 }}>{p.tekst}</span>
               </div>
