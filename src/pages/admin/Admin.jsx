@@ -9,6 +9,7 @@ import TabMeldingen from './tabs/TabMeldingen'
 import TabFeedback from './tabs/TabFeedback'
 import TabQuotes from './tabs/TabQuotes'
 import TabGebruik from './tabs/TabGebruik'
+import TabDatabase from './tabs/TabDatabase'
 import { useBeheerTellers } from './useBeheerTellers'
 import { Teller } from './ui'
 import { Icoon, PaginaKop } from '../../ui'
@@ -22,6 +23,7 @@ const ONDERDELEN = [
   { id: 'meldingen',   label: 'Meldingen',   icon: 'bel' },
   { id: 'quotes',      label: 'Quotes',      icon: 'citaat' },
   { id: 'gebruik',     label: 'Gebruik',     icon: 'klassement' },
+  { id: 'database',    label: 'Database',    icon: 'archief' },
   { id: 'feedback',    label: 'Feedback',    icon: 'inbox', teller: 'ongelezenFeedback', tellerKleur: 'var(--z-paars)' },
 ]
 
@@ -77,6 +79,7 @@ export default function Admin() {
           {actieveTab === 'meldingen' && <TabMeldingen />}
           {actieveTab === 'quotes' && <TabQuotes />}
           {actieveTab === 'gebruik' && <TabGebruik />}
+          {actieveTab === 'database' && <TabDatabase />}
           {actieveTab === 'feedback' && (
             <TabFeedback onGelezen={() => tellers.setTellers(t => ({ ...t, ongelezenFeedback: 0 }))} />
           )}

@@ -1226,3 +1226,27 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
 .z-gebruik-kolom > span { font-size: 11px; font-weight: 700; color: var(--z-tekst-3); min-height: 14px; }
 .z-gebruik-kolom > div { width: 100%; max-width: 34px; border-radius: 6px 6px 2px 2px; background: var(--z-blauw); }
 .z-gebruik-kolom > small { font-size: 10px; color: var(--z-tekst-4); white-space: nowrap; }
+
+/* ─── Beheer: databaseschema ────────────────────────────────────────────── */
+
+.z-db-vlak { position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 40px 48px; padding: 22px; align-items: start; }
+.z-db-lijnen { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.z-db-groep { position: relative; display: flex; flex-direction: column; gap: 16px; }
+.z-db-groepkop { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.z-db-tabel {
+  position: relative; z-index: 1; overflow: hidden; cursor: pointer;
+  background: var(--z-kaart); border: 1px solid var(--z-lijn); border-radius: var(--z-r);
+  box-shadow: var(--z-schaduw-s); transition: opacity 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.z-db-tabel:hover { border-color: var(--z-lijn-sterk); }
+.z-db-tabelkop {
+  display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px;
+  border-top: 3px solid; border-bottom: 1px solid var(--z-lijn-zacht);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; font-weight: 700; color: var(--z-tekst);
+}
+.z-db-view { margin-left: auto; font-family: var(--z-font); font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 99px; background: var(--z-paars-bg); color: var(--z-paars); }
+.z-db-uitleg { padding: 6px 12px 7px; font-size: 11px; line-height: 1.4; color: var(--z-tekst-4); border-bottom: 1px solid var(--z-lijn-zacht); }
+.z-db-kolom { display: flex; align-items: center; gap: 6px; height: 24px; padding: 0 12px 0 8px; font-size: 12px; }
+.z-db-sleutel { width: 18px; flex-shrink: 0; font-size: 9px; font-weight: 800; text-align: center; }
+.z-db-naam { flex: 1; min-width: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--z-tekst-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.z-db-type { flex-shrink: 0; font-size: 11px; color: var(--z-tekst-4); }
