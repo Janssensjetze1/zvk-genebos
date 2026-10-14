@@ -1165,3 +1165,21 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
   .z-pint-links, .z-pint-rechts, .z-pint-bel, .z-pintjes-spat span { animation: none; }
   .z-pintjes-tekst { animation: z-pintjes-scherm 2.2s ease both; }
 }
+
+/* Beheer: gebruik per lid */
+.z-gebruik th { font-size: 12px; font-weight: 600; color: var(--z-tekst-4); padding: 12px 12px; border-bottom: 1px solid var(--z-lijn); white-space: nowrap; }
+.z-gebruik td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--z-lijn-zacht); vertical-align: middle; }
+.z-gebruik tr:last-child td { border-bottom: none; }
+.z-gebruik-emoji {
+  display: inline-flex; align-items: center; gap: 3px; height: 24px; padding: 0 7px;
+  border-radius: 99px; background: var(--z-vlak); border: 1px solid var(--z-lijn); font-size: 13px;
+}
+.z-gebruik-emoji b { font-size: 11px; font-weight: 700; color: var(--z-tekst-3); font-variant-numeric: tabular-nums; }
+.z-gebruik-balk { flex: 1; height: 8px; border-radius: 99px; background: var(--z-lijn-zacht); overflow: hidden; }
+.z-gebruik-balk > div { height: 100%; border-radius: 99px; background: var(--z-blauw); }
+
+.z-gebruik-grafiek { display: flex; align-items: stretch; gap: 8px; height: 170px; }
+.z-gebruik-kolom { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; min-width: 0; }
+.z-gebruik-kolom > span { font-size: 11px; font-weight: 700; color: var(--z-tekst-3); min-height: 14px; }
+.z-gebruik-kolom > div { width: 100%; max-width: 34px; border-radius: 6px 6px 2px 2px; background: var(--z-blauw); }
+.z-gebruik-kolom > small { font-size: 10px; color: var(--z-tekst-4); white-space: nowrap; }
