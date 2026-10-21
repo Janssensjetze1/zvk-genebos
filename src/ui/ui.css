@@ -1318,3 +1318,359 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
   .z-db-vlak { grid-template-columns: minmax(0, 1fr); padding: 14px; }
   .z-db-lijnen { display: none; }
 }
+
+/* ─── Fanshop ───────────────────────────────────────────────────────────────
+   Hero in clubblauw met het logo in de achtergrond, daaronder een galerij
+   van producten. Bestellen gebeurt in een .z-paneel. Zie src/components/Fanshop.jsx. */
+
+.z-shop { display: flex; flex-direction: column; gap: 28px; }
+
+.z-shop-held {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 22px;
+  padding: 28px 22px;
+  color: white;
+  background:
+    radial-gradient(90% 120% at 100% 0%, rgba(65, 112, 240, 0.55) 0%, transparent 55%),
+    radial-gradient(70% 90% at 0% 100%, rgba(31, 79, 216, 0.35) 0%, transparent 60%),
+    linear-gradient(160deg, #13234d 0%, #0c1a3d 70%);
+  box-shadow: 0 18px 50px rgba(12, 26, 61, 0.28);
+}
+.z-shop-held::before {
+  /* fijne lichtvlekken, als schijnwerpers boven het veld */
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(2px 2px at 18% 22%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1.5px 1.5px at 72% 14%, rgba(255,255,255,0.45), transparent),
+    radial-gradient(1.5px 1.5px at 86% 46%, rgba(255,255,255,0.35), transparent),
+    radial-gradient(2px 2px at 38% 64%, rgba(255,255,255,0.25), transparent);
+}
+.z-shop-held-logo {
+  position: absolute;
+  z-index: -1;
+  right: -60px;
+  top: -40px;
+  width: 280px;
+  opacity: 0.13;
+  transform: rotate(-14deg);
+  pointer-events: none;
+}
+.z-shop-bovenlabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a9c1ff;
+}
+.z-shop-bovenlabel::before { content: ''; width: 18px; height: 2px; background: currentColor; border-radius: 2px; }
+.z-shop-titel {
+  font-family: var(--z-font-merk);
+  font-size: clamp(34px, 9vw, 52px);
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  margin: 12px 0 12px;
+  text-wrap: balance;
+}
+.z-shop-titel span {
+  background: linear-gradient(90deg, #ffffff 0%, #a9c1ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.z-shop-held p { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.72); max-width: 440px; margin: 0; white-space: pre-wrap; }
+.z-shop-held-rij { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+
+.z-shop-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.16);
+  backdrop-filter: blur(6px);
+}
+.z-shop-status i { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 0 rgba(74,222,128,0.6); animation: z-shop-puls 2s infinite; }
+.z-shop-status-dicht i { background: #f87171; animation: none; }
+@keyframes z-shop-puls { 0% { box-shadow: 0 0 0 0 rgba(74,222,128,0.55); } 70% { box-shadow: 0 0 0 8px rgba(74,222,128,0); } 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); } }
+
+.z-shop-mandje {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 99px;
+  border: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0c1a3d;
+  background: white;
+  cursor: pointer;
+}
+.z-shop-mandje:hover { background: #e8eeff; }
+
+/* Galerij */
+.z-shop-kop { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.z-shop-kop h2 { font-family: var(--z-font-merk); font-size: 22px; color: var(--z-tekst); margin: 0; }
+.z-shop-kop span { font-size: 13px; color: var(--z-tekst-4); }
+
+.z-shop-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 16px; }
+
+.z-shop-product {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid var(--z-lijn);
+  background: var(--z-kaart);
+  box-shadow: var(--z-schaduw);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+  animation: z-shop-op 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes z-shop-op { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.z-shop-product:focus-visible { outline: 2px solid var(--z-blauw-500); outline-offset: 3px; }
+@media (hover: hover) {
+  .z-shop-product:hover { transform: translateY(-4px); box-shadow: var(--z-schaduw-l); border-color: var(--z-blauw-200); }
+  .z-shop-product:hover .z-shop-beeld img.z-shop-foto { transform: scale(1.06); }
+  .z-shop-product:hover .z-shop-pijl { transform: translateX(3px); background: var(--z-blauw); color: white; }
+}
+.z-shop-product:active { transform: scale(0.99); }
+
+.z-shop-beeld { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--z-navy); }
+.z-shop-beeld img.z-shop-foto { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+/* Zonder foto: een sjaal die schuin door het beeld loopt, met het logo erop */
+.z-shop-plaats {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(100% 100% at 50% 0%, #2a4fb8 0%, #13234d 55%, #0c1a3d 100%);
+}
+.z-shop-plaats::before {
+  content: '';
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  top: 50%;
+  height: 34%;
+  transform: translateY(-50%) rotate(-12deg);
+  background: repeating-linear-gradient(90deg, #1f4fd8 0 34px, #ffffff 34px 68px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+.z-shop-plaats img { position: relative; width: 34%; max-width: 110px; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.45)); }
+
+.z-shop-prijs {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 6px 12px;
+  border-radius: 99px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0c1a3d;
+  background: white;
+  box-shadow: 0 6px 18px rgba(12, 26, 61, 0.3);
+  font-variant-numeric: tabular-nums;
+}
+.z-shop-lint {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  background: rgba(21, 128, 61, 0.92);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.z-shop-info { display: flex; flex-direction: column; gap: 8px; padding: 16px 16px 18px; flex: 1; }
+.z-shop-naam { font-family: var(--z-font-merk); font-size: 19px; line-height: 1.2; color: var(--z-tekst); }
+.z-shop-tekst {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--z-tekst-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.z-shop-voet { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 6px; }
+.z-shop-maten { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+.z-shop-maten span { font-size: 11px; font-weight: 700; padding: 3px 7px; border-radius: 6px; background: var(--z-vlak); border: 1px solid var(--z-lijn); color: var(--z-tekst-2); }
+.z-shop-pijl {
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--z-blauw-50);
+  color: var(--z-blauw);
+  transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+}
+
+/* Detailpaneel: de inhoud bepaalt de hoogte, tot het maximum van .z-paneel */
+.z-shop-paneel { overflow: hidden; }
+.z-shop-paneel .z-paneel-inhoud { flex: 1 1 auto; }
+.z-shop-paneel-beeld { position: relative; aspect-ratio: 16 / 10; margin: -20px -20px 0; overflow: hidden; background: var(--z-navy); }
+.z-shop-paneel-beeld img.z-shop-foto { width: 100%; height: 100%; object-fit: cover; display: block; }
+.z-shop-sluit {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background: rgba(12, 26, 61, 0.55);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+.z-shop-maatknoppen { display: flex; gap: 8px; flex-wrap: wrap; }
+.z-shop-maatknop {
+  position: relative;
+  min-width: 52px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--z-lijn);
+  background: var(--z-kaart);
+  color: var(--z-tekst-2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.z-shop-maatknop[aria-pressed='true'] { border-color: var(--z-blauw); background: var(--z-blauw); color: white; box-shadow: 0 6px 16px rgba(31, 79, 216, 0.3); }
+.z-shop-maatknop i { position: absolute; top: -4px; right: -4px; width: 11px; height: 11px; border-radius: 50%; background: var(--z-winst); border: 2px solid var(--z-achtergrond); }
+
+.z-shop-teller {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 14px;
+  border: 1.5px solid var(--z-lijn);
+  background: var(--z-kaart);
+  overflow: hidden;
+}
+.z-shop-teller button {
+  width: 46px;
+  height: 46px;
+  border: none;
+  background: none;
+  color: var(--z-tekst);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.z-shop-teller button:disabled { color: var(--z-lijn-sterk); cursor: not-allowed; }
+.z-shop-teller button:not(:disabled):hover { background: var(--z-vlak); }
+.z-shop-teller output { min-width: 40px; text-align: center; font-size: 20px; font-weight: 800; color: var(--z-tekst); font-variant-numeric: tabular-nums; }
+
+.z-shop-cta {
+  flex: 1;
+  height: 50px;
+  border: none;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  color: white;
+  cursor: pointer;
+  background: linear-gradient(135deg, #2f63ef 0%, #1a40b0 100%);
+  box-shadow: 0 10px 24px rgba(31, 79, 216, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+.z-shop-cta:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(31, 79, 216, 0.42); }
+.z-shop-cta:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+/* Kassabon met je eigen bestellingen */
+.z-shop-bon {
+  position: relative;
+  background: var(--z-kaart);
+  border: 1px solid var(--z-lijn);
+  border-radius: 18px;
+  box-shadow: var(--z-schaduw);
+  overflow: hidden;
+}
+.z-shop-bon-kop { display: flex; align-items: center; gap: 12px; padding: 16px 18px; }
+.z-shop-bon-kop .z-icoonvak { width: 40px; height: 40px; border-radius: 12px; }
+.z-shop-bon-scheur {
+  height: 14px;
+  background:
+    radial-gradient(circle at 7px 7px, var(--z-achtergrond) 6px, transparent 6.5px) -7px 0 / 14px 14px repeat-x;
+  border-top: 1px dashed var(--z-lijn-sterk);
+  margin-top: -1px;
+}
+.z-shop-bon-regel { display: flex; align-items: center; gap: 12px; padding: 12px 18px; }
+.z-shop-bon-regel + .z-shop-bon-regel { border-top: 1px solid var(--z-lijn-zacht); }
+.z-shop-bon-aantal {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--z-blauw);
+  background: var(--z-blauw-50);
+}
+.z-shop-bon-totaal {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px 16px;
+  background: var(--z-vlak);
+  border-top: 1px dashed var(--z-lijn-sterk);
+}
+.z-shop-bon-totaal strong { font-size: 22px; font-weight: 800; color: var(--z-tekst); font-variant-numeric: tabular-nums; }
+
+/* Stapjes besteld → betaald → afgegeven */
+.z-shop-stappen { display: flex; gap: 3px; margin-top: 6px; }
+.z-shop-stappen span { height: 4px; flex: 1; max-width: 26px; border-radius: 4px; background: var(--z-lijn); }
+.z-shop-stappen span.klaar { background: var(--z-winst); }
+
+@media (min-width: 900px) {
+  .z-shop-held { padding: 44px; border-radius: 26px; }
+  .z-shop-held-logo { width: 420px; right: -40px; top: -80px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .z-shop-status i, .z-shop-product { animation: none; }
+}

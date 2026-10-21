@@ -5,6 +5,7 @@ import { AnnouncementPopup } from '../components/AnnouncementPopup'
 import PWASplashScreen from './PWASplashScreen'
 import WedstrijdFormulier from '../components/WedstrijdFormulier'
 import { Avatar, Icoon } from '../ui'
+import { useShopOpen } from '../hooks/useShopOpen'
 
 const TABS = [
   { path: '/app', label: 'Wedstrijden', icoon: 'kalender' },
@@ -16,6 +17,7 @@ const TABS = [
 const MEER_ITEMS = [
   { label: 'Pronostiek', icoon: 'pronostiek', path: '/app/pronostiek' },
   { label: 'Badges', icoon: 'badge', path: '/app/badges' },
+  { label: 'ZVK-fanshop', icoon: 'winkel', path: '/app/fanshop', enkelAlsShopOpen: true },
   { label: 'Info', icoon: 'info', path: '/app/info' },
   { label: 'Feedback', icoon: 'chat', path: '/app/feedback' },
   { label: 'Instellingen', icoon: 'beheer', path: '/app/account' },
@@ -113,6 +115,7 @@ function usePullToRefresh(mainRef) {
 
 // ─── Meer: bottom sheet met de secundaire schermen ───────────────────────────
 function MeerMenu({ open, onClose, isAdmin, onNieuweWedstrijd }) {
+  const shopOpen = useShopOpen()
   const navigate = useNavigate()
   if (!open) return null
 
@@ -158,7 +161,7 @@ function MeerMenu({ open, onClose, isAdmin, onNieuweWedstrijd }) {
               <Icoon naam="chevron" grootte={16} dikte={2} className="z-chevron" />
             </div>
           )}
-          {MEER_ITEMS.map(item => (
+          {MEER_ITEMS.filter(item => !item.enkelAlsShopOpen || shopOpen).map(item => (
             <div
               key={item.path}
               className="z-rij z-rij-klik"

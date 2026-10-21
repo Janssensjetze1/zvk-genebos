@@ -6,6 +6,7 @@ import { useMatchdayCountdown } from '../hooks/useMatchdayCountdown'
 import { AnnouncementPopup } from './AnnouncementPopup'
 import { Avatar, Icoon } from '../ui'
 import { useThema } from '../lib/thema'
+import { useShopOpen } from '../hooks/useShopOpen'
 
 const NAV = [
   { label: 'Overzicht', path: '/', icoon: 'home' },
@@ -15,6 +16,7 @@ const NAV = [
   { label: 'Spelers', path: '/spelers', icoon: 'spelers' },
   { label: 'Pronostiek', path: '/pronostiek', icoon: 'pronostiek' },
   { label: 'Badges', path: '/badges', icoon: 'badge' },
+  { label: 'ZVK-fanshop', path: '/fanshop', icoon: 'winkel', enkelAlsShopOpen: true },
 ]
 
 const ADMIN_NAV = [
@@ -30,6 +32,7 @@ const TITELS = {
   '/spelers': 'Spelers',
   '/pronostiek': 'Pronostiek',
   '/badges': 'Badges',
+  '/fanshop': 'ZVK-fanshop',
   '/account': 'Account',
   '/admin': 'Beheer',
   '/gouden-jaar': 'Het gouden jaar',
@@ -53,6 +56,7 @@ function Zijbalk() {
   const { isAdmin, signOut, profile } = useAuth()
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const shopOpen = useShopOpen()
 
   async function afmelden() {
     await signOut()
@@ -73,7 +77,7 @@ function Zijbalk() {
       </Link>
 
       <nav className="z-nav">
-        {NAV.map(item => <NavItem key={item.path} item={item} actief={isActief(item.path)} />)}
+        {NAV.filter(item => !item.enkelAlsShopOpen || shopOpen).map(item => <NavItem key={item.path} item={item} actief={isActief(item.path)} />)}
 
         {isAdmin && (
           <>

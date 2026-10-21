@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { SeasonProvider } from './context/SeasonContext'
 import { TopscorerProvider } from './context/TopscorerContext'
-import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute'
+import { ProtectedRoute, AdminRoute, ShopRoute } from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import PWALayout from './pwa/PWALayout'
 import Pintjes from './components/Pintjes'
@@ -21,6 +21,7 @@ import Onboarding from './pages/Onboarding'
 import Klassement from './pages/Klassement'
 import Wedstrijden from './pages/Wedstrijden'
 import GoudenJaar from './pages/GoudenJaar'
+import FanshopPagina from './pages/FanshopPagina'
 import MobileGate from './pages/MobileGate'
 
 // PWA pagina's
@@ -32,6 +33,7 @@ import PWAAccount from './pwa/PWAAccount'
 import PWABadges from './pwa/PWABadges'
 import PWAInfo from './pwa/PWAInfo'
 import PWAFeedback from './pwa/PWAFeedback'
+import PWAFanshop from './pwa/PWAFanshop'
 import PWAPronostiek from './pwa/PWAPronostiek'
 import PWAWedstrijdDetail from './pwa/PWAWedstrijdDetail'
 import Invullen from './pages/Invullen'
@@ -110,6 +112,11 @@ function AppRoutes() {
             <PWALayout><PWAInfo /></PWALayout>
           </ProtectedRoute>
         } />
+        <Route path="/app/fanshop" element={
+          <ShopRoute>
+            <PWALayout><PWAFanshop /></PWALayout>
+          </ShopRoute>
+        } />
         <Route path="/app/feedback" element={
           <ProtectedRoute>
             <PWALayout><PWAFeedback /></PWALayout>
@@ -176,6 +183,9 @@ function AppRoutes() {
       } />
       <Route path="/badges" element={
         <ProtectedRoute><Layout><Badges /></Layout></ProtectedRoute>
+      } />
+      <Route path="/fanshop" element={
+        <ShopRoute><Layout><FanshopPagina /></Layout></ShopRoute>
       } />
       <Route path="/invullen" element={
         <AdminRoute><Invullen /></AdminRoute>

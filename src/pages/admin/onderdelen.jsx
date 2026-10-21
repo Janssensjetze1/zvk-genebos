@@ -8,6 +8,7 @@ import TabFeedback from './tabs/TabFeedback'
 import TabQuotes from './tabs/TabQuotes'
 import TabGebruik from './tabs/TabGebruik'
 import TabDatabase from './tabs/TabDatabase'
+import TabFanshop from './tabs/TabFanshop'
 
 // Rendert één onderdeel van het beheer; de lijst staat in ./onderdelenLijst.js
 
@@ -22,6 +23,7 @@ export function OnderdeelInhoud({ id, tellers }) {
     case 'quotes': return <TabQuotes />
     case 'gebruik': return <TabGebruik />
     case 'database': return <TabDatabase />
+    case 'fanshop': return <TabFanshop onGewijzigd={tellers?.herlaad} />
     case 'feedback': return <TabFeedback onGelezen={() => tellers?.setTellers(t => ({ ...t, ongelezenFeedback: 0 }))} />
     default: return null
   }

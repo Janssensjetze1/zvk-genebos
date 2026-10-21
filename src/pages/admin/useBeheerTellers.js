@@ -3,18 +3,19 @@ import { supabase } from '../../lib/supabase'
 import { useSeason } from '../../context/SeasonContext'
 import { isGespeeld } from '../../lib/wedstrijd'
 
-// Wat vraagt aandacht in het beheer? Drie getallen die ook als teller naast de
+// Wat vraagt aandacht in het beheer? Getallen die ook als teller naast de
 // onderdelen in de navigatie staan.
-const LEEG = { wachtendeLeden: 0, ongelezenFeedback: 0, bladOntbreekt: 0 }
+const LEEG = { wachtendeLeden: 0, ongelezenFeedback: 0, bladOntbreekt: 0, onbetaaldeBestellingen: 0 }
 
 export function useBeheerTellers() {
   const { actief: seizoen } = useSeason()
   const [tellers, setTellers] = useState(LEEG)
 
   const herlaad = useCallback(async () => {
-    const [leden, feedback, wedstrijden] = await Promise.all([
+    const [leden, feedback, shop, wedstrijden] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('approved', false),
       supabase.from('feedback').select('id', { count: 'exact', head: true }).is('read_at', null),
+      supabase.from('shop_bestellingen').select('id', { count: 'exact', head: true }).is('betaald_at', null),
       seizoen
         ? supabase
             .from('matches')
@@ -33,6 +34,7 @@ export function useBeheerTellers() {
     setTellers({
       wachtendeLeden: leden.count ?? 0,
       ongelezenFeedback: feedback.count ?? 0,
+      onbetaaldeBestellingen: shop.count ?? 0,
       bladOntbreekt,
     })
   }, [seizoen?.id])

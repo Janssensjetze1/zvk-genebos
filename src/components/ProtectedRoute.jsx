@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useShopOpen } from '../hooks/useShopOpen'
 import { willekeurigeQuote } from '../lib/quotes'
 
 export function ProtectedRoute({ children, skipOnboarding = false }) {
@@ -85,5 +86,20 @@ function LoadingScreen() {
         }
       `}</style>
     </div>
+  )
+}
+
+// De fanshop: enkel bereikbaar als hij open staat. Admins mogen er altijd in,
+// zodat ze kunnen nakijken hoe hij eruitziet voor ze hem openen.
+export function ShopRoute({ children }) {
+  const { isAdmin } = useAuth()
+  const shopOpen = useShopOpen()
+
+  return (
+    <ProtectedRoute>
+      {shopOpen === null && !isAdmin
+        ? <LoadingScreen />
+        : shopOpen || isAdmin ? children : <Navigate to="/" replace />}
+    </ProtectedRoute>
   )
 }
