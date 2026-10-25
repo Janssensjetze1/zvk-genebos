@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { usePush } from '../hooks/usePush'
@@ -7,6 +7,7 @@ import EerKronen from '../components/EerKronen'
 import { RING_KLASSE } from '../lib/eer'
 import { Icoon, Segment } from '../ui'
 import { THEMA_OPTIES, useThema } from '../lib/thema'
+import { verkleinFoto } from '../lib/foto'
 
 // ── Hoofd component ─────────────────────────────────────────────────────────
 export default function PWAAccount() {
@@ -14,7 +15,6 @@ export default function PWAAccount() {
   const { user, profile, patchProfile, signOut } = useAuth()
   const { eer } = useTopscorer()
   const { status: pushStatus, fout: pushFout, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePush()
-  const fotoInputRef = useRef(null)
 
   const [speler, setSpeler]             = useState(null)
   const [naam, setNaam]                 = useState('')
@@ -55,8 +55,10 @@ export default function PWAAccount() {
   }
 
   function handleFotoKiezen(e) {
-    const bestand = e.target.files[0]
+    const bestand = e.target.files?.[0]
+    e.target.value = '' // zelfde foto opnieuw kiezen moet ook een change geven
     if (!bestand) return
+    setBericht(null)
     setFotoBestand(bestand)
     const reader = new FileReader()
     reader.onload = ev => setFotoPreview(ev.target.result)
@@ -76,15 +78,25 @@ export default function PWAAccount() {
       if (naamDirty || bijnaamDirty || gebdatumDirty) {
         let photo_url = speler?.photo_url ?? profile?.avatar_url ?? null
         if (fotoBestand) {
-          const ext = fotoBestand.name.split('.').pop()
+          const klein = await verkleinFoto(fotoBestand)
+          const ext = klein.type === 'image/jpeg' ? 'jpg' : (fotoBestand.name.split('.').pop() || 'jpg')
           const fileName = `${Date.now()}.${ext}`
-          await supabase.storage.from('player-photos').upload(fileName, fotoBestand, { upsert: true })
+          const { error: uploadFout } = await supabase.storage
+            .from('player-photos')
+            .upload(fileName, klein, { upsert: true, contentType: klein.type || undefined })
+          if (uploadFout) throw new Error('Foto uploaden mislukt: ' + uploadFout.message)
           const { data: urlData } = supabase.storage.from('player-photos').getPublicUrl(fileName)
           photo_url = urlData.publicUrl
         }
-        if (speler) await supabase.from('players').update({ name: naam, photo_url, nickname: bijnaam.trim() || null, birth_date: gebdatum || null }).eq('id', speler.id)
+        if (speler) {
+          const { error: spelerFout } = await supabase.from('players').update({ name: naam, photo_url, nickname: bijnaam.trim() || null, birth_date: gebdatum || null }).eq('id', speler.id)
+          if (spelerFout) throw new Error('Spelersfiche bijwerken mislukt: ' + spelerFout.message)
+          // Het scherm toont de foto van de fiche: lokaal meteen bijwerken
+          setSpeler(prev => ({ ...prev, name: naam, photo_url, nickname: bijnaam.trim() || null, birth_date: gebdatum || null }))
+        }
         const profileChanges = { display_name: naam, avatar_url: photo_url, nickname: bijnaam.trim() || null, birth_date: gebdatum || null }
-        await supabase.from('profiles').update(profileChanges).eq('id', user.id)
+        const { error: profielFout } = await supabase.from('profiles').update(profileChanges).eq('id', user.id)
+        if (profielFout) throw new Error('Profiel bijwerken mislukt: ' + profielFout.message)
         patchProfile(profileChanges)
         setOrigNaam(naam); setOrigBijnaam(bijnaam); setOrigGebdatum(gebdatum)
         setFotoBestand(null); setFotoPreview(null)
@@ -128,9 +140,12 @@ export default function PWAAccount() {
             className={jouwEer ? RING_KLASSE[jouwEer] : undefined}
             style={{ width: '80px', height: '80px', flexShrink: 0, borderRadius: '50%' }}
           >
-          <div
-            onClick={() => fotoInputRef.current?.click()}
+          {/* Een label opent de fotokiezer ook op iPhone betrouwbaar, zonder code */}
+          <label
+            htmlFor="profielfoto"
+            aria-label="Profielfoto wijzigen"
             style={{
+              display: 'block',
               width: '100%', height: '100%', borderRadius: '50%',
               background: '#1f3266',
               border: jouwEer ? 'none' : '3px solid rgba(255,255,255,0.15)',
@@ -157,8 +172,8 @@ export default function PWAAccount() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <input ref={fotoInputRef} type="file" accept="image/*" onChange={handleFotoKiezen} style={{ display: 'none' }} />
-          </div>
+          </label>
+          <input id="profielfoto" type="file" accept="image/*" onChange={handleFotoKiezen} style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }} />
           </div>
 
           {/* Naam en info */}
@@ -342,7 +357,7 @@ export default function PWAAccount() {
       {/* ── Sticky save bar ── */}
       {isDirty && (
         <div style={{
-          position: 'fixed', bottom: '90px', left: '16px', right: '16px', zIndex: 100,
+          position: 'fixed', bottom: 'calc(env(safe-area-inset-bottom) + 96px)', left: '16px', right: '16px', zIndex: 100,
           background: 'var(--z-donker)', borderRadius: '18px',
           padding: '13px 16px', display: 'flex', alignItems: 'center', gap: '14px',
           boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
