@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { isGespeeld, perWeekend } from '../lib/wedstrijd'
 import PloegLogo from './PloegLogo'
+import { useMvpWinnaars } from '../hooks/useMvp'
+import { Icoon } from '../ui'
 
 // Compacte lijst van wedstrijden, gegroepeerd per dag. Bedoeld voor alles wat
 // niet enkel over ZVK gaat: het weekendprogramma en de uitslagen van de andere
@@ -41,7 +43,7 @@ function Ploeg({ team, score, sterk, dof }) {
   )
 }
 
-function Rij({ w, laatste, onOpen, onder }) {
+function Rij({ w, laatste, onOpen, onder, mvps }) {
   const gespeeld = isGespeeld(w)
   const onze = w.home_team?.is_zvk || w.away_team?.is_zvk
   const thuisWint = gespeeld && w.home_score > w.away_score
@@ -68,6 +70,12 @@ function Rij({ w, laatste, onOpen, onder }) {
               fontSize: '11px', fontWeight: '600', padding: '1px 8px', borderRadius: '99px',
               ...TYPE_COLORS[w.type],
             }}>{TYPE_LABELS[w.type]}</span>
+          )}
+          {gespeeld && mvps?.length > 0 && (
+            <span className="z-mvp-lijn">
+              <Icoon naam="kroon" grootte={13} dikte={2.4} />
+              MVP: {mvps.map(s => s.name).join(' & ')}
+            </span>
           )}
         </div>
 
@@ -100,6 +108,7 @@ export function DagLabel({ datum }) {
 // onder: optionele functie (w) => inhoud onder een regel, bv. reacties
 export function WedstrijdRijen({ wedstrijden, variant = 'pwa', onder }) {
   const navigate = useNavigate()
+  const mvpWinnaars = useMvpWinnaars()
   return (
     <div className="z-kaart" style={{ overflow: 'hidden' }}>
       {wedstrijden.map((w, i) => (
@@ -108,6 +117,7 @@ export function WedstrijdRijen({ wedstrijden, variant = 'pwa', onder }) {
           w={w}
           laatste={i === wedstrijden.length - 1}
           onder={onder}
+          mvps={mvpWinnaars[w.id]}
           onOpen={() => navigate(`${variant === 'pwa' ? '/app' : ''}/wedstrijd/${w.id}`)}
         />
       ))}

@@ -1674,3 +1674,100 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
 @media (prefers-reduced-motion: reduce) {
   .z-shop-status i, .z-shop-product { animation: none; }
 }
+
+/* ─── MVP per wedstrijd ─────────────────────────────────────────────────────
+   Stemmen en de winnaar op de wedstrijdpagina. Zie src/components/MvpBlok.jsx. */
+
+.z-mvp { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+.z-mvp-kop { display: flex; align-items: center; gap: 12px; }
+.z-mvp-kop h2 { font-size: 15px; font-weight: 700; color: var(--z-tekst); margin: 0; }
+.z-mvp-kop p { font-size: 12px; color: var(--z-tekst-3); margin: 2px 0 0; }
+.z-mvp-kroon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #7a4a00;
+  background: radial-gradient(circle at 35% 30%, #fff4c2 0%, #fbbf24 50%, #d97706 100%);
+  box-shadow: 0 6px 16px rgba(217, 119, 6, 0.3);
+}
+.z-mvp-kroon-dof { background: var(--z-lijn-zacht); color: var(--z-tekst-4); box-shadow: none; }
+.z-mvp-klok {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 4px 9px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--z-gelijk);
+  background: var(--z-gelijk-bg);
+  border: 1px solid var(--z-gelijk-rand);
+}
+
+.z-mvp-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; }
+.z-mvp-speler {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px 8px;
+  border-radius: 14px;
+  border: 1.5px solid transparent;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.z-mvp-speler:hover:not(:disabled) { background: var(--z-vlak); }
+.z-mvp-speler:active:not(:disabled) { transform: scale(0.96); }
+.z-mvp-speler:disabled { cursor: default; opacity: 0.45; }
+.z-mvp-speler[aria-pressed='true'] { opacity: 1; border-color: #fbbf24; background: var(--z-gelijk-bg); }
+.z-mvp-speler[aria-pressed='true'] .z-avatar { box-shadow: 0 0 0 3px #fbbf24; }
+.z-mvp-foto { position: relative; line-height: 0; }
+.z-mvp-vink {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #7a4a00;
+  background: #fbbf24;
+  border: 2px solid var(--z-kaart);
+}
+.z-mvp-naam { max-width: 100%; font-size: 12px; font-weight: 600; color: var(--z-tekst-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.z-mvp-speler[aria-pressed='true'] .z-mvp-naam { color: var(--z-tekst); font-weight: 700; }
+.z-mvp-fout { font-size: 12px; color: var(--z-verlies); margin: 0; }
+.z-mvp-voet { font-size: 12px; color: var(--z-tekst-4); line-height: 1.5; padding-top: 10px; border-top: 1px solid var(--z-lijn-zacht); }
+
+/* De winnaar: een gouden kaart */
+.z-mvp-winnaar {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--z-r-l);
+  padding: 18px 20px 20px;
+  color: #3b2400;
+  background:
+    radial-gradient(80% 120% at 100% 0%, rgba(255, 255, 255, 0.55) 0%, transparent 60%),
+    linear-gradient(135deg, #fde68a 0%, #fbbf24 45%, #d97706 100%);
+  box-shadow: 0 12px 30px rgba(217, 119, 6, 0.3);
+}
+.z-mvp-winnaar-logo { position: absolute; z-index: -1; right: -24px; top: -18px; width: 140px; opacity: 0.16; transform: rotate(-14deg); pointer-events: none; }
+.z-mvp-winnaar-label { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(59, 36, 0, 0.7); }
+.z-mvp-winnaar-rij { display: flex; flex-wrap: wrap; gap: 14px 24px; margin-top: 12px; }
+.z-mvp-winnaar-speler { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.z-mvp-winnaar-foto { line-height: 0; border-radius: 50%; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.85), 0 8px 18px rgba(122, 74, 0, 0.35); }
+.z-mvp-winnaar-speler strong { display: block; font-family: var(--z-font-merk); font-size: 22px; line-height: 1.15; color: #2a1900; }
+.z-mvp-winnaar-speler small { display: block; font-size: 12px; font-weight: 600; color: rgba(59, 36, 0, 0.65); margin-top: 2px; }
+
+/* Kroontje bij de uitslag in de lijsten */
+.z-mvp-lijn { display: inline-flex; align-items: center; gap: 5px; margin-left: 32px; font-size: 12px; font-weight: 600; color: var(--z-goud); }

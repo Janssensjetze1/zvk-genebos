@@ -6,14 +6,15 @@ import Ranglijst from './Ranglijst'
 import Podium from './Podium'
 import { Laden, LegeStaat, Sectie } from '../ui'
 
-// De Gouden Stier en de Assistenkoning: top 3 op het podium, de rest
-// eronder. Gedeeld door de statspagina van de app en die van de desktop.
+// De Gouden Stier, de Assistenkoning en de MVP's: top 3 op het podium, de
+// rest eronder. Gedeeld door de statspagina van de app en die van de desktop.
 // naastElkaar: op desktop staan beide klasseringen naast elkaar.
 
 export default function StatsOverzicht({ naastElkaar = false }) {
   const { actief: seizoen } = useSeason()
   const [goals, setGoals] = useState([])
   const [spelers, setSpelers] = useState([])
+  const [mvpTitels, setMvpTitels] = useState({})
   const [loading, setLoading] = useState(true)
 
   const seizoenId = seizoen?.id
@@ -23,11 +24,13 @@ export default function StatsOverzicht({ naastElkaar = false }) {
     Promise.all([
       supabase.from('goals').select('*, match:match_id(date, season_id)').eq('match.season_id', seizoenId),
       supabase.from('players').select('*'),
-    ]).then(([{ data: gData }, { data: sData }]) => {
+      supabase.from('mvp_klassement').select('player_id, mvps').eq('season_id', seizoenId),
+    ]).then(([{ data: gData }, { data: sData }, { data: mData }]) => {
       if (!levend) return
       // Een doelpunt bestaat enkel als het wedstrijdblad is ingevuld, dus telt het mee
       setGoals((gData ?? []).filter(g => isGespeeld({ ...g.match, goals: [g] })))
       setSpelers(sData ?? [])
+      setMvpTitels(Object.fromEntries((mData ?? []).map(m => [m.player_id, m.mvps])))
       setLoading(false)
     })
     return () => { levend = false }
@@ -50,6 +53,11 @@ export default function StatsOverzicht({ naastElkaar = false }) {
     .filter(s => s.assists > 0)
     .sort((a, b) => b.assists - a.assists)
 
+  const topmvps = spelers
+    .map(s => ({ ...s, mvps: mvpTitels[s.id] || 0 }))
+    .filter(s => s.mvps > 0)
+    .sort((a, b) => b.mvps - a.mvps)
+
   return (
     <div
       className={naastElkaar ? 'z-raster z-raster-2' : undefined}
@@ -61,6 +69,10 @@ export default function StatsOverzicht({ naastElkaar = false }) {
 
       <Sectie titel="Assistenkoning" meta="Meeste assists">
         <Klassering spelers={topassists} sleutel="assists" eenheid={['assist', 'assists']} loading={loading} leeg="Nog geen assists geregistreerd." />
+      </Sectie>
+
+      <Sectie titel="MVP van de match" meta="Meeste keren verkozen">
+        <Klassering spelers={topmvps} sleutel="mvps" eenheid={['keer', 'keer']} loading={loading} leeg="Nog geen MVP verkozen dit seizoen." />
       </Sectie>
     </div>
   )

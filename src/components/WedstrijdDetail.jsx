@@ -9,6 +9,7 @@ import { opgaveOpentOp } from '../hooks/useOpgave'
 import Opgave from './Opgave'
 import Pronostiek from './Pronostiek'
 import VerslagPaneel from './VerslagPaneel'
+import MvpBlok from './MvpBlok'
 import { hoofdletter, Icoon, Laden, LegeStaat, TypeChip } from '../ui'
 
 // Detailpagina van één wedstrijd: alles wat over deze match te weten valt op
@@ -73,7 +74,7 @@ export default function WedstrijdDetail({ variant = 'pwa' }) {
           home_team:home_team_id(id,name,is_zvk),
           away_team:away_team_id(id,name,is_zvk),
           goals(id, scorer_id, assist_id, minute, scorer:scorer_id(name), assist:assist_id(name)),
-          match_players(player_id, player:player_id(name))
+          match_players(player_id, player:player_id(name, photo_url))
         `)
         .eq('id', id)
         .maybeSingle()
@@ -173,6 +174,9 @@ export default function WedstrijdDetail({ variant = 'pwa' }) {
         </div>
       </div>
       )}
+
+      {/* MVP: stemmen tot 48 uur na de aftrap, daarna de winnaar */}
+      {gespeeld && onze && <MvpBlok wedstrijd={w} />}
 
       {/* Pronostiek: op deze pagina meteen open, dat is waarvoor je hier bent */}
       {pronostiekStatus(w) !== 'geen' && (

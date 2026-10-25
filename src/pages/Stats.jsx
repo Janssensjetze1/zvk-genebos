@@ -9,7 +9,7 @@ export default function Stats() {
       <PaginaKop
         bovenlabel={seizoen ? `Seizoen ${seizoen.name}` : null}
         titel="Statistieken"
-        ondertitel="De Gouden Stier en de Assistenkoning van het seizoen"
+        ondertitel="De Gouden Stier, de Assistenkoning en de MVP’s van het seizoen"
       />
       <StatsOverzicht naastElkaar />
     </div>
