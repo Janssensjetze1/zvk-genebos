@@ -10,9 +10,10 @@ import { WedstrijdenPerWeekend } from '../components/WedstrijdenPerDag'
 import VolgendeWedstrijdKaart from '../components/VolgendeWedstrijdKaart'
 import Reacties from '../components/Reacties'
 import WedstrijdFormulier from '../components/WedstrijdFormulier'
+import PWAOverzicht from './PWAOverzicht'
 import { AppPagina, Knop, Laden, LegeStaat } from '../ui'
 
-const TABS = [['aankomend', 'Aankomend'], ['gespeeld', 'Gespeeld']]
+const TABS = [['overzicht', 'Overzicht'], ['aankomend', 'Aankomend'], ['gespeeld', 'Gespeeld']]
 const isZvk = w => !!(w.home_team?.is_zvk || w.away_team?.is_zvk)
 
 export default function PWAWedstrijden() {
@@ -23,8 +24,8 @@ export default function PWAWedstrijden() {
   const { isAdmin } = useAuth()
   // De tab zit in de URL, zodat je na een detailpagina terugkomt waar je was.
   const [params, setParams] = useSearchParams()
-  const tab = TABS.some(([id]) => id === params.get('tab')) ? params.get('tab') : 'aankomend'
-  const setTab = id => setParams(id === 'aankomend' ? {} : { tab: id }, { replace: true })
+  const tab = TABS.some(([id]) => id === params.get('tab')) ? params.get('tab') : 'overzicht'
+  const setTab = id => setParams(id === 'overzicht' ? {} : { tab: id }, { replace: true })
 
   useEffect(() => { if (seizoen) fetchWedstrijden() }, [seizoen])
 
@@ -43,7 +44,7 @@ export default function PWAWedstrijden() {
         *,
         home_team:home_team_id(id,name,is_zvk),
         away_team:away_team_id(id,name,is_zvk),
-        goals(id,scorer_id,scorer:scorer_id(name)),
+        goals(id,scorer_id,assist_id,scorer:scorer_id(name,photo_url),assist:assist_id(name,photo_url)),
         match_players(player_id, player:player_id(name))
       `)
       .eq('season_id', seizoen.id)
@@ -79,6 +80,8 @@ export default function PWAWedstrijden() {
 
       {loading ? (
         <Laden regels={4} />
+      ) : tab === 'overzicht' ? (
+        <PWAOverzicht wedstrijden={wedstrijden} />
       ) : tab === 'gespeeld' ? (
         gespeeld.length === 0
           ? <LegeStaat tekst="Nog geen gespeelde wedstrijden." icoon="bal" />

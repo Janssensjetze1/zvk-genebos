@@ -6,8 +6,8 @@ import { isGespeeld, vandaagISO, weekendBereik, weekendWedstrijden } from '../li
 import WedstrijdenPerDag from '../components/WedstrijdenPerDag'
 import Ranglijst from '../components/Ranglijst'
 import VolgendeWedstrijdKaart from '../components/VolgendeWedstrijdKaart'
-import { useNavigate } from 'react-router-dom'
-import { hoofdletter, Kaart, LegeStaat, PaginaKop, Rij, Sectie, Stat, TypeChip, UitslagLetter } from '../ui'
+import VorigeWedstrijdKaart from '../components/VorigeWedstrijdKaart'
+import { hoofdletter, LegeStaat, PaginaKop, Sectie, Stat } from '../ui'
 
 export default function Dashboard() {
   const { profile } = useAuth()
@@ -144,7 +144,7 @@ export default function Dashboard() {
 
           {!loading && vorige && (
             <Sectie titel="Laatste uitslag">
-              <VorigeKaart wedstrijd={vorige} />
+              <VorigeWedstrijdKaart wedstrijd={vorige} />
             </Sectie>
           )}
 
@@ -183,36 +183,5 @@ export default function Dashboard() {
 function HeroSkelet() {
   return (
     <div style={{ height: '196px', borderRadius: 'var(--z-r-l)', background: 'var(--z-navy)', opacity: 0.12 }} />
-  )
-}
-
-// ── Vorige wedstrijd ─────────────────────────────────────────────────────────
-
-function VorigeKaart({ wedstrijd: w }) {
-  const navigate = useNavigate()
-  const isThuis = w.home_team?.is_zvk
-  const zvkScore = isThuis ? w.home_score : w.away_score
-  const tegScore = isThuis ? w.away_score : w.home_score
-  const uitslag = zvkScore > tegScore ? 'W' : zvkScore < tegScore ? 'V' : 'G'
-  const datum = new Date(`${w.date}T00:00:00`).toLocaleDateString('nl-BE', { day: 'numeric', month: 'long' })
-
-  return (
-    <Kaart>
-      <Rij onClick={() => navigate(`/wedstrijd/${w.id}`)} style={{ padding: '16px 20px' }}>
-        <UitslagLetter uitslag={uitslag} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--z-tekst)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {w.home_team?.name} – {w.away_team?.name}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', fontSize: '13px', color: 'var(--z-tekst-3)' }}>
-            {datum}
-            <TypeChip type={w.type} />
-          </div>
-        </div>
-        <div className="z-tab-nums" style={{ fontSize: '22px', fontWeight: 700, color: 'var(--z-tekst)', letterSpacing: '0.02em' }}>
-          {w.home_score}<span style={{ color: 'var(--z-tekst-4)', margin: '0 6px' }}>–</span>{w.away_score}
-        </div>
-      </Rij>
-    </Kaart>
   )
 }
