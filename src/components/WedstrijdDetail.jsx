@@ -10,6 +10,7 @@ import Opgave from './Opgave'
 import Pronostiek from './Pronostiek'
 import VerslagPaneel from './VerslagPaneel'
 import MvpBlok from './MvpBlok'
+import { naPenaltys } from '../lib/beker'
 import { hoofdletter, Icoon, Laden, LegeStaat, TypeChip } from '../ui'
 
 // Detailpagina van één wedstrijd: alles wat over deze match te weten valt op
@@ -17,6 +18,16 @@ import { hoofdletter, Icoon, Laden, LegeStaat, TypeChip } from '../ui'
 // Route: /wedstrijd/:id (desktop) en /app/wedstrijd/:id (PWA)
 
 const TYPE_LABELS = { competitie: 'Competitie', beker: 'Beker', vriendschappelijk: 'Vriendschappelijk' }
+const RONDE_ENKEL = { poule: 'Poulefase', achtste: 'Achtste finale', kwart: 'Kwartfinale', halve: 'Halve finale', finale: 'Finale' }
+
+// "Eindstand", "Halve finale · eindstand", "… · na strafschoppen 4-3"
+function kopTekst(w, gespeeld) {
+  const ronde = w.type === 'beker' && w.beker_ronde ? `${RONDE_ENKEL[w.beker_ronde]} · ` : ''
+  const stand = gespeeld ? 'eindstand' : 'nog te spelen'
+  const pens = naPenaltys(w) ? ` · na strafschoppen ${w.home_pen}-${w.away_pen}` : ''
+  const tekst = ronde + stand + pens
+  return tekst.charAt(0).toUpperCase() + tekst.slice(1)
+}
 const TYPE_COLORS = {
   competitie: { bg: 'var(--z-blauw-50)', color: 'var(--z-blauw)' },
   beker: { bg: 'var(--z-paars-bg)', color: 'var(--z-paars)' },
@@ -259,7 +270,7 @@ function Scorebord({ w, gespeeld, datum }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '22px' }}>
         <TypeChip type={w.type} />
         <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>
-          {gespeeld ? 'Eindstand' : 'Nog te spelen'}
+          {kopTekst(w, gespeeld)}
         </span>
       </div>
 
@@ -316,7 +327,7 @@ function ScorebordCompact({ w, gespeeld, datum }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
         <TypeChip type={w.type} />
-        <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>{gespeeld ? 'Eindstand' : 'Nog te spelen'}</span>
+        <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>{kopTekst(w, gespeeld)}</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {regel(w.home_team, w.home_score, thuisWint, uitWint)}

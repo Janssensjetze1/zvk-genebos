@@ -1778,3 +1778,99 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
 
 /* Kroontje bij de uitslag in de lijsten */
 .z-mvp-lijn { display: inline-flex; align-items: center; gap: 5px; margin-left: 32px; font-size: 12px; font-weight: 600; color: var(--z-goud); }
+
+/* ─── Beker ─────────────────────────────────────────────────────────────────
+   Poules en knock-out op het scherm Stand. Zie src/components/BekerOverzicht.jsx. */
+
+.z-beker { display: flex; flex-direction: column; gap: 22px; }
+.z-beker-kop { font-size: 15px; font-weight: 700; color: var(--z-tekst); margin: 0 0 10px; display: flex; align-items: center; gap: 10px; }
+.z-beker-kop::after { content: ''; flex: 1; height: 1px; background: var(--z-lijn); }
+
+.z-beker-status { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.z-beker-trofee {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #7a4a00;
+  background: radial-gradient(circle at 35% 30%, #fff4c2 0%, #fbbf24 55%, #d97706 100%);
+}
+
+.z-beker-poules { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px; }
+.z-beker-poule { padding: 10px 0 4px; overflow: hidden; }
+.z-beker-poulenaam { padding: 0 14px 6px; font-size: 14px; font-weight: 700; color: var(--z-tekst); }
+.z-beker-rij {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) 28px 36px 34px;
+  gap: 6px;
+  align-items: center;
+  padding: 9px 14px;
+  font-size: 14px;
+  color: var(--z-tekst-2);
+  border-top: 1px solid var(--z-lijn-zacht);
+  font-variant-numeric: tabular-nums;
+}
+.z-beker-rij > :nth-child(n+3) { text-align: right; }
+.z-beker-rij .naam { color: var(--z-tekst); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.z-beker-rij strong { color: var(--z-tekst); }
+.z-beker-rij.door { box-shadow: inset 3px 0 0 var(--z-winst); }
+.z-beker-rij.zvk .naam { color: var(--z-blauw); font-weight: 700; }
+.z-beker-rij-kop { border-top: none; padding-top: 0; font-size: 11px; font-weight: 600; color: var(--z-tekst-4); }
+.z-beker-legende { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; color: var(--z-tekst-3); }
+.z-beker-legende i { width: 3px; height: 12px; border-radius: 2px; background: var(--z-winst); }
+
+/* Knock-out: in de app onder elkaar, op desktop naast elkaar */
+.z-beker-schema { display: flex; flex-direction: column; gap: 18px; }
+.z-beker-rondenaam { font-size: 12px; font-weight: 700; color: var(--z-tekst-4); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.z-beker-matchen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 8px; }
+.z-beker-schema-breed { flex-direction: row; align-items: stretch; gap: 0; }
+.z-beker-schema-breed .z-beker-ronde { flex: 1; display: flex; flex-direction: column; min-width: 0; padding-right: 28px; position: relative; }
+.z-beker-schema-breed .z-beker-matchen { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 16px; }
+.z-beker-schema-breed .z-beker-ronde:not(.z-beker-finaleronde) .z-beker-duel::after {
+  content: '';
+  position: absolute;
+  right: -28px;
+  top: 50%;
+  width: 28px;
+  height: 1.5px;
+  background: var(--z-lijn-sterk);
+}
+.z-beker-schema-breed .z-beker-finaleronde { flex: 1.2; padding-right: 0; justify-content: center; }
+
+.z-beker-duel {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  overflow: visible;
+  transition: border-color 0.15s ease;
+}
+.z-beker-duel:hover { border-color: var(--z-blauw-200); }
+.z-beker-team { display: flex; align-items: center; gap: 8px; padding: 9px 12px; font-size: 14px; color: var(--z-tekst); }
+.z-beker-team + .z-beker-team { border-top: 1px solid var(--z-lijn-zacht); }
+.z-beker-team .naam { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.z-beker-team .score { font-weight: 700; font-variant-numeric: tabular-nums; }
+.z-beker-team .score sup { font-size: 10px; font-weight: 600; color: var(--z-tekst-4); margin-left: 2px; }
+.z-beker-team.win { font-weight: 700; }
+.z-beker-team.uit { color: var(--z-tekst-4); }
+.z-beker-team.zvk .naam { color: var(--z-blauw); font-weight: 700; }
+.z-beker-team.uit.zvk .naam { color: var(--z-tekst-4); }
+.z-beker-wanneer { display: flex; align-items: center; gap: 5px; padding: 0 12px 9px; font-size: 12px; color: var(--z-tekst-3); }
+
+.z-beker-finale { display: block; width: 100%; padding: 0; font: inherit; text-align: left; cursor: pointer; overflow: hidden; border: 1.5px solid #fbbf24; }
+.z-beker-finaleploegen { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; padding: 12px 14px 14px; }
+.z-beker-finaleploeg { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font-size: 14px; font-weight: 600; color: var(--z-tekst); min-width: 0; }
+.z-beker-finaleploeg .naam { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.z-beker-finaleploeg .score { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.z-beker-finaleploeg.zvk .naam { color: var(--z-blauw); }
+.z-beker-finaleploeg.uit { opacity: 0.5; }
+.z-beker-letter { width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; color: var(--z-tekst-3); background: var(--z-lijn-zacht); }
+.z-beker-finaleploeg.zvk .z-beker-letter { color: var(--z-blauw); background: var(--z-blauw-50); }
+.z-beker-finaleploegen .vs { font-size: 14px; font-weight: 600; color: var(--z-tekst-4); }
+.z-beker-winnaar { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; font-size: 13px; font-weight: 700; color: var(--z-gelijk); background: var(--z-gelijk-bg); }

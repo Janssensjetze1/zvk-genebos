@@ -11,7 +11,9 @@ import { Icoon, Segment } from '../ui'
 // standaard op de eerstvolgende zondag.
 //
 // Props:
-//   wedstrijd     bestaande wedstrijd om te bewerken (leeg = nieuwe)
+//   wedstrijd     bestaande wedstrijd om te bewerken (leeg = nieuwe). Zonder id
+//                 is het een voorstel: een nieuwe wedstrijd met die velden al
+//                 ingevuld (bv. een bekerkoppel vanuit het beheer)
 //   onSluiten     paneel dicht
 //   onOpgeslagen  na elke opslag of ongedaan maken, om lijsten te verversen
 
@@ -21,6 +23,12 @@ const TYPES = [
   { waarde: 'competitie', label: 'Competitie' },
   { waarde: 'beker', label: 'Beker' },
   { waarde: 'vriendschappelijk', label: 'Vriendschappelijk' },
+]
+const BEKER_RONDES = [
+  { waarde: 'poule', label: 'Poule' },
+  { waarde: 'kwart', label: '1/4' },
+  { waarde: 'halve', label: '1/2' },
+  { waarde: 'finale', label: 'Finale' },
 ]
 
 function isoDag(d) {
@@ -50,7 +58,7 @@ function langLabel(iso) {
 
 export default function WedstrijdFormulier({ wedstrijd, onSluiten, onOpgeslagen }) {
   const { actief: seizoen } = useSeason()
-  const isBewerk = !!wedstrijd
+  const isBewerk = !!wedstrijd?.id
 
   const [teams, setTeams] = useState([])
   const [seizoenWedstrijden, setSeizoenWedstrijden] = useState([])
@@ -62,6 +70,7 @@ export default function WedstrijdFormulier({ wedstrijd, onSluiten, onOpgeslagen 
   const [uur, setUur] = useState(wedstrijd?.time?.slice(0, 5) ?? '')
   const [anderUur, setAnderUur] = useState(false)
   const [type, setType] = useState(wedstrijd?.type ?? 'competitie')
+  const [ronde, setRonde] = useState(wedstrijd?.beker_ronde ?? 'poule')
   const [locatie, setLocatie] = useState(wedstrijd?.location ?? '')
   const [locatieAangeraakt, setLocatieAangeraakt] = useState(isBewerk)
   const [thuisScore, setThuisScore] = useState(wedstrijd?.home_score ?? 0)
@@ -159,6 +168,7 @@ export default function WedstrijdFormulier({ wedstrijd, onSluiten, onOpgeslagen 
       date: datum,
       time: uur || null,
       type,
+      beker_ronde: type === 'beker' ? ronde : null,
       location: locatieWaarde.trim() || null,
       home_team_id: thuisId,
       away_team_id: uitId,
@@ -332,6 +342,12 @@ export default function WedstrijdFormulier({ wedstrijd, onSluiten, onOpgeslagen 
                   <span className="z-veldlabel">Soort</span>
                   <Segment vol waarde={type} onChange={setType} opties={TYPES} />
                 </div>
+                {type === 'beker' && (
+                  <div>
+                    <span className="z-veldlabel">Ronde</span>
+                    <Segment vol waarde={ronde} onChange={setRonde} opties={BEKER_RONDES} />
+                  </div>
+                )}
                 <div>
                   <label className="z-veldlabel" htmlFor="wf-locatie">Locatie</label>
                   <input

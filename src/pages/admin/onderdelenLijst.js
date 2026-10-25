@@ -9,6 +9,7 @@ export const ONDERDELEN = [
   { id: 'fanshop',     label: 'Fanshop',     icon: 'winkel',     groep: 'Ploeg',        uitleg: 'Fanshop openen, producten en bestellingen', teller: 'onbetaaldeBestellingen', tellerKleur: 'var(--z-gelijk)' },
   { id: 'wedstrijden', label: 'Wedstrijden', icon: 'bal',        groep: 'Competitie',   uitleg: 'Programma, uitslagen en wedstrijdbladen', teller: 'bladOntbreekt', tellerKleur: 'var(--z-goud)' },
   { id: 'seizoen',     label: 'Seizoenen',   icon: 'kalender',   groep: 'Competitie',   uitleg: 'Seizoenen aanmaken en archiveren' },
+  { id: 'beker',       label: 'Beker',       icon: 'beker',      groep: 'Competitie',   uitleg: 'Poules indelen, knock-out en strafschoppen' },
   { id: 'meldingen',   label: 'Meldingen',   icon: 'bel',        groep: 'Communicatie', uitleg: 'Popups en pushmeldingen' },
   { id: 'quotes',      label: 'Quotes',      icon: 'citaat',     groep: 'Communicatie', uitleg: 'Quotes op het startscherm' },
   { id: 'feedback',    label: 'Feedback',    icon: 'inbox',      groep: 'Communicatie', uitleg: 'Berichten van de leden', teller: 'ongelezenFeedback', tellerKleur: 'var(--z-paars)' },
