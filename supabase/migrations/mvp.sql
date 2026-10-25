@@ -7,7 +7,7 @@
 --            de stemming open staat.
 -- Op wie:    een speler die op het wedstrijdblad staat (match_players), niet
 --            op jezelf.
--- Wanneer:   zodra het wedstrijdblad ingevuld is, tot 48 uur na de aftrap
+-- Wanneer:   zodra het wedstrijdblad ingevuld is, tot 24 uur na de aftrap
 --            (pronostiek_aftrap: datum + uur, of 20:00 als er geen uur is).
 -- Uitslag:   pas na het sluiten zichtbaar, in mvp_uitslag. Tijdens de stemming
 --            enkel het aantal stemmen (mvp_tellers). Staan er spelers gelijk
@@ -34,7 +34,7 @@ language sql
 stable
 set search_path = public
 as $$
-  select public.pronostiek_aftrap(p_match_id) + interval '48 hours';
+  select public.pronostiek_aftrap(p_match_id) + interval '24 hours';
 $$;
 
 -- Security definer: match_players en teams lezen, los van de RLS van de vrager

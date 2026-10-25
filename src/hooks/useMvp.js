@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 // database, zie supabase/migrations/mvp.sql. Hier enkel wat de app nodig heeft
 // om te tonen.
 
-export const MVP_UREN = 48
+export const MVP_UREN = 24
 
 // Aftrap in lokale tijd: datum + uur, of 20:00 als er geen uur is (zoals
 // pronostiek_aftrap in de database)

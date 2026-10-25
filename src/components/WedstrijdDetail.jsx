@@ -186,7 +186,7 @@ export default function WedstrijdDetail({ variant = 'pwa' }) {
       </div>
       )}
 
-      {/* MVP: stemmen tot 48 uur na de aftrap, daarna de winnaar */}
+      {/* MVP: stemmen tot 24 uur na de aftrap, daarna de winnaar */}
       {gespeeld && onze && <MvpBlok wedstrijd={w} />}
 
       {/* Pronostiek: op deze pagina meteen open, dat is waarvoor je hier bent */}
