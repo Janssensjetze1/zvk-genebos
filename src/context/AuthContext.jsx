@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { ververseQuotes } from '../lib/quotes'
 
@@ -29,13 +29,26 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  // Voor wie het profiel geladen is (of wordt). Supabase meldt ook SIGNED_IN
+  // en TOKEN_REFRESHED als de app terug op de voorgrond komt, bv. na de
+  // fotokiezer of een andere app. Zou dat het laadscherm tonen, dan wordt de
+  // pagina opnieuw opgebouwd en is alles wat je nog niet bewaarde weg.
+  // Daarom enkel opnieuw laden als er echt iemand anders aangemeld is.
+  const geladenVoor = useRef(null)
 
   useEffect(() => {
+    function laadVoor(userId) {
+      if (geladenVoor.current === userId) return
+      geladenVoor.current = userId
+      setLoading(true) // Wacht op profiel voor ProtectedRoute evalueert
+      fetchProfile(userId)
+    }
+
     // Haal huidige sessie op
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       if (session?.user) {
-        fetchProfile(session.user.id)
+        laadVoor(session.user.id)
         markeerOnline(session.user.id)
       } else {
         setLoading(false)
@@ -46,12 +59,12 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
       if (session?.user) {
-        setLoading(true) // Wacht op profiel voor ProtectedRoute evalueert
-        fetchProfile(session.user.id)
+        laadVoor(session.user.id)
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           markeerOnline(session.user.id)
         }
       } else {
+        geladenVoor.current = null
         setProfile(null)
         setLoading(false)
       }
