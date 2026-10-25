@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 // Het wedstrijdverslag van één wedstrijd: laten genereren, zelf schrijven of
-// achteraf bijwerken. De tekst staat in matches.report; een leeg verslag wordt
+// achteraf bijwerken. Voor het genereren kan de admin eerst gebeurtenissen
+// meegeven die in het verslag moeten komen (matches.report_notes). De tekst staat in matches.report; een leeg verslag wordt
 // als null bewaard zodat "nog geen verslag" één betekenis houdt.
 // wedstrijd mag null zijn (pagina die nog aan het laden is); de hook doet dan
 // gewoon niets. Let op: de begintoestand komt van de eerste render, dus mount
@@ -14,18 +15,28 @@ export function useVerslag(wedstrijd) {
   const [tekst, setTekst] = useState(wedstrijd?.report ?? '')
   const [bezig, setBezig] = useState(false)
   const [fout, setFout] = useState('')
+  const [voorbereiden, setVoorbereiden] = useState(false)
+  const [gebeurtenissen, setGebeurtenissen] = useState(wedstrijd?.report_notes ?? '')
+
+  // Eerst vragen wat er gebeurde, dan pas genereren
+  function startGenereren() {
+    setFout('')
+    setBewerkt(false)
+    setVoorbereiden(true)
+  }
 
   async function genereer() {
     if (!wedstrijd?.id) return
     setFout('')
     setBewerkt(false)
+    setVoorbereiden(false)
     setGenereert(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-match-report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body: JSON.stringify({ match_id: wedstrijd.id }),
+        body: JSON.stringify({ match_id: wedstrijd.id, gebeurtenissen: gebeurtenissen.trim() }),
       })
       const json = await res.json()
       if (json.report) {
@@ -68,5 +79,9 @@ export function useVerslag(wedstrijd) {
     setBewerkt(false)
   }
 
-  return { verslag, genereert, genereer, bewerkt, startBewerken, annuleer, tekst, setTekst, bewaar, bezig, fout }
+  return {
+    verslag, genereert, genereer, bewerkt,
+    voorbereiden, startGenereren, stopGenereren: () => setVoorbereiden(false), gebeurtenissen, setGebeurtenissen,
+    startBewerken, annuleer, tekst, setTekst, bewaar, bezig, fout,
+  }
 }

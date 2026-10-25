@@ -69,6 +69,38 @@ export default function VerslagPaneel({ verslagState: v, variant = 'pwa', toonGe
           <p style={{ fontSize: '13px' }}>Verslag wordt gegenereerd...</p>
         </div>
 
+      /* Gebeurtenissen meegeven voor het genereren */
+      ) : v.voorbereiden ? (
+        <div>
+          <label htmlFor="verslag-gebeurtenissen" style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--z-tekst)', marginBottom: '4px' }}>
+            Wat moet er nog in het verslag?
+          </label>
+          <p style={{ fontSize: '12px', color: 'var(--z-tekst-4)', margin: '0 0 8px', lineHeight: 1.5 }}>
+            Optioneel. De uitslag, doelpunten en spelers weet de app al.
+          </p>
+          <textarea
+            id="verslag-gebeurtenissen"
+            value={v.gebeurtenissen}
+            onChange={e => v.setGebeurtenissen(e.target.value.slice(0, 1000))}
+            rows={4}
+            autoFocus
+            placeholder={'Bv. Thomas miste een penalty in de laatste minuut\nDe keeper van de tegenstander werd uitgesloten\nNa de match trakteerde Lander op een bak'}
+            style={{
+              width: '100%', boxSizing: 'border-box',
+              fontSize: '13px', lineHeight: 1.6, color: 'var(--z-tekst-2)', fontFamily: 'inherit',
+              background: 'var(--z-kaart)', border: '1.5px solid var(--z-lijn)', borderRadius: '10px',
+              padding: '10px 12px', resize: 'vertical', outline: 'none',
+            }}
+          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
+            <Knop soort="vol" onClick={v.genereer}>✨ Genereer verslag</Knop>
+            <Knop soort="rand" onClick={v.stopGenereren}>Annuleren</Knop>
+            <span style={{ fontSize: '11px', color: 'var(--z-lijn-sterk)', marginLeft: 'auto' }}>
+              {v.gebeurtenissen.length}/1000
+            </span>
+          </div>
+        </div>
+
       /* Bewerken */
       ) : v.bewerkt ? (
         <div>
@@ -109,7 +141,7 @@ export default function VerslagPaneel({ verslagState: v, variant = 'pwa', toonGe
           {isAdmin && (
             <div style={{ display: 'flex', gap: '14px', marginTop: '12px', flexWrap: 'wrap' }}>
               <Knop onClick={v.startBewerken}>✎ Aanpassen</Knop>
-              {toonGenereren && <Knop onClick={v.genereer}>Opnieuw genereren</Knop>}
+              {toonGenereren && <Knop onClick={v.startGenereren}>Opnieuw genereren</Knop>}
             </div>
           )}
         </div>
@@ -123,7 +155,7 @@ export default function VerslagPaneel({ verslagState: v, variant = 'pwa', toonGe
             justifyContent: isAdminKaart ? 'flex-start' : 'center',
           }}>
             {toonGenereren && (
-              <Knop soort="vol" onClick={v.genereer}>✨ Genereer verslag</Knop>
+              <Knop soort="vol" onClick={v.startGenereren}>✨ Genereer verslag</Knop>
             )}
             <Knop soort="rand" onClick={v.startBewerken}>✍️ Zelf schrijven</Knop>
           </div>

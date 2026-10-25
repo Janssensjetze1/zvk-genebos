@@ -284,7 +284,7 @@ function ZvkRij({ wedstrijd: w, spelers, onBewerken, onBlad, onVerwijderen }) {
 
   function genereerVerslag() {
     setOpen(true)
-    verslagState.genereer()
+    verslagState.startGenereren()
   }
 
   let actie
