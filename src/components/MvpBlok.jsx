@@ -133,7 +133,7 @@ function Uitslag({ w }) {
     let actief = true
     supabase
       .from('mvp_uitslag')
-      .select('player_id, stemmen, is_mvp')
+      .select('player_id, stemmen, is_mvp, gekozen')
       .eq('match_id', w.id)
       .order('stemmen', { ascending: false })
       .then(({ data }) => { if (actief) setRijen(data ?? []) })
@@ -143,7 +143,7 @@ function Uitslag({ w }) {
   if (rijen === null) return null
 
   const spelers = Object.fromEntries(spelersVan(w).map(s => [s.id, s]))
-  const mvps = rijen.filter(r => r.is_mvp).map(r => ({ ...spelers[r.player_id], stemmen: r.stemmen })).filter(s => s.id)
+  const mvps = rijen.filter(r => r.is_mvp).map(r => ({ ...spelers[r.player_id], stemmen: r.stemmen, gekozen: r.gekozen })).filter(s => s.id)
   const totaal = rijen.reduce((t, r) => t + r.stemmen, 0)
 
   if (mvps.length === 0) {
@@ -173,7 +173,7 @@ function Uitslag({ w }) {
             <span className="z-mvp-winnaar-foto"><Avatar naam={s.name} foto={s.photo_url} grootte={64} /></span>
             <div>
               <strong>{s.name}</strong>
-              <small>{s.stemmen} van de {totaal} stemmen</small>
+              <small>{s.gekozen && totaal === 0 ? 'Aangeduid door het bestuur' : `${s.stemmen} van de ${totaal} stemmen`}</small>
             </div>
           </div>
         ))}
