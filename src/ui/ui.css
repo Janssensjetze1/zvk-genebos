@@ -1768,6 +1768,32 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
     linear-gradient(135deg, #fde68a 0%, #fbbf24 45%, #d97706 100%);
   box-shadow: 0 12px 30px rgba(217, 119, 6, 0.3);
 }
+/* Chromen rand: een metaalverloop, gemaskeerd tot een rand van 3px, met een
+   glans die langzaam rondloopt */
+.z-mvp-winnaar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 3px;
+  border-radius: inherit;
+  background: linear-gradient(115deg,
+    #6b7280 0%, #f8fafc 12%, #9ca3af 24%, #4b5563 36%, #e5e7eb 48%,
+    #ffffff 52%, #9ca3af 62%, #f3f4f6 76%, #6b7280 88%, #e5e7eb 100%);
+  background-size: 250% 250%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: z-chroom 6s ease-in-out infinite alternate;
+}
+@keyframes z-chroom {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .z-mvp-winnaar::before { animation: none; }
+}
 .z-mvp-winnaar-logo { position: absolute; z-index: -1; right: -24px; top: -18px; width: 140px; opacity: 0.16; transform: rotate(-14deg); pointer-events: none; }
 .z-mvp-winnaar-label { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(59, 36, 0, 0.7); }
 .z-mvp-winnaar-rij { display: flex; flex-wrap: wrap; gap: 14px 24px; margin-top: 12px; }
