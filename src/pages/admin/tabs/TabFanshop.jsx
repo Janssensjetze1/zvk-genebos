@@ -357,7 +357,7 @@ function Producten({ producten, bestellingen, herlaad }) {
             return (
               <Kaart key={p.id} style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', opacity: p.actief ? 1 : 0.6 }}>
                 {p.foto_url
-                  ? <img src={p.foto_url} alt="" style={{ width: '56px', height: '40px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0 }} />
+                  ? <img src={p.foto_url} alt="" style={{ width: '56px', height: '40px', objectFit: 'contain', borderRadius: '6px', flexShrink: 0 }} />
                   : <div style={{ width: '56px', height: '40px', borderRadius: '6px', flexShrink: 0, background: 'repeating-linear-gradient(135deg, var(--z-blauw) 0 8px, #fff 8px 16px)' }} />}
                 <div style={{ flex: 1, minWidth: '140px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -552,7 +552,7 @@ function FotoBeheer({ fotos, onWijzig }) {
             position: 'relative', width: '104px', height: '78px', borderRadius: '10px', overflow: 'hidden',
             border: i === 0 ? '2px solid var(--z-blauw)' : '1px solid var(--z-lijn)', background: 'var(--z-vlak)',
           }}>
-            <img src={f.url ?? f.voorbeeld} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            <img src={f.url ?? f.voorbeeld} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
             {i === 0 ? (
               <span style={{
                 position: 'absolute', left: '4px', bottom: '4px', padding: '2px 6px', borderRadius: '6px',

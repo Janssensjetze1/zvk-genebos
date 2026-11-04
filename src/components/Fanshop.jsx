@@ -160,11 +160,22 @@ function ProductTegel({ product: p, besteld, vertraging, onClick }) {
 
 // Foto van het product, of zolang er geen is een sjaal met het logo
 function ProductBeeld({ url, naam }) {
-  if (url) return <img src={url} alt={naam} className="z-shop-foto" />
+  if (url) return <FotoVlak url={url} alt={naam} />
   return (
     <div className="z-shop-plaats">
       <img src="/logo.png" alt="" />
     </div>
+  )
+}
+
+// De foto past altijd volledig in het vlak. De lege randen vult dezelfde foto,
+// vergroot en vervaagd, zodat er geen balken te zien zijn.
+function FotoVlak({ url, alt, lui }) {
+  return (
+    <span className="z-shop-fotovlak">
+      <img src={url} alt="" aria-hidden="true" className="z-shop-foto-achter" loading={lui ? 'lazy' : undefined} />
+      <img src={url} alt={alt} className="z-shop-foto" loading={lui ? 'lazy' : undefined} />
+    </span>
   )
 }
 
@@ -189,7 +200,7 @@ function ProductGalerij({ product: p }) {
         onScroll={e => setActief(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
       >
         {fotos.map((url, i) => (
-          <img key={url} src={url} alt={`${p.naam}, foto ${i + 1} van ${fotos.length}`} className="z-shop-foto" loading={i ? 'lazy' : undefined} />
+          <FotoVlak key={url} url={url} alt={`${p.naam}, foto ${i + 1} van ${fotos.length}`} lui={i > 0} />
         ))}
       </div>
       {actief > 0 && (

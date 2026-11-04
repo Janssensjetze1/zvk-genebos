@@ -1463,7 +1463,7 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
 .z-shop-product:active { transform: scale(0.99); }
 
 .z-shop-beeld { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--z-navy); }
-.z-shop-beeld img.z-shop-foto { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.z-shop-beeld img.z-shop-foto { width: 100%; height: 100%; object-fit: contain; display: block; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
 
 /* Zonder foto: een sjaal die schuin door het beeld loopt, met het logo erop */
 .z-shop-plaats {
@@ -1547,12 +1547,16 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
 .z-shop-paneel { overflow: hidden; }
 .z-shop-paneel .z-paneel-inhoud { flex: 1 1 auto; }
 .z-shop-paneel-beeld { position: relative; aspect-ratio: 16 / 10; margin: -20px -20px 0; overflow: hidden; background: var(--z-navy); }
-.z-shop-paneel-beeld img.z-shop-foto { width: 100%; height: 100%; object-fit: cover; display: block; }
+.z-shop-paneel-beeld img.z-shop-foto { width: 100%; height: 100%; object-fit: contain; display: block; }
+/* Foto volledig zichtbaar, met een vervaagde kopie als achtergrond */
+.z-shop-fotovlak { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; }
+.z-shop-fotovlak img.z-shop-foto { position: relative; }
+.z-shop-foto-achter { position: absolute; inset: -12%; width: 124%; height: 124%; object-fit: cover; filter: blur(22px) saturate(1.15) brightness(0.85); pointer-events: none; }
 
 /* Meerdere foto's: vegen met scroll-snap, pijlen op desktop, stippen onderaan */
 .z-shop-galerij { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
 .z-shop-galerij::-webkit-scrollbar { display: none; }
-.z-shop-galerij img.z-shop-foto { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: center; }
+.z-shop-galerij .z-shop-fotovlak { flex: 0 0 100%; scroll-snap-align: center; }
 .z-shop-galerij-pijl {
   position: absolute;
   top: 50%;
