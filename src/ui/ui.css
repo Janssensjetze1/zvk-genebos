@@ -1465,7 +1465,7 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
 .z-shopblok-pijl { flex-shrink: 0; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.16); transition: transform 0.2s ease; }
 .z-shopblok-rij { display: grid; grid-template-columns: repeat(var(--kolommen, 3), minmax(0, 1fr)); gap: 10px; }
 /* Eén product: foto links, naam en prijs ernaast */
-.z-shopblok-rij.een .z-shopblok-product { display: grid; grid-template-columns: 96px minmax(0, 1fr); grid-template-rows: auto auto; align-content: center; column-gap: 14px; }
+.z-shopblok-rij.een .z-shopblok-product { display: grid; grid-template-columns: clamp(96px, 34%, 150px) minmax(0, 1fr); grid-template-rows: auto auto; align-content: center; column-gap: 14px; }
 .z-shopblok-rij.een .z-shopblok-beeld { grid-row: span 2; margin: 0; }
 .z-shopblok-rij.een .z-shopblok-naam { align-self: end; font-size: 15px; }
 .z-shopblok-rij.een .z-shopblok-prijs { align-self: start; font-size: 14px; }
@@ -1505,7 +1505,7 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
 }
 .z-shop-product:active { transform: scale(0.99); }
 
-.z-shop-beeld { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--z-navy); }
+.z-shop-beeld { position: relative; aspect-ratio: 1; overflow: hidden; background: var(--z-navy); }
 .z-shop-beeld img.z-shop-foto { width: 100%; height: 100%; object-fit: contain; display: block; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
 
 /* Zonder foto: een sjaal die schuin door het beeld loopt, met het logo erop */
@@ -1589,12 +1589,12 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
 /* Detailpaneel: de inhoud bepaalt de hoogte, tot het maximum van .z-paneel */
 .z-shop-paneel { overflow: hidden; }
 .z-shop-paneel .z-paneel-inhoud { flex: 1 1 auto; }
-.z-shop-paneel-beeld { position: relative; aspect-ratio: 16 / 10; margin: -20px -20px 0; overflow: hidden; background: var(--z-navy); }
+.z-shop-paneel-beeld { position: relative; aspect-ratio: 4 / 3; margin: -20px -20px 0; overflow: hidden; background: var(--z-navy); }
 .z-shop-paneel-beeld img.z-shop-foto { width: 100%; height: 100%; object-fit: contain; display: block; }
 /* Foto volledig zichtbaar, met een vervaagde kopie als achtergrond */
 .z-shop-fotovlak { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; }
 .z-shop-fotovlak img.z-shop-foto { position: relative; }
-.z-shop-foto-achter { position: absolute; inset: -12%; width: 124%; height: 124%; object-fit: cover; filter: blur(22px) saturate(1.15) brightness(0.85); pointer-events: none; }
+.z-shop-foto-achter { position: absolute; inset: -12%; width: 124%; height: 124%; max-width: none; object-fit: cover; filter: blur(22px) saturate(1.15) brightness(0.85); pointer-events: none; }
 
 /* Meerdere foto's: vegen met scroll-snap, pijlen op desktop, stippen onderaan */
 .z-shop-galerij { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
