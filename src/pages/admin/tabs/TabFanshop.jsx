@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
 import { Knop, Kaart, TabKop, Melding, LegeStaat } from '../ui'
 import { inputStijl, labelStijl } from '../stijlen'
 import { ConfirmDialog } from '../../../components/ConfirmDialog'
 import { euro, bestelStatus, matenUitTekst } from '../../../lib/fanshop'
-import { Chip, Segment } from '../../../ui'
+import { Chip, Icoon, Segment } from '../../../ui'
+import { verkleinFoto } from '../../../lib/foto'
 import { SHOP_GEWIJZIGD } from '../../../hooks/useShopOpen'
 
 const STATUS_FILTERS = [
@@ -403,7 +404,10 @@ function ProductFormulier({ product, onKlaar, onAnnuleer }) {
   const [maximum, setMaximum] = useState(product.max_per_lid ? String(product.max_per_lid) : '')
   const [volgorde, setVolgorde] = useState(String(product.volgorde ?? 0))
   const [actief, setActief] = useState(product.actief ?? true)
-  const [foto, setFoto] = useState(null)
+  // De eerste foto is de hoofdfoto. Een foto is al online ({ url }) of nog
+  // op het toestel ({ bestand, voorbeeld }).
+  const [fotos, setFotos] = useState(() =>
+    [product.foto_url, ...(product.fotos ?? [])].filter(Boolean).map(url => ({ sleutel: url, url })))
   const [bezig, setBezig] = useState(false)
   const [fout, setFout] = useState('')
 
@@ -419,16 +423,17 @@ function ProductFormulier({ product, onKlaar, onAnnuleer }) {
     }
 
     setBezig(true)
-    let foto_url = product.foto_url ?? null
-    if (foto) {
-      const ext = foto.name.split('.').pop()
-      const pad = `fanshop/${Date.now()}.${ext}`
-      const { error } = await supabase.storage.from('player-photos').upload(pad, foto, { upsert: true })
+    const urls = []
+    for (const f of fotos) {
+      if (f.url) { urls.push(f.url); continue }
+      const bestand = await verkleinFoto(f.bestand, 1600, 0.85)
+      const pad = `fanshop/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`
+      const { error } = await supabase.storage.from('player-photos').upload(pad, bestand, { contentType: bestand.type })
       if (error) {
         setBezig(false)
-        return setFout('De foto kon niet geüpload worden.')
+        return setFout('Een foto kon niet geüpload worden.')
       }
-      foto_url = supabase.storage.from('player-photos').getPublicUrl(pad).data.publicUrl
+      urls.push(supabase.storage.from('player-photos').getPublicUrl(pad).data.publicUrl)
     }
 
     const velden = {
@@ -439,7 +444,8 @@ function ProductFormulier({ product, onKlaar, onAnnuleer }) {
       max_per_lid: maxGetal,
       volgorde: volgordeGetal,
       actief,
-      foto_url,
+      foto_url: urls[0] ?? null,
+      fotos: urls.slice(1),
     }
     const { error } = nieuw
       ? await supabase.from('shop_producten').insert(velden)
@@ -488,13 +494,7 @@ function ProductFormulier({ product, onKlaar, onAnnuleer }) {
         style={{ ...inputStijl, fontFamily: 'inherit', resize: 'vertical', marginBottom: '12px' }}
       />
 
-      <label style={labelStijl} htmlFor="p-foto">Foto</label>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', flexWrap: 'wrap' }}>
-        {product.foto_url && !foto && (
-          <img src={product.foto_url} alt="" style={{ width: '64px', height: '40px', objectFit: 'cover', borderRadius: '6px' }} />
-        )}
-        <input id="p-foto" type="file" accept="image/*" onChange={e => setFoto(e.target.files?.[0] ?? null)} style={{ fontSize: '13px' }} />
-      </div>
+      <FotoBeheer fotos={fotos} onWijzig={setFotos} />
 
       <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--z-tekst-2)', marginBottom: '14px', cursor: 'pointer' }}>
         <input type="checkbox" checked={actief} onChange={e => setActief(e.target.checked)} />
@@ -514,6 +514,90 @@ function ProductFormulier({ product, onKlaar, onAnnuleer }) {
       </div>
     </Kaart>
   )
+}
+
+// Foto's van een product: de eerste is de hoofdfoto, de rest volgt in het
+// productpaneel. Nieuwe foto's worden pas bij Opslaan geüpload.
+const MAX_FOTOS = 13
+
+function FotoBeheer({ fotos, onWijzig }) {
+  // Voorbeelden van nog niet geüploade foto's opruimen als het formulier sluit
+  const huidig = useRef(fotos)
+  useEffect(() => { huidig.current = fotos }, [fotos])
+  useEffect(() => () => huidig.current.forEach(f => f.voorbeeld && URL.revokeObjectURL(f.voorbeeld)), [])
+
+  function voegToe(bestanden) {
+    const nieuw = [...bestanden].slice(0, MAX_FOTOS - fotos.length).map(bestand => {
+      const voorbeeld = URL.createObjectURL(bestand)
+      return { sleutel: voorbeeld, bestand, voorbeeld }
+    })
+    onWijzig([...fotos, ...nieuw])
+  }
+
+  function verwijder(i) {
+    if (fotos[i].voorbeeld) URL.revokeObjectURL(fotos[i].voorbeeld)
+    onWijzig(fotos.filter((_, j) => j !== i))
+  }
+
+  function maakHoofd(i) {
+    onWijzig([fotos[i], ...fotos.filter((_, j) => j !== i)])
+  }
+
+  return (
+    <div style={{ marginBottom: '14px' }}>
+      <div style={labelStijl}>Foto's</div>
+      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        {fotos.map((f, i) => (
+          <div key={f.sleutel} style={{
+            position: 'relative', width: '104px', height: '78px', borderRadius: '10px', overflow: 'hidden',
+            border: i === 0 ? '2px solid var(--z-blauw)' : '1px solid var(--z-lijn)', background: 'var(--z-vlak)',
+          }}>
+            <img src={f.url ?? f.voorbeeld} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            {i === 0 ? (
+              <span style={{
+                position: 'absolute', left: '4px', bottom: '4px', padding: '2px 6px', borderRadius: '6px',
+                background: 'var(--z-blauw)', color: 'white', fontSize: '10px', fontWeight: 700,
+              }}>Hoofdfoto</span>
+            ) : (
+              <button type="button" onClick={() => maakHoofd(i)} title="Maak hoofdfoto" aria-label="Maak hoofdfoto" style={fotoKnop('left')}>
+                <Icoon naam="ster" grootte={13} dikte={2.2} />
+              </button>
+            )}
+            <button type="button" onClick={() => verwijder(i)} title="Verwijderen" aria-label="Foto verwijderen" style={fotoKnop('right')}>
+              <Icoon naam="sluit" grootte={13} dikte={2.4} />
+            </button>
+          </div>
+        ))}
+        {fotos.length < MAX_FOTOS && (
+          <label htmlFor="p-fotos" style={{
+            width: '104px', height: '78px', borderRadius: '10px', border: '1.5px dashed var(--z-lijn-sterk)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
+            color: 'var(--z-tekst-3)', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+          }}>
+            <Icoon naam="plus" grootte={18} dikte={2.2} />
+            {fotos.length ? 'Foto toevoegen' : 'Hoofdfoto'}
+          </label>
+        )}
+        <input
+          id="p-fotos" type="file" accept="image/*" multiple hidden
+          onChange={e => { voegToe(e.target.files ?? []); e.target.value = '' }}
+        />
+      </div>
+      {fotos.length > 1 && (
+        <p style={{ fontSize: '12px', color: 'var(--z-tekst-4)', margin: '6px 0 0' }}>
+          De hoofdfoto staat op de tegel in de collectie. Met de ster maak je een andere foto de hoofdfoto.
+        </p>
+      )}
+    </div>
+  )
+}
+
+function fotoKnop(kant) {
+  return {
+    position: 'absolute', top: '4px', [kant]: '4px', width: '24px', height: '24px', borderRadius: '50%',
+    border: 'none', background: 'rgba(0, 0, 0, 0.55)', color: 'white', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+  }
 }
 
 // ─── Onderdelen ──────────────────────────────────────────────────────────────

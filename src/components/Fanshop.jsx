@@ -134,6 +134,9 @@ function ProductTegel({ product: p, besteld, vertraging, onClick }) {
       <div className="z-shop-beeld">
         <ProductBeeld url={p.foto_url} naam={p.naam} />
         <span className="z-shop-prijs">{euro(p.prijs)}</span>
+        {p.foto_url && p.fotos?.length > 0 && (
+          <span className="z-shop-aantal-fotos">1/{p.fotos.length + 1}</span>
+        )}
         {besteld > 0 && (
           <span className="z-shop-lint">
             <Icoon naam="vink" grootte={12} dikte={3} />
@@ -162,6 +165,49 @@ function ProductBeeld({ url, naam }) {
     <div className="z-shop-plaats">
       <img src="/logo.png" alt="" />
     </div>
+  )
+}
+
+// In het paneel: de hoofdfoto en de extra foto's om door te vegen
+function ProductGalerij({ product: p }) {
+  const fotos = [p.foto_url, ...(p.fotos ?? [])].filter(Boolean)
+  const spoor = useRef(null)
+  const [actief, setActief] = useState(0)
+
+  if (fotos.length < 2) return <ProductBeeld url={fotos[0]} naam={p.naam} />
+
+  const ga = i => {
+    const el = spoor.current
+    el?.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' })
+  }
+
+  return (
+    <>
+      <div
+        ref={spoor}
+        className="z-shop-galerij"
+        onScroll={e => setActief(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
+      >
+        {fotos.map((url, i) => (
+          <img key={url} src={url} alt={`${p.naam}, foto ${i + 1} van ${fotos.length}`} className="z-shop-foto" loading={i ? 'lazy' : undefined} />
+        ))}
+      </div>
+      {actief > 0 && (
+        <button type="button" className="z-shop-galerij-pijl links" onClick={() => ga(actief - 1)} aria-label="Vorige foto">
+          <Icoon naam="chevron" grootte={18} dikte={2.4} />
+        </button>
+      )}
+      {actief < fotos.length - 1 && (
+        <button type="button" className="z-shop-galerij-pijl rechts" onClick={() => ga(actief + 1)} aria-label="Volgende foto">
+          <Icoon naam="chevron" grootte={18} dikte={2.4} />
+        </button>
+      )}
+      <div className="z-shop-galerij-stippen">
+        {fotos.map((url, i) => (
+          <button key={url} type="button" aria-label={`Foto ${i + 1}`} aria-current={i === actief} onClick={() => ga(i)} />
+        ))}
+      </div>
+    </>
   )
 }
 
@@ -322,7 +368,7 @@ function ProductPaneel({ product: p, open, regels, userId, onGewijzigd, onSluit 
       <div className="z-paneel z-shop-paneel" role="dialog" aria-modal="true" aria-label={p.naam}>
         <div className="z-paneel-inhoud">
           <div className="z-shop-paneel-beeld">
-            <ProductBeeld url={p.foto_url} naam={p.naam} />
+            <ProductGalerij product={p} />
             <button type="button" className="z-shop-sluit" onClick={onSluit} aria-label="Sluiten">
               <Icoon naam="sluit" grootte={18} dikte={2.2} />
             </button>

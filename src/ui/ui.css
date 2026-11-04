@@ -1548,6 +1548,58 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
 .z-shop-paneel .z-paneel-inhoud { flex: 1 1 auto; }
 .z-shop-paneel-beeld { position: relative; aspect-ratio: 16 / 10; margin: -20px -20px 0; overflow: hidden; background: var(--z-navy); }
 .z-shop-paneel-beeld img.z-shop-foto { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* Meerdere foto's: vegen met scroll-snap, pijlen op desktop, stippen onderaan */
+.z-shop-galerij { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.z-shop-galerij::-webkit-scrollbar { display: none; }
+.z-shop-galerij img.z-shop-foto { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: center; }
+.z-shop-galerij-pijl {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  margin-top: -18px;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--z-navy);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+.z-shop-galerij-pijl.links { left: 12px; }
+.z-shop-galerij-pijl.links svg { transform: rotate(180deg); }
+.z-shop-galerij-pijl.rechts { right: 12px; }
+@media (hover: none) { .z-shop-galerij-pijl { display: none; } }
+.z-shop-galerij-stippen {
+  position: absolute;
+  left: 12px;
+  bottom: 14px;
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+}
+.z-shop-galerij-stippen button { width: 7px; height: 7px; padding: 0; border: none; border-radius: 999px; background: rgba(255, 255, 255, 0.5); cursor: pointer; transition: width 0.2s, background 0.2s; }
+.z-shop-galerij-stippen button[aria-current="true"] { width: 18px; background: white; }
+.z-shop-aantal-fotos {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  backdrop-filter: blur(6px);
+}
 .z-shop-sluit {
   position: absolute;
   top: 12px;
