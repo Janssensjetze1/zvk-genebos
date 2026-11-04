@@ -7,6 +7,7 @@ import VolgendeWedstrijdKaart from '../components/VolgendeWedstrijdKaart'
 import VorigeWedstrijdKaart from '../components/VorigeWedstrijdKaart'
 import WedstrijdenPerDag from '../components/WedstrijdenPerDag'
 import Ranglijst from '../components/Ranglijst'
+import FanshopBlok from '../components/FanshopBlok'
 import { LegeStaat, Sectie, Stat } from '../ui'
 
 // Tab Overzicht op het startscherm van de app: hetzelfde als het
@@ -71,6 +72,8 @@ export default function PWAOverzicht({ wedstrijden }) {
           <VorigeWedstrijdKaart wedstrijd={vorige} variant="pwa" />
         </Sectie>
       )}
+
+      <FanshopBlok pad="/app/fanshop" />
 
       {mijn && (
         <Sectie titel="Jouw seizoen">

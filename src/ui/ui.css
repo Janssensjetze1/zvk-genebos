@@ -1434,6 +1434,49 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
 .z-shop-kop h2 { font-family: var(--z-font-merk); font-size: 22px; color: var(--z-tekst); margin: 0; }
 .z-shop-kop span { font-size: 13px; color: var(--z-tekst-4); }
 
+/* Fanshopblok op het startscherm: kleine versie van de hero, met een paar
+   producten. Zie src/components/FanshopBlok.jsx. */
+.z-shopblok {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 20px;
+  color: white;
+  text-decoration: none;
+  background:
+    radial-gradient(90% 120% at 100% 0%, rgba(65, 112, 240, 0.55) 0%, transparent 55%),
+    linear-gradient(160deg, #13234d 0%, #0c1a3d 70%);
+  box-shadow: 0 14px 36px rgba(12, 26, 61, 0.24);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+@media (hover: hover) {
+  .z-shopblok:hover { transform: translateY(-2px); box-shadow: 0 18px 44px rgba(12, 26, 61, 0.32); }
+  .z-shopblok:hover .z-shopblok-pijl { transform: translateX(3px); }
+}
+.z-shopblok-logo { position: absolute; z-index: -1; right: -40px; top: -30px; width: 170px; opacity: 0.12; transform: rotate(-14deg); pointer-events: none; }
+.z-shopblok-kop { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.z-shopblok-kop .z-shop-status { height: 26px; font-size: 11px; }
+.z-shopblok h3 { font-family: var(--z-font-merk); font-size: 28px; line-height: 1; margin: 12px 0 0; }
+.z-shopblok h3 span { background: linear-gradient(90deg, #fff 0%, #a9c1ff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.z-shopblok-pijl { flex-shrink: 0; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.16); transition: transform 0.2s ease; }
+.z-shopblok-rij { display: grid; grid-template-columns: repeat(var(--kolommen, 3), minmax(0, 1fr)); gap: 10px; }
+/* Eén product: foto links, naam en prijs ernaast */
+.z-shopblok-rij.een .z-shopblok-product { display: grid; grid-template-columns: 96px minmax(0, 1fr); grid-template-rows: auto auto; align-content: center; column-gap: 14px; }
+.z-shopblok-rij.een .z-shopblok-beeld { grid-row: span 2; margin: 0; }
+.z-shopblok-rij.een .z-shopblok-naam { align-self: end; font-size: 15px; }
+.z-shopblok-rij.een .z-shopblok-prijs { align-self: start; font-size: 14px; }
+.z-shopblok-product { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.z-shopblok-beeld { display: grid; place-items: center; aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #fff; margin-bottom: 4px; }
+.z-shopblok-beeld img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.z-shopblok-beeld img.z-shopblok-plaats { width: 55%; height: 55%; opacity: 0.85; }
+.z-shopblok-naam { font-size: 12px; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.z-shopblok-prijs { font-size: 12px; color: #a9c1ff; font-variant-numeric: tabular-nums; }
+.z-shopblok-cta { display: flex; align-items: center; justify-content: center; height: 42px; border-radius: 12px; background: #fff; color: #0c1a3d; font-size: 14px; font-weight: 700; }
+
 .z-shop-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 16px; }
 
 .z-shop-product {

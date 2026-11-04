@@ -7,6 +7,7 @@ import WedstrijdenPerDag from '../components/WedstrijdenPerDag'
 import Ranglijst from '../components/Ranglijst'
 import VolgendeWedstrijdKaart from '../components/VolgendeWedstrijdKaart'
 import VorigeWedstrijdKaart from '../components/VorigeWedstrijdKaart'
+import FanshopBlok from '../components/FanshopBlok'
 import { hoofdletter, LegeStaat, PaginaKop, Sectie, Stat } from '../ui'
 
 export default function Dashboard() {
@@ -157,6 +158,8 @@ export default function Dashboard() {
 
         {/* Rechts: persoonlijk en de ranglijsten */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', minWidth: 0 }}>
+          <FanshopBlok pad="/fanshop" />
+
           {profile?.player_id && (
             <Sectie titel="Jouw seizoen">
               <div className="z-raster" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '12px' }}>
