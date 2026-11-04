@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { Chip, Icoon, Laden } from '../ui'
 import { MAX_AANTAL, euro, bestelStatus, shopFout } from '../lib/fanshop'
 import { ConfirmDialog } from './ConfirmDialog'
+import FotoZoom from './FotoZoom'
 
 // De ZVK-fanshop, gedeeld door de app (PWAFanshop) en desktop (FanshopPagina).
 // Bovenaan een hero in clubblauw, daaronder de collectie en je eigen
@@ -179,17 +180,46 @@ function FotoVlak({ url, alt, lui }) {
   )
 }
 
-// In het paneel: de hoofdfoto en de extra foto's om door te vegen
+// In het paneel: de hoofdfoto en de extra foto's om door te vegen. Tik op een
+// foto om ze op volledig scherm te bekijken en in te zoomen.
 function ProductGalerij({ product: p }) {
   const fotos = [p.foto_url, ...(p.fotos ?? [])].filter(Boolean)
   const spoor = useRef(null)
   const [actief, setActief] = useState(0)
+  const [zoom, setZoom] = useState(null)
 
-  if (fotos.length < 2) return <ProductBeeld url={fotos[0]} naam={p.naam} />
+  if (fotos.length === 0) return <ProductBeeld naam={p.naam} />
 
   const ga = i => {
     const el = spoor.current
     el?.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' })
+  }
+
+  const vergroot = (
+    <>
+      <button type="button" className="z-shop-vergroot" onClick={() => setZoom(actief)} aria-label="Foto vergroten">
+        <Icoon naam="inzoomen" grootte={16} dikte={2.4} />
+      </button>
+      {zoom !== null && (
+        <FotoZoom
+          fotos={fotos}
+          start={zoom}
+          naam={p.naam}
+          onSluit={() => { setZoom(null) }}
+        />
+      )}
+    </>
+  )
+
+  if (fotos.length === 1) {
+    return (
+      <>
+        <button type="button" className="z-shop-fotoknop" onClick={() => setZoom(0)} aria-label="Foto vergroten">
+          <FotoVlak url={fotos[0]} alt={p.naam} />
+        </button>
+        {vergroot}
+      </>
+    )
   }
 
   return (
@@ -200,7 +230,9 @@ function ProductGalerij({ product: p }) {
         onScroll={e => setActief(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
       >
         {fotos.map((url, i) => (
-          <FotoVlak key={url} url={url} alt={`${p.naam}, foto ${i + 1} van ${fotos.length}`} lui={i > 0} />
+          <button key={url} type="button" className="z-shop-fotoknop" onClick={() => setZoom(i)} aria-label={`Foto ${i + 1} vergroten`}>
+            <FotoVlak url={url} alt={`${p.naam}, foto ${i + 1} van ${fotos.length}`} lui={i > 0} />
+          </button>
         ))}
       </div>
       {actief > 0 && (
@@ -218,6 +250,7 @@ function ProductGalerij({ product: p }) {
           <button key={url} type="button" aria-label={`Foto ${i + 1}`} aria-current={i === actief} onClick={() => ga(i)} />
         ))}
       </div>
+      {vergroot}
     </>
   )
 }
