@@ -22,6 +22,7 @@ import Klassement from './pages/Klassement'
 import Wedstrijden from './pages/Wedstrijden'
 import GoudenJaar from './pages/GoudenJaar'
 import FanshopPagina from './pages/FanshopPagina'
+import HallOfFamePagina from './pages/HallOfFamePagina'
 import MobileGate from './pages/MobileGate'
 
 // PWA pagina's
@@ -34,6 +35,7 @@ import PWABadges from './pwa/PWABadges'
 import PWAInfo from './pwa/PWAInfo'
 import PWAFeedback from './pwa/PWAFeedback'
 import PWAFanshop from './pwa/PWAFanshop'
+import PWAHallOfFame from './pwa/PWAHallOfFame'
 import PWAPronostiek from './pwa/PWAPronostiek'
 import PWAWedstrijdDetail from './pwa/PWAWedstrijdDetail'
 import Invullen from './pages/Invullen'
@@ -117,6 +119,11 @@ function AppRoutes() {
             <PWALayout><PWAFanshop /></PWALayout>
           </ShopRoute>
         } />
+        <Route path="/app/hall-of-fame" element={
+          <ProtectedRoute>
+            <PWALayout><PWAHallOfFame /></PWALayout>
+          </ProtectedRoute>
+        } />
         <Route path="/app/feedback" element={
           <ProtectedRoute>
             <PWALayout><PWAFeedback /></PWALayout>
@@ -183,6 +190,9 @@ function AppRoutes() {
       } />
       <Route path="/badges" element={
         <ProtectedRoute><Layout><Badges /></Layout></ProtectedRoute>
+      } />
+      <Route path="/hall-of-fame" element={
+        <ProtectedRoute><Layout><HallOfFamePagina /></Layout></ProtectedRoute>
       } />
       <Route path="/fanshop" element={
         <ShopRoute><Layout><FanshopPagina /></Layout></ShopRoute>

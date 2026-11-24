@@ -16,6 +16,7 @@ const NAV = [
   { label: 'Spelers', path: '/spelers', icoon: 'spelers' },
   { label: 'Pronostiek', path: '/pronostiek', icoon: 'pronostiek' },
   { label: 'Badges', path: '/badges', icoon: 'badge' },
+  { label: 'Hall of Fame', path: '/hall-of-fame', icoon: 'beker' },
   { label: 'ZVK-fanshop', path: '/fanshop', icoon: 'winkel', enkelAlsShopOpen: true },
 ]
 
@@ -32,6 +33,7 @@ const TITELS = {
   '/spelers': 'Spelers',
   '/pronostiek': 'Pronostiek',
   '/badges': 'Badges',
+  '/hall-of-fame': 'Hall of Fame',
   '/fanshop': 'ZVK-fanshop',
   '/account': 'Account',
   '/admin': 'Beheer',

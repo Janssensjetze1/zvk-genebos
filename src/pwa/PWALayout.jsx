@@ -17,6 +17,7 @@ const TABS = [
 const MEER_ITEMS = [
   { label: 'Pronostiek', icoon: 'pronostiek', path: '/app/pronostiek' },
   { label: 'Badges', icoon: 'badge', path: '/app/badges' },
+  { label: 'Hall of Fame', icoon: 'beker', path: '/app/hall-of-fame' },
   { label: 'ZVK-fanshop', icoon: 'winkel', path: '/app/fanshop', enkelAlsShopOpen: true },
   { label: 'Info', icoon: 'info', path: '/app/info' },
   { label: 'Feedback', icoon: 'chat', path: '/app/feedback' },
