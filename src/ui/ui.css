@@ -2102,65 +2102,88 @@ html:has(.z-auth) body { background: #0c1a3d; overscroll-behavior-y: none; }
 .z-beker-winnaar { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; font-size: 13px; font-weight: 700; color: var(--z-gelijk); background: var(--z-gelijk-bg); }
 
 /* ─── Hall of Fame ──────────────────────────────────────────────────────────
-   Hero in clubblauw met goud, daaronder per rubriek een sectie.
-   Zie src/components/HallOfFame.jsx. */
+   Een lange baan met een podium dat blijft plakken. De animatie zelf hangt aan
+   de scrollpositie, zie src/components/HallOfFame.jsx. */
 
-.z-hof { display: flex; flex-direction: column; gap: 28px; }
-.z-hof-held {
+/* De pagina vult alles onder de balk; elke scroll stopt bij een quote */
+.z-inhoud:has(.z-hof) { max-width: none; padding: 0; }
+.z-app-inhoud:has(.z-hof) { padding-bottom: 0; }
+html:has(.z-hof) { scroll-snap-type: y mandatory; scroll-padding-top: 60px; scroll-behavior: auto; }
+html:has(.z-app .z-hof) { scroll-padding-top: calc(56px + env(safe-area-inset-top)); }
+
+.z-hof {
+  --boven: 60px;
+  --podium: calc(100vh - var(--boven));
+  --stap: 60vh;
   position: relative;
-  isolation: isolate;
+  height: calc(var(--podium) + var(--scenes) * var(--stap));
+}
+.z-app .z-hof { --boven: calc(56px + env(safe-area-inset-top)); }
+@supports (height: 100svh) { .z-hof { --podium: calc(100svh - var(--boven)); --stap: 60svh; } }
+
+.z-hof-halte { position: absolute; left: 0; top: calc(var(--i) * var(--stap)); width: 1px; height: 1px; scroll-snap-align: start; scroll-snap-stop: always; }
+
+.z-hof-podium {
+  position: sticky;
+  top: var(--boven);
+  height: var(--podium);
   overflow: hidden;
-  border-radius: 22px;
-  padding: 28px 22px;
+  isolation: isolate;
   color: white;
-  background:
-    radial-gradient(80% 120% at 100% 0%, rgba(217, 119, 6, 0.42) 0%, transparent 58%),
-    linear-gradient(160deg, #13234d 0%, #0c1a3d 70%);
-  box-shadow: 0 18px 50px rgba(12, 26, 61, 0.28);
+  background: radial-gradient(80% 60% at 50% 45%, #1b3272 0%, #0f1f4a 45%, #070f26 100%);
+  perspective: 900px;
 }
-.z-hof-held-logo { position: absolute; z-index: -1; right: -60px; top: -40px; width: 280px; opacity: 0.13; transform: rotate(-14deg); pointer-events: none; }
-.z-hof-bovenlabel { font-size: 13px; font-weight: 600; color: #fcd34d; }
-.z-hof-held h1 { font-family: var(--z-font-merk); font-size: clamp(34px, 9vw, 52px); line-height: 1; margin: 8px 0 12px; color: white; }
-.z-hof-held h1 span { color: #fcd34d; }
-.z-hof-held p { font-size: 14px; line-height: 1.6; color: rgba(255, 255, 255, 0.78); max-width: 440px; margin: 0; }
+.z-hof-stralen {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 220vmax;
+  height: 220vmax;
+  z-index: -1;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(rgba(252, 211, 77, 0.075) 0deg 7deg, transparent 12deg 22deg, rgba(252, 211, 77, 0.075) 30deg);
+  -webkit-mask: radial-gradient(circle, black 0%, transparent 42%);
+  mask: radial-gradient(circle, black 0%, transparent 42%);
+  will-change: transform;
+}
+.z-hof-stof { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+.z-hof-teken { position: absolute; left: 50%; top: 62%; z-index: -1; height: 1em; font-family: var(--z-font-merk); font-size: min(110vw, 110vh); line-height: 1; color: #fcd34d; opacity: 0; transform: translate(-50%, -50%); pointer-events: none; }
 
-.z-hof-kop { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-.z-hof-kop h2 { font-family: var(--z-font-merk); font-size: 22px; color: var(--z-tekst); margin: 0; }
-.z-hof-kop > span { font-size: 13px; color: var(--z-tekst-3); }
-
-.z-hof-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.z-hof-filters button {
-  display: inline-flex;
+.z-hof-scene { position: absolute; inset: 0; transform-style: preserve-3d; visibility: hidden; will-change: transform, opacity; }
+.z-hof-scene:first-of-type { visibility: visible; }
+.z-hof-binnen {
+  position: absolute;
+  inset: 44px 24px 84px;
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 7px;
-  min-height: 40px;
-  padding: 0 14px;
-  border-radius: 99px;
-  border: 1px solid var(--z-lijn);
-  background: var(--z-kaart);
-  color: var(--z-tekst-2);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
+  justify-content: safe center;
+  text-align: center;
+  transform-style: preserve-3d;
 }
-.z-hof-filters button[aria-pressed="true"] { background: var(--z-blauw); border-color: var(--z-blauw); color: white; }
-.z-hof-filters small { font-size: 12px; opacity: 0.75; font-variant-numeric: tabular-nums; }
+.z-app .z-hof-binnen { bottom: calc(150px + env(safe-area-inset-bottom)); }
+.z-hof-binnen blockquote { position: relative; width: 100%; margin: 0; font-family: var(--z-font-merk); font-weight: 700; line-height: 1.22; text-wrap: balance; color: white; text-shadow: 0 6px 30px rgba(0, 0, 0, 0.45); transform-style: preserve-3d; }
+.z-hof-binnen blockquote > span { transform-style: preserve-3d; }
+.z-hof-lees { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.z-hof-woord { display: inline-block; will-change: transform, opacity; }
 
-/* Kolommen, zodat korte en lange quotes netjes in elkaar schuiven */
-.z-hof-quotes { columns: 300px; column-gap: 14px; }
-.z-hof-quote {
-  break-inside: avoid;
-  position: relative;
-  margin: 0 0 14px;
-  padding: 18px 20px;
-  border-radius: 18px;
-  border: 1px solid var(--z-lijn);
-  background: var(--z-kaart);
-  box-shadow: var(--z-schaduw);
-}
-.z-hof-teken { display: block; height: 26px; font-family: var(--z-font-merk); font-size: 52px; line-height: 1; color: var(--z-goud); }
-.z-hof-quote blockquote { margin: 6px 0 14px; font-family: var(--z-font-merk); font-size: 18px; line-height: 1.45; color: var(--z-tekst); white-space: pre-wrap; overflow-wrap: anywhere; }
-.z-hof-quote.groot blockquote { font-size: 23px; line-height: 1.3; }
-.z-hof-quote.lang blockquote { font-size: 16px; line-height: 1.55; }
-.z-hof-quote figcaption { font-size: 14px; font-weight: 600; color: var(--z-tekst-3); }
+.z-hof-foto { flex-shrink: 0; backface-visibility: visible; }
+.z-hof-portret { width: clamp(96px, 17vh, 160px); height: clamp(96px, 17vh, 160px); margin-bottom: 26px; padding: 4px; border-radius: 50%; background: conic-gradient(from 210deg, #fde68a, #d97706, #fff7d6, #b45309, #fde68a); box-shadow: 0 0 60px rgba(252, 211, 77, 0.35); }
+.z-hof-portret img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.z-hof-auteur { flex-shrink: 0; margin-top: 26px; font-size: clamp(17px, 2.2vw, 22px); font-weight: 700; color: #fcd34d; }
+
+.z-hof-logo { width: clamp(110px, 20vh, 170px); margin-bottom: 24px; filter: drop-shadow(0 12px 34px rgba(0, 0, 0, 0.5)); }
+.z-hof-intro h1 { margin: 0; font-family: var(--z-font-merk); font-size: clamp(48px, 10vw, 112px); line-height: 1; color: white; text-shadow: 0 8px 40px rgba(0, 0, 0, 0.5); transform-style: preserve-3d; }
+.z-hof-intro .goud { color: #fcd34d; }
+.z-hof-intro p { margin: 0; font-size: 17px; font-weight: 500; line-height: 1.5; color: rgba(255, 255, 255, 0.85); }
+.z-hof-hint { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 26px; font-size: 14px; font-weight: 600; color: #fcd34d; animation: z-hof-hint 1.8s ease-in-out infinite; }
+@keyframes z-hof-hint { 50% { transform: translateY(8px); } }
+
+.z-hof-voet { position: absolute; left: 24px; right: 24px; bottom: 26px; display: flex; align-items: center; gap: 14px; max-width: 980px; margin: 0 auto; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, 0.75); }
+.z-app .z-hof-voet { bottom: calc(112px + env(safe-area-inset-bottom)); }
+.z-hof-voet span { min-width: 58px; }
+.z-hof-voet div { flex: 1; height: 3px; border-radius: 3px; overflow: hidden; background: rgba(255, 255, 255, 0.16); }
+.z-hof-voet i { display: block; height: 100%; background: #fcd34d; transform: scaleX(0); transform-origin: left; }
+@media (prefers-reduced-motion: reduce) { .z-hof-hint { animation: none; } }

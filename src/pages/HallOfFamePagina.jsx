@@ -1,10 +1,6 @@
 import HallOfFame from '../components/HallOfFame'
 
-// De hero van de Hall of Fame is zelf de paginatitel
+// Vult de hele ruimte naast het menu, zonder de gewone marges van een pagina
 export default function HallOfFamePagina() {
-  return (
-    <div style={{ maxWidth: '1040px' }}>
-      <HallOfFame />
-    </div>
-  )
+  return <HallOfFame />
 }
