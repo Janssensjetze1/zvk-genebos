@@ -1,6 +1,11 @@
 import HallOfFame from '../components/HallOfFame'
+import { AppPagina } from '../ui'
 
-// Vult het hele scherm, zonder de gewone marges van een pagina
+// De hero van de Hall of Fame is zelf de paginatitel
 export default function PWAHallOfFame() {
-  return <HallOfFame />
+  return (
+    <AppPagina>
+      <HallOfFame />
+    </AppPagina>
+  )
 }
